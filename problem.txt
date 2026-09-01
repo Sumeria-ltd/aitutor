@@ -1,0 +1,3 @@
+Learners attend courses — at Station J, at university, online — and every session leaves a trail. Slides, a PDF, the notes they typed while trying to keep up. A week later that trail is scattered across a downloads folder, a phone app and a notebook, and almost none of it is opened again.
+AITutor is a place to put it. A learner creates a course, gives it objectives, and adds sessions as they happen. For each session they attach a file or write a summary in their own words. Everything they add gets read, broken up, labelled and kept.
+Later they can ask their own material a question and get an answer that cites the session it came from, or generate practice questions and check themselves before the next class.
