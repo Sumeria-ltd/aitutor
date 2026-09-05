@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&amp;display=swap">
+  <style>
+    body { margin: 0; background: #FBFAF7; color: #1A1A18;
+      font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.55;
+      -webkit-font-smoothing: antialiased; }
+    a { color: #0F6B63; text-decoration: none; }
+    a:hover { color: #0A554E; }
+  </style>
+</helmet>
+
+<div style="display: flex; align-items: center; justify-content: space-between; height: 60px; padding-inline: 40px; border-bottom: 1px solid #E8E5DE;">
+  <div style="display: flex; align-items: center; gap: 26px;">
+    <div style="display: flex; align-items: center; gap: 9px;">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <path d="M2.5 4h5.2A1.3 1.3 0 0 1 9 5.3V14a1.1 1.1 0 0 0-1.1-1.1H2.5z" stroke="#0F6B63" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M15.5 4h-5.2A1.3 1.3 0 0 0 9 5.3V14a1.1 1.1 0 0 1 1.1-1.1h5.4z" stroke="#1A1A18" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      <span style="font-size: 15px; font-weight: 600; letter-spacing: -0.012em;">AITutor</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: #6B6B66;">
+      <span>Courses</span><span style="color: #C9C6BE;">/</span><span>Thermodynamics</span><span style="color: #C9C6BE;">/</span><span style="color: #1A1A18;">Ask</span>
+    </div>
+  </div>
+  <div style="width: 28px; height: 28px; border-radius: 50%; background: #EEF6F4; border: 1px solid #D3E3DF; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 600; color: #0F6B63;">LH</div>
+</div>
+
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 40px; border-bottom: 1px solid #E8E5DE; background: #F7F5F0;">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <span style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500;">Asking</span>
+    <span style="display: inline-flex; align-items: center; gap: 8px; height: 30px; padding-inline: 12px; border: 1px solid #DBD7CE; border-radius: 6px; background: #FBFAF7; font-size: 13px;">
+      Thermodynamics
+      <span style="color: #C9C6BE;">·</span>
+      <span style="color: #6B6B66;">sessions 1–7</span>
+      <span style="color: #C9C6BE;">·</span>
+      <span style="color: #6B6B66;">9 documents</span>
+    </span>
+    <span style="font-size: 13px; color: #0F6B63;">Change what I'm asking</span>
+  </div>
+  <span style="font-size: 12.5px; color: #9C9A93;">Answers come only from what you have added here.</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 528px; align-items: start;">
+
+  <div style="padding: 32px 40px 40px 40px;">
+
+    <div style="opacity: 0.62; padding-bottom: 30px; border-bottom: 1px solid #E8E5DE;">
+      <div style="font-size: 17px; font-weight: 600; letter-spacing: -0.012em; line-height: 1.4;">How does the third law constrain absolute entropy at 0 K?</div>
+      <div style="padding-top: 14px; display: flex; gap: 14px;">
+        <div style="width: 3px; border-radius: 2px; background: #DBD7CE; flex-shrink: 0;"></div>
+        <div>
+          <div style="font-size: 15px; line-height: 1.6; color: #1A1A18;">Your material doesn't cover this.</div>
+          <div style="padding-top: 8px; font-size: 14.5px; line-height: 1.62; color: #6B6B66; max-width: 62ch; text-wrap: pretty;">The third law is listed on the course-outline slide in session 1, but no session develops it — nothing in sessions 1–7 defines absolute entropy or what happens as temperature approaches zero. If this was covered in class, the material for it hasn't been captured yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding-top: 30px;">
+      <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.014em; line-height: 1.38; max-width: 40ch;">Why does the Clausius inequality become an equality for a reversible process?</div>
+
+      <div style="padding-top: 20px; display: flex; gap: 14px;">
+        <div style="width: 3px; border-radius: 2px; background: #0F6B63; flex-shrink: 0;"></div>
+        <div style="max-width: 66ch;">
+          <p style="margin: 0; font-size: 15px; line-height: 1.68; text-wrap: pretty;">Session 5 introduces it as <span style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 13.5px;">∮ δQ/T ≤ 0</span>, and the <span style="font-weight: 500;">≤</span> is there because of entropy generated <span style="font-style: italic;">inside</span> the system. Slide 12 gives the two things that generate it — a finite temperature difference across the boundary, and friction — and states that both vanish only when every step of the cycle is reversible. <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid #0F6B63; background: #0F6B63; border-radius: 5px; font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11.5px; color: #FBFAF7; vertical-align: 2px;"><svg width="9" height="10" viewBox="0 0 9 10" fill="none" aria-hidden="true"><path d="M1 1h4.2L8 3.6V9H1z" stroke="#FBFAF7" stroke-width="1.1" stroke-linejoin="round"/></svg>S5 · p.12</span></p>
+
+          <p style="margin: 16px 0 0 0; font-size: 15px; line-height: 1.68; text-wrap: pretty;">So the generated term drops out and the relation closes to an equality. Your session 4 notes come at the same point from the other direction: the Carnot cycle is used precisely <span style="font-style: italic;">because</span> it is the case where the equality holds, which is what lets the efficiency bound be derived at all. <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid #BFDAD5; background: #EEF6F4; border-radius: 5px; font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11.5px; color: #0F6B63; vertical-align: 2px;"><svg width="9" height="10" viewBox="0 0 9 10" fill="none" aria-hidden="true"><path d="M1 1h4.2L8 3.6V9H1z" stroke="#0F6B63" stroke-width="1.1" stroke-linejoin="round"/></svg>S4 · p.7</span></p>
+
+          <div style="margin-top: 22px; padding-top: 16px; border-top: 1px solid #E8E5DE; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+            <div style="font-size: 12.5px; color: #9C9A93;">Built from 2 of the 9 documents in scope. Open either one and check it.</div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="height: 34px; padding-inline: 13px; border-radius: 7px; border: 1px solid #DBD7CE; font-size: 13.5px; display: inline-flex; align-items: center;">Quiz me on this</span>
+              <span style="height: 34px; padding-inline: 13px; border-radius: 7px; border: 1px solid #DBD7CE; font-size: 13.5px; display: inline-flex; align-items: center;">Open session 5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding-top: 34px;">
+      <div style="border: 1px solid #DBD7CE; border-radius: 10px; background: #FFFFFF; padding: 14px 16px; display: flex; align-items: center; gap: 14px;">
+        <span style="flex: 1; font-size: 14.5px; color: #9C9A93;">Ask something else about sessions 1–7…</span>
+        <span style="height: 34px; padding-inline: 15px; border-radius: 7px; background: #0F6B63; color: #FBFAF7; font-size: 13.5px; font-weight: 500; display: inline-flex; align-items: center;">Ask</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="border-inline-start: 1px solid #E8E5DE; background: #F7F5F0; padding: 24px 32px 40px 32px; min-height: 880px;">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500;">The source</div>
+        <div style="padding-top: 7px; font-size: 16px; font-weight: 600; letter-spacing: -0.012em;">Session 5 · Entropy and the second law</div>
+        <div style="padding-top: 5px; font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11.5px; color: #6B6B66;">lecture5-slides.pdf · page 12 of 24</div>
+      </div>
+      <div style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #DBD7CE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1.8 1.8 9.2 9.2M9.2 1.8 1.8 9.2" stroke="#6B6B66" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; background: #FFFFFF; border: 1px solid #DBD7CE; border-radius: 8px; padding: 30px 32px 34px 32px;">
+      <div style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 10.5px; color: #B7B4AC; letter-spacing: 0.04em;">PHYS 214 — LECTURE 5</div>
+      <div style="padding-top: 16px; font-size: 21px; font-weight: 600; letter-spacing: -0.014em;">The Clausius inequality</div>
+      <div style="padding-top: 20px; display: flex; flex-direction: column; gap: 13px; font-size: 13.5px; line-height: 1.6; color: #3A3A36;">
+        <div style="display: flex; gap: 10px;"><span style="color: #B7B4AC;">·</span><span>For any cycle, <span style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 12.5px;">∮ δQ/T ≤ 0</span>, with T the boundary temperature.</span></div>
+        <div style="background: #EEF6F4; border-inline-start: 2px solid #0F6B63; margin-inline-start: -12px; padding: 10px 12px;">
+          <div style="display: flex; gap: 10px;"><span style="color: #7FA9A3;">·</span><span>The inequality is entropy <span style="font-style: italic;">generated inside</span> the system: finite ΔT across the boundary, and friction.</span></div>
+          <div style="display: flex; gap: 10px; padding-top: 9px;"><span style="color: #7FA9A3;">·</span><span>Both vanish only if every step is reversible. Then <span style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 12.5px;">∮ δQ/T = 0</span>.</span></div>
+        </div>
+        <div style="display: flex; gap: 10px;"><span style="color: #B7B4AC;">·</span><span>This is what lets us define S as a state function in the next slide.</span></div>
+        <div style="display: flex; gap: 10px;"><span style="color: #B7B4AC;">·</span><span>Worked example: irreversible expansion, ΔT = 40 K at the wall.</span></div>
+      </div>
+      <div style="margin-top: 26px; padding-top: 14px; border-top: 1px solid #EDEAE3; display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 10.5px; color: #B7B4AC;">
+        <span>Kassem · Fall 2026</span><span>12</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #DBD7CE; background: #FBFAF7; display: inline-flex; align-items: center; justify-content: center;">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M7.4 2.4 3.8 6l3.6 3.6" stroke="#6B6B66" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #DBD7CE; background: #FBFAF7; display: inline-flex; align-items: center; justify-content: center;">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4.6 2.4 8.2 6l-3.6 3.6" stroke="#6B6B66" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span style="font-size: 12.5px; color: #9C9A93; padding-inline-start: 4px;">page 12 of 24</span>
+      </div>
+      <span style="font-size: 13px; color: #0F6B63;">Open the whole session</span>
+    </div>
+
+    <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid #E8E5DE;">
+      <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500;">Also cited</div>
+      <div style="padding-top: 12px; display: flex; align-items: center; gap: 10px;">
+        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid #BFDAD5; background: #EEF6F4; border-radius: 5px; font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11.5px; color: #0F6B63;">
+          <svg width="9" height="10" viewBox="0 0 9 10" fill="none" aria-hidden="true"><path d="M1 1h4.2L8 3.6V9H1z" stroke="#0F6B63" stroke-width="1.1" stroke-linejoin="round"/></svg>
+          S4 · p.7
+        </span>
+        <span style="font-size: 13px; color: #6B6B66;">The Carnot cycle and reversibility</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

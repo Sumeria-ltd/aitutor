@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&amp;display=swap">
+  <style>
+    body { margin: 0; background: #FBFAF7; color: #1A1A18;
+      font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.55;
+      -webkit-font-smoothing: antialiased; }
+    a { color: #0F6B63; text-decoration: none; }
+    a:hover { color: #0A554E; }
+  </style>
+</helmet>
+
+<div style="display: flex; align-items: center; justify-content: space-between; height: 60px; padding-inline: 40px; border-bottom: 1px solid #E8E5DE;">
+  <div style="display: flex; align-items: center; gap: 26px;">
+    <div style="display: flex; align-items: center; gap: 9px;">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <path d="M2.5 4h5.2A1.3 1.3 0 0 1 9 5.3V14a1.1 1.1 0 0 0-1.1-1.1H2.5z" stroke="#0F6B63" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M15.5 4h-5.2A1.3 1.3 0 0 0 9 5.3V14a1.1 1.1 0 0 1 1.1-1.1h5.4z" stroke="#1A1A18" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      <span style="font-size: 15px; font-weight: 600; letter-spacing: -0.012em;">AITutor</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: #6B6B66;">
+      <span>Thermodynamics</span><span style="color: #C9C6BE;">/</span><span>Session 5</span><span style="color: #C9C6BE;">/</span><span style="color: #1A1A18;">Your summary</span>
+    </div>
+  </div>
+  <span style="font-size: 13px; color: #6B6B66;">Close</span>
+</div>
+
+<div style="display: flex; justify-content: center; padding: 76px 40px 60px 40px;">
+  <div style="width: 100%; max-width: 720px;">
+
+    <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500;">Session 5 · 14 October</div>
+    <h1 style="margin: 12px 0 0 0; font-size: 32px; font-weight: 600; letter-spacing: -0.022em; line-height: 1.22;">What did this session cover?</h1>
+    <p style="margin: 14px 0 0 0; font-size: 15.5px; line-height: 1.6; color: #6B6B66; max-width: 52ch; text-wrap: pretty;">In your own words, from memory. Write it the way you'd explain it to someone who missed the class.</p>
+
+    <div style="margin-top: 34px; background: #FFFDF9; border: 1px solid #DBD7CE; border-radius: 10px; padding: 32px 34px; min-height: 340px; display: flex; flex-direction: column;">
+      <div style="font-family: 'Newsreader', Georgia, serif; font-size: 19px; line-height: 1.7; color: #B7B4AC; font-style: italic; font-weight: 300;">Start anywhere. It doesn't have to be tidy.</div>
+      <div style="flex: 1;"></div>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 24px; border-top: 1px solid #EDEAE3;">
+        <span style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11.5px; color: #B7B4AC;">0 words</span>
+        <span style="font-size: 12.5px; color: #9C9A93;">Saved as you type</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+      <span style="font-size: 13.5px; color: #9C9A93;">You can come back to this later.</span>
+      <span style="height: 44px; padding-inline: 22px; border-radius: 7px; background: #C9D9D6; color: #FBFAF7; font-size: 15px; font-weight: 500; display: inline-flex; align-items: center;">Check what I wrote</span>
+    </div>
+
+    <div style="margin-top: 56px; padding-top: 24px; border-top: 1px solid #E8E5DE; display: flex; gap: 14px; align-items: flex-start;">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px;">
+        <circle cx="8.5" cy="8.5" r="6.6" stroke="#C9C6BE" stroke-width="1.2"/>
+        <path d="M8.5 7.6v4.2" stroke="#9C9A93" stroke-width="1.3" stroke-linecap="round"/>
+        <circle cx="8.5" cy="5.2" r="0.85" fill="#9C9A93"/>
+      </svg>
+      <p style="margin: 0; font-size: 13.5px; line-height: 1.65; color: #6B6B66; max-width: 60ch; text-wrap: pretty;">Nothing from the session is shown on this screen — not the slides, not an outline, not last week's summary. Pulling it out of your head is the part that works; reading it back off a slide isn't. Everything opens again the moment you've written yours.</p>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&amp;display=swap">
+  <style>
+    body { margin: 0; background: #FBFAF7; color: #1A1A18;
+      font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.55;
+      -webkit-font-smoothing: antialiased; }
+    a { color: #0F6B63; text-decoration: none; }
+    a:hover { color: #0A554E; }
+  </style>
+</helmet>
+
+<div style="display: flex; align-items: center; justify-content: space-between; height: 60px; padding-inline: 40px; border-bottom: 1px solid #E8E5DE;">
+  <div style="display: flex; align-items: center; gap: 26px;">
+    <div style="display: flex; align-items: center; gap: 9px;">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <path d="M2.5 4h5.2A1.3 1.3 0 0 1 9 5.3V14a1.1 1.1 0 0 0-1.1-1.1H2.5z" stroke="#0F6B63" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M15.5 4h-5.2A1.3 1.3 0 0 0 9 5.3V14a1.1 1.1 0 0 1 1.1-1.1h5.4z" stroke="#1A1A18" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      <span style="font-size: 15px; font-weight: 600; letter-spacing: -0.012em;">AITutor</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: #6B6B66;">
+      <span>Courses</span><span style="color: #C9C6BE;">/</span><span style="color: #1A1A18;">Thermodynamics</span>
+    </div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 16px;">
+    <span style="font-size: 13px; color: #9C9A93;">Fall 2026</span>
+    <div style="width: 28px; height: 28px; border-radius: 50%; background: #EEF6F4; border: 1px solid #D3E3DF; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 600; color: #0F6B63;">LH</div>
+  </div>
+</div>
+
+<div style="padding: 34px 40px 20px 40px; display: flex; align-items: flex-end; justify-content: space-between; gap: 40px;">
+  <div>
+    <h1 style="margin: 0; font-size: 34px; font-weight: 600; letter-spacing: -0.024em;">Thermodynamics</h1>
+    <div style="padding-top: 8px; font-size: 13.5px; color: #6B6B66;">PHYS 214 · 7 sessions · 6 objectives · last captured 2 days ago</div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <div style="height: 40px; padding-inline: 16px; border-radius: 7px; border: 1px solid #DBD7CE; font-size: 14px; display: inline-flex; align-items: center;">Ask this course</div>
+    <div style="height: 40px; padding-inline: 16px; border-radius: 7px; border: 1px solid #DBD7CE; font-size: 14px; display: inline-flex; align-items: center;">Quiz me</div>
+    <div style="height: 40px; padding-inline: 18px; border-radius: 7px; background: #0F6B63; color: #FBFAF7; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 2.6v8.8M2.6 7h8.8" stroke="#FBFAF7" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Add session
+    </div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 372px; gap: 60px; padding: 22px 40px 48px 40px;">
+
+  <div>
+    <div style="display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 20px; border-bottom: 1px solid #E8E5DE;">
+      <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500;">Sessions</div>
+      <div style="font-size: 12.5px; color: #9C9A93;">Newest first</div>
+    </div>
+
+    <div style="padding-top: 26px;">
+
+      <div style="display: flex; gap: 20px;">
+        <div style="display: flex; flex-direction: column; align-items: center; width: 34px; flex-shrink: 0;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #DBD7CE; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #6B6B66;">7</div>
+          <div style="flex: 1; width: 1px; background: #E8E5DE; margin-top: 8px;"></div>
+        </div>
+        <div style="flex: 1; padding-bottom: 30px;">
+          <div style="font-size: 12.5px; color: #9C9A93;">21 October · Tuesday</div>
+          <h3 style="margin: 5px 0 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.012em;">Maxwell relations</h3>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 12px;">
+            <span style="display: inline-flex; align-items: center; gap: 7px; height: 27px; padding-inline: 10px; border: 1px solid #E8E5DE; border-radius: 5px; font-size: 12.5px; color: #6B6B66; background: #FFFDF9;">
+              <svg width="10" height="12" viewBox="0 0 10 12" fill="none" aria-hidden="true"><path d="M1 1h4.6L9 4.2V11H1z" stroke="#9C9A93" stroke-width="1.1" stroke-linejoin="round"/></svg>
+              lecture7-slides.pdf · 18 pages
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 7px; height: 27px; padding-inline: 10px; border: 1px dashed #CFE0DC; border-radius: 5px; font-size: 12.5px; color: #0F6B63; background: #FBFAF7;">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M7.4 1.6 9.4 3.6 4 9H2V7z" stroke="#0F6B63" stroke-width="1.1" stroke-linejoin="round"/></svg>
+              Write what you took from it
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 20px;">
+        <div style="display: flex; flex-direction: column; align-items: center; width: 34px; flex-shrink: 0;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #DBD7CE; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #6B6B66;">6</div>
+          <div style="flex: 1; width: 1px; background: #E8E5DE; margin-top: 8px;"></div>
+        </div>
+        <div style="flex: 1; padding-bottom: 30px;">
+          <div style="font-size: 12.5px; color: #9C9A93;">18 October · Saturday</div>
+          <h3 style="margin: 5px 0 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.012em;">Gibbs free energy and spontaneity</h3>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 12px;">
+            <span style="display: inline-flex; align-items: center; gap: 7px; height: 27px; padding-inline: 10px; border: 1px solid #E8E5DE; border-radius: 5px; font-size: 12.5px; color: #6B6B66; background: #FFFDF9;">
+              <svg width="12" height="11" viewBox="0 0 12 11" fill="none" aria-hidden="true"><rect x="1" y="1.6" width="10" height="8" rx="1.4" stroke="#9C9A93" stroke-width="1.1"/><circle cx="4.2" cy="4.6" r="1" stroke="#9C9A93" stroke-width="1"/><path d="M1 8.2 4.4 5.6l2.6 2 1.8-1.3L11 8.2" stroke="#9C9A93" stroke-width="1.1" stroke-linejoin="round"/></svg>
+              board-photo.jpg
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 7px; height: 27px; padding-inline: 10px; border: 1px solid #E8E5DE; border-radius: 5px; font-size: 12.5px; color: #6B6B66; background: #FFFDF9;">
+              <svg width="10" height="12" viewBox="0 0 10 12" fill="none" aria-hidden="true"><path d="M1 1h4.6L9 4.2V11H1z" stroke="#9C9A93" stroke-width="1.1" stroke-linejoin="round"/></svg>
+              tutorial-sheet.pdf · 4 pages
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 7px; height: 27px; padding-inline: 10px; border: 1px solid #BFDAD5; background: #EEF6F4; border-radius: 5px; font-size: 12.5px; color: #0F6B63;">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1.6 5.8 4.2 8.3 9.4 2.9" stroke="#0F6B63" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Your summary · checked
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 20px;">
+        <div style="display: flex; flex-direction: column; align-items: center; width: 34px; flex-shrink: 0;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #DBD7CE; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #6B6B66;">5</div>
+          <div style="flex: 1; width: 1px; background: #E8E5DE; margin-top: 8px;"></div>
+        </div>
+        <div style="flex: 1; padding-bottom: 30px;">
+          <div style="font-size: 12.5px; color: #9C9A93;">14 October · Tuesday</div>
+          <h3 style="margin: 5px 0 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.012em;">Entropy and the second law</h3>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 12px;">
+            <span style="display: inline-flex; align-items: center; gap: 7px; height: 27px; padding-inline: 10px; border: 1px solid #E8E5DE; border-radius: 5px; font-size: 12.5px; color: #6B6B66; background: #FFFDF9;">
+              <svg width="10" height="12" viewBox="0 0 10 12" fill="none" aria-hidden="true"><path d="M1 1h4.6L9 4.2V11H1z" stroke="#9C9A93" stroke-width="1.1" stroke-linejoin="round"/></svg>
+              lecture5-slides.pdf · 24 pages
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 7px; height: 27px; padding-inline: 10px; border: 1px solid #BFDAD5; background: #EEF6F4; border-radius: 5px; font-size: 12.5px; color: #0F6B63;">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1.6 5.8 4.2 8.3 9.4 2.9" stroke="#0F6B63" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Your summary · checked
+            </span>
+            <span style="display: inline-flex; align-items: center; height: 27px; padding-inline: 10px; border: 1px solid #E8E5DE; border-radius: 5px; font-size: 12.5px; color: #6B6B66; background: #FFFDF9;">Practised twice</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 20px;">
+        <div style="display: flex; flex-direction: column; align-items: center; width: 34px; flex-shrink: 0;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #DBD7CE; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #6B6B66;">4</div>
+          <div style="flex: 1; width: 1px; background: #E8E5DE; margin-top: 8px;"></div>
+        </div>
+        <div style="flex: 1; padding-bottom: 26px;">
+          <div style="font-size: 12.5px; color: #9C9A93;">11 October · Saturday</div>
+          <h3 style="margin: 5px 0 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.012em;">The Carnot cycle and reversibility</h3>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 12px;">
+            <span style="display: inline-flex; align-items: center; gap: 7px; height: 27px; padding-inline: 10px; border: 1px solid #E8E5DE; border-radius: 5px; font-size: 12.5px; color: #6B6B66; background: #FFFDF9;">
+              <svg width="10" height="12" viewBox="0 0 10 12" fill="none" aria-hidden="true"><path d="M1 1h4.6L9 4.2V11H1z" stroke="#9C9A93" stroke-width="1.1" stroke-linejoin="round"/></svg>
+              lecture4-slides.pdf · 16 pages
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 7px; height: 27px; padding-inline: 10px; border: 1px dashed #CFE0DC; border-radius: 5px; font-size: 12.5px; color: #0F6B63; background: #FBFAF7;">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M7.4 1.6 9.4 3.6 4 9H2V7z" stroke="#0F6B63" stroke-width="1.1" stroke-linejoin="round"/></svg>
+              Write what you took from it
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 20px; align-items: center;">
+        <div style="width: 34px; display: flex; justify-content: center; flex-shrink: 0;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; border: 1px dashed #DBD7CE; display: flex; align-items: center; justify-content: center;">
+            <svg width="12" height="4" viewBox="0 0 12 4" fill="none" aria-hidden="true"><circle cx="1.6" cy="2" r="1.1" fill="#B7B4AC"/><circle cx="6" cy="2" r="1.1" fill="#B7B4AC"/><circle cx="10.4" cy="2" r="1.1" fill="#B7B4AC"/></svg>
+          </div>
+        </div>
+        <div style="font-size: 13.5px; color: #0F6B63;">Show 3 earlier sessions</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div>
+    <div style="display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 20px; border-bottom: 1px solid #E8E5DE;">
+      <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500;">Where you stand</div>
+      <div style="font-size: 12.5px; color: #0F6B63;">See all six</div>
+    </div>
+
+    <div style="padding-top: 22px; display: flex; flex-direction: column; gap: 22px;">
+
+      <div style="border: 1px solid #DBD7CE; border-radius: 10px; padding: 18px; background: #FFFDF9;">
+        <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500;">Nothing behind it yet</div>
+        <div style="padding-top: 9px; font-size: 16px; line-height: 1.42; letter-spacing: -0.008em;">Apply the second law to real engines and refrigerators</div>
+        <div style="display: flex; gap: 3px; padding-top: 14px;">
+          <div style="height: 6px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+        </div>
+        <div style="padding-top: 11px; font-size: 13px; color: #6B6B66;">No material · never practised</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div>
+          <div style="font-size: 14.5px; line-height: 1.45;">Relate microscopic states to entropy</div>
+          <div style="display: flex; gap: 3px; padding-top: 10px;">
+            <div style="height: 5px; flex: 1; border-radius: 3px; background: #0F6B63;"></div>
+            <div style="height: 5px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+            <div style="height: 5px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+          </div>
+          <div style="padding-top: 8px; font-size: 12.5px; color: #9C9A93;">Material in session 5 · you haven't written or practised it</div>
+        </div>
+        <div>
+          <div style="font-size: 14.5px; line-height: 1.45;">Compute work and heat for ideal-gas processes</div>
+          <div style="display: flex; gap: 3px; padding-top: 10px;">
+            <div style="height: 5px; flex: 1; border-radius: 3px; background: #0F6B63;"></div>
+            <div style="height: 5px; flex: 1; border-radius: 3px; background: #0F6B63;"></div>
+            <div style="height: 5px; flex: 1; border-radius: 3px; background: #0F6B63;"></div>
+          </div>
+          <div style="padding-top: 8px; font-size: 12.5px; color: #9C9A93;">Sessions 2, 3, 4 · summarised · practised</div>
+        </div>
+        <div>
+          <div style="font-size: 14.5px; line-height: 1.45;">State and use the first law</div>
+          <div style="display: flex; gap: 3px; padding-top: 10px;">
+            <div style="height: 5px; flex: 1; border-radius: 3px; background: #0F6B63;"></div>
+            <div style="height: 5px; flex: 1; border-radius: 3px; background: #0F6B63;"></div>
+            <div style="height: 5px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+          </div>
+          <div style="padding-top: 8px; font-size: 12.5px; color: #9C9A93;">Sessions 1, 2 · summarised · not practised</div>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid #E8E5DE; padding-top: 18px;">
+        <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500;">Check a summary</div>
+        <p style="margin: 9px 0 0 0; font-size: 13.5px; line-height: 1.6; color: #6B6B66; text-wrap: pretty;">Two sessions are still waiting for your account of them — 7 and 4.</p>
+        <div style="padding-top: 12px;">
+          <span style="height: 36px; padding-inline: 14px; border-radius: 7px; border: 1px solid #DBD7CE; font-size: 13.5px; display: inline-flex; align-items: center;">Write about session 7</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

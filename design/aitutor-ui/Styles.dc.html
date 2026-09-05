@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&amp;display=swap">
+  <style>
+    body { margin: 0; background: #FBFAF7; color: #1A1A18;
+      font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.55;
+      -webkit-font-smoothing: antialiased; }
+    a { color: #0F6B63; text-decoration: none; }
+    a:hover { color: #0A554E; }
+  </style>
+</helmet>
+
+<div style="padding: 48px 56px 56px 56px;">
+
+  <div style="display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid #E8E5DE;">
+    <div>
+      <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500;">Design system</div>
+      <h1 style="margin: 6px 0 0 0; font-size: 30px; font-weight: 600; letter-spacing: -0.02em;">Warm paper, one ink accent</h1>
+    </div>
+    <div style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11.5px; color: #9C9A93;">AITutor · v1</div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px; padding-top: 36px;">
+
+    <div style="display: flex; flex-direction: column; gap: 36px;">
+
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500; padding-bottom: 14px;">Palette</div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="height: 64px; border-radius: 8px; background: #FBFAF7; border: 1px solid #E8E5DE;"></div>
+            <div style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #6B6B66;">#FBFAF7</div>
+            <div style="font-size: 12.5px; color: #9C9A93;">Paper</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="height: 64px; border-radius: 8px; background: #F5F3ED; border: 1px solid #E8E5DE;"></div>
+            <div style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #6B6B66;">#F5F3ED</div>
+            <div style="font-size: 12.5px; color: #9C9A93;">Inset</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="height: 64px; border-radius: 8px; background: #E8E5DE;"></div>
+            <div style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #6B6B66;">#E8E5DE</div>
+            <div style="font-size: 12.5px; color: #9C9A93;">Hairline</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="height: 64px; border-radius: 8px; background: #1A1A18;"></div>
+            <div style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #6B6B66;">#1A1A18</div>
+            <div style="font-size: 12.5px; color: #9C9A93;">Ink</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="height: 64px; border-radius: 8px; background: #6B6B66;"></div>
+            <div style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #6B6B66;">#6B6B66</div>
+            <div style="font-size: 12.5px; color: #9C9A93;">Muted</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="height: 64px; border-radius: 8px; background: #0F6B63;"></div>
+            <div style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #6B6B66;">#0F6B63</div>
+            <div style="font-size: 12.5px; color: #9C9A93;">Accent</div>
+          </div>
+        </div>
+        <p style="margin: 16px 0 0 0; font-size: 13.5px; line-height: 1.6; color: #6B6B66; max-width: 46ch; text-wrap: pretty;">The accent has exactly two jobs: things you can press, and citations. It appears nowhere else, so a spot of teal on a page always means the same thing.</p>
+      </div>
+
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500; padding-bottom: 14px;">Two voices</div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+          <div style="border: 1px solid #E8E5DE; border-radius: 10px; padding: 18px;">
+            <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500; padding-bottom: 10px;">Ours</div>
+            <div style="font-size: 15px; line-height: 1.5;">Session 5 · Entropy and the second law</div>
+            <div style="font-size: 12.5px; color: #9C9A93; padding-top: 12px;">Instrument Sans · interface chrome</div>
+          </div>
+          <div style="border: 1px solid #E8E5DE; border-radius: 10px; padding: 18px; background: #FFFDF9;">
+            <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500; padding-bottom: 10px;">Theirs</div>
+            <div style="font-family: 'Newsreader', Georgia, serif; font-size: 17px; line-height: 1.6; font-weight: 400;">Entropy always goes up in a closed system, so heat only moves one way.</div>
+            <div style="font-size: 12.5px; color: #9C9A93; padding-top: 12px;">Newsreader · the student's own words</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500; padding-bottom: 14px;">Type scale</div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: baseline; gap: 18px;"><span style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #9C9A93; width: 62px; flex-shrink: 0;">34 / 600</span><span style="font-size: 34px; font-weight: 600; letter-spacing: -0.024em;">Thermodynamics</span></div>
+          <div style="display: flex; align-items: baseline; gap: 18px;"><span style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #9C9A93; width: 62px; flex-shrink: 0;">19 / 600</span><span style="font-size: 19px; font-weight: 600; letter-spacing: -0.012em;">Where you stand</span></div>
+          <div style="display: flex; align-items: baseline; gap: 18px;"><span style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #9C9A93; width: 62px; flex-shrink: 0;">15 / 400</span><span style="font-size: 15px;">Body copy and controls sit here.</span></div>
+          <div style="display: flex; align-items: baseline; gap: 18px;"><span style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #9C9A93; width: 62px; flex-shrink: 0;">13 / 400</span><span style="font-size: 13px; color: #6B6B66;">Secondary detail, metadata, dates.</span></div>
+          <div style="display: flex; align-items: baseline; gap: 18px;"><span style="font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: #9C9A93; width: 62px; flex-shrink: 0;">11 / 500</span><span style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500;">Section label</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 36px;">
+
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500; padding-bottom: 14px;">Controls</div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div style="height: 40px; padding-inline: 18px; border-radius: 7px; background: #0F6B63; color: #FBFAF7; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 2.6v8.8M2.6 7h8.8" stroke="#FBFAF7" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Add session
+          </div>
+          <div style="height: 40px; padding-inline: 16px; border-radius: 7px; border: 1px solid #DBD7CE; color: #1A1A18; font-size: 14px; display: inline-flex; align-items: center;">Ask this course</div>
+          <div style="height: 40px; padding-inline: 4px; color: #0F6B63; font-size: 14px; display: inline-flex; align-items: center; gap: 6px;">See readiness
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 6h7M6.6 3.1 9.5 6l-2.9 2.9" stroke="#0F6B63" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <div style="padding-top: 14px;">
+          <div style="height: 40px; border: 1px solid #DBD7CE; border-radius: 7px; background: #FFFFFF; display: flex; align-items: center; padding-inline: 14px; font-size: 14px; color: #9C9A93; max-width: 320px;">you@university.edu</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500; padding-bottom: 14px;">Citation</div>
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid #BFDAD5; background: #EEF6F4; border-radius: 5px; font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11.5px; color: #0F6B63;">
+            <svg width="9" height="10" viewBox="0 0 9 10" fill="none" aria-hidden="true"><path d="M1 1h4.2L8 3.6V9H1z" stroke="#0F6B63" stroke-width="1.1" stroke-linejoin="round"/></svg>
+            S5 · p.12
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid #0F6B63; background: #0F6B63; border-radius: 5px; font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 11.5px; color: #FBFAF7;">
+            <svg width="9" height="10" viewBox="0 0 9 10" fill="none" aria-hidden="true"><path d="M1 1h4.2L8 3.6V9H1z" stroke="#FBFAF7" stroke-width="1.1" stroke-linejoin="round"/></svg>
+            S5 · p.12
+          </span>
+          <span style="font-size: 13px; color: #9C9A93;">resting · open</span>
+        </div>
+        <p style="margin: 14px 0 0 0; font-size: 13.5px; line-height: 1.6; color: #6B6B66; max-width: 46ch; text-wrap: pretty;">A citation is never smaller than the sentence it supports. It is the part the student is meant to press.</p>
+      </div>
+
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500; padding-bottom: 14px;">Evidence strip</div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="display: flex; gap: 3px; width: 120px;">
+              <div style="height: 6px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+              <div style="height: 6px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+              <div style="height: 6px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+            </div>
+            <span style="font-size: 13px; color: #6B6B66;">Nothing behind it yet</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="display: flex; gap: 3px; width: 120px;">
+              <div style="height: 6px; flex: 1; border-radius: 3px; background: #0F6B63;"></div>
+              <div style="height: 6px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+              <div style="height: 6px; flex: 1; border-radius: 3px; background: #E8E5DE;"></div>
+            </div>
+            <span style="font-size: 13px; color: #6B6B66;">Material only</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="display: flex; gap: 3px; width: 120px;">
+              <div style="height: 6px; flex: 1; border-radius: 3px; background: #0F6B63;"></div>
+              <div style="height: 6px; flex: 1; border-radius: 3px; background: #0F6B63;"></div>
+              <div style="height: 6px; flex: 1; border-radius: 3px; background: #0F6B63;"></div>
+            </div>
+            <span style="font-size: 13px; color: #6B6B66;">Material · your words · practised</span>
+          </div>
+        </div>
+        <p style="margin: 14px 0 0 0; font-size: 13.5px; line-height: 1.6; color: #6B6B66; max-width: 46ch; text-wrap: pretty;">Gaps read as unfilled, never as red. A gap is information, not a warning — the moment it feels like a telling-off, students start gaming it.</p>
+      </div>
+
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #9C9A93; font-weight: 500; padding-bottom: 14px;">Rules</div>
+        <div style="display: flex; flex-direction: column; gap: 9px; font-size: 13.5px; color: #6B6B66;">
+          <div style="display: flex; gap: 10px;"><span style="color: #C9C6BE;">—</span><span>Hairlines at 1px, never a drop shadow.</span></div>
+          <div style="display: flex; gap: 10px;"><span style="color: #C9C6BE;">—</span><span>Radii: 5px chips, 7px controls, 10px panels.</span></div>
+          <div style="display: flex; gap: 10px;"><span style="color: #C9C6BE;">—</span><span>Spacing on a 4px base; 40px page gutters.</span></div>
+          <div style="display: flex; gap: 10px;"><span style="color: #C9C6BE;">—</span><span>Logical inline start/end throughout, so an Arabic build mirrors without redrawing.</span></div>
+          <div style="display: flex; gap: 10px;"><span style="color: #C9C6BE;">—</span><span>No streaks, badges, scores or nudges anywhere in the product.</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
