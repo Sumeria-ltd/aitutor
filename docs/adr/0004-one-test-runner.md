@@ -2,7 +2,7 @@
 id: 0004
 status: approved
 owner: aitutor-architect
-inputs: [docs/prd.md, docs/intents/0001-scaffold-the-repository.md, docs/adr/0003-one-typescript-monorepo.md]
+inputs: [docs/prd.md, docs/adr/0003-one-typescript-monorepo.md]
 updated: 2026-09-08
 ---
 
@@ -10,11 +10,14 @@ updated: 2026-09-08
 
 ## Context
 
-Requirement 0001 states plainly that a suite which passes against a broken project is worse
-than no suite, because it is trusted. Its second open question asks how much must exist for
-the suite to be meaningful, and answers itself: that depends on architecture decisions not yet
-made. ADR 0003 has now made them — three workspaces, one language. Requirement 0001 also asks
-for *one* agreed way to run the tests, which rules out the obvious per-workspace answer.
+A suite which passes against a broken project is worse than no suite, because it is trusted.
+How much must exist for one to be meaningful depended on architecture decisions not yet made;
+ADR 0003 has now made them — three workspaces, one language. PRD §7 also asks for *one* agreed
+way to run the tests, which rules out the obvious per-workspace answer.
+
+> The "worse than no suite" reasoning came from the removed intent 0001, whose LIMITS
+> stated it directly. PRD §7 records the countable bar but not this rationale. The intent is
+> at `git show c2e1fc9:docs/intents/0001-scaffold-the-repository.md`.
 
 ## Decision
 
@@ -29,13 +32,13 @@ constant against itself.
 
 ### A separate runner per workspace, each with its own command
 
-Requirement 0001 asks for one agreed way to run the tests. Three commands is three ways, and
+PRD §7 asks for one agreed way to run the tests. Three commands is three ways, and
 a newcomer has to discover which one applies to the change they just made. That is precisely
-the "step you had to work out yourself" that the requirement counts and requires to be zero.
+the "step you had to work out yourself" that PRD §7 counts and requires to be zero.
 
 ### A smoke test that asserts the runner runs
 
-It passes against a broken project, which is the exact failure requirement 0001 names. A green
+It passes against a broken project, which is the exact failure the §7 constraint exists to prevent. A green
 suite would then carry no information, and would be trusted anyway — the worst of the
 available outcomes.
 
@@ -57,5 +60,5 @@ would be found by the validator, late, and would mean the seams chosen were not 
 
 | Requirement ID | How this constrains it |
 |---|---|
-| 0001 | Fixes the runner, the single root command, and the requirement that initial tests cross a real boundary |
-| 0002–0010 | Every later requirement's ACCEPT lines are tested through this runner; the engineer writes a failing test per ACCEPT line before implementing |
+| PRD §7 constraint | Fixes the runner, the single root command, and the requirement that initial tests cross a real boundary |
+| 0001–0009 | Every later requirement's ACCEPT lines are tested through this runner; the engineer writes a failing test per ACCEPT line before implementing |

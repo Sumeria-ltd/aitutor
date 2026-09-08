@@ -2,7 +2,7 @@
 id: 0006
 status: approved
 owner: aitutor-architect
-inputs: [docs/prd.md, docs/intents/0002-register-an-account.md, docs/intents/0010-know-its-working.md, CLAUDE.md]
+inputs: [docs/prd.md, docs/intents/0001-register-an-account.md, docs/intents/0009-know-its-working.md, CLAUDE.md]
 updated: 2026-09-08
 ---
 
@@ -12,9 +12,9 @@ updated: 2026-09-08
 
 Two PRD constraints state the boundary: a course belongs to one learner and nobody else reads
 their material, and the operator may see learner content only with that learner's consent for
-that case, recorded. Requirement 0010's acceptance sets the bar at zero — no place anywhere in
+that case, recorded. Requirement 0009's acceptance sets the bar at zero — no place anywhere in
 the operator's view where a learner's own words or the contents of their material are
-readable. Requirement 0002's intent explains what rests on this: a learner willing to write an
+readable. Requirement 0001's intent explains what rests on this: a learner willing to write an
 honest, unflattering summary is a learner who believes nobody else will read it.
 
 ## Decision
@@ -30,7 +30,7 @@ naming the learner, the case and the time, and the read itself is recorded along
 ### Filter by owner in application code over a shared collection
 
 It makes the privacy promise depend on every query ever written being correct, including every
-query written in a hurry two years from now. Requirement 0010 sets the bar at zero occurrences,
+query written in a hurry two years from now. Requirement 0009 sets the bar at zero occurrences,
 and no convention-based approach holds a zero over time — one forgotten clause is a breach.
 
 ### Give the operator read access and rely on policy
@@ -46,7 +46,7 @@ the learner for consent, which costs time in exactly the moments a learner is al
 frustrated and least inclined to cooperate. Writing operational events separately from content
 is also duplicated work at every write.
 
-**We gain:** the privacy promise is structural rather than procedural. Requirement 0010 can be
+**We gain:** the privacy promise is structural rather than procedural. Requirement 0009 can be
 built at all, because the view it reads from contains nothing that would violate the promise.
 
 **We will know it was wrong if:** operators routinely need consent to resolve ordinary
@@ -57,6 +57,6 @@ carry too little to diagnose with, and the answer is richer events — not wider
 
 | Requirement ID | How this constrains it |
 |---|---|
-| 0002 | The account is the owner key every record carries; deletion must remove the records it owns |
-| 0010 | The operator's view reads only counts and operational events, never content; consent is a record, not a setting |
-| 0004–0009 | Every write carries its owner, and every read asserts it |
+| 0001 | The account is the owner key every record carries; deletion must remove the records it owns |
+| 0009 | The operator's view reads only counts and operational events, never content; consent is a record, not a setting |
+| 0003–0008 | Every write carries its owner, and every read asserts it |
