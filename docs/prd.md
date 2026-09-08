@@ -1,6 +1,6 @@
 ---
 id: prd
-status: ready-for-review
+status: approved
 owner: aitutor-pm
 inputs: [problem.txt, CLAUDE.md, docs/PRD.md@116b918]
 updated: 2026-09-08

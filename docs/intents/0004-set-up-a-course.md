@@ -1,6 +1,6 @@
 ---
 id: 0004
-status: ready-for-review
+status: approved
 owner: aitutor-pm
 inputs: [docs/prd.md]
 updated: 2026-09-08
