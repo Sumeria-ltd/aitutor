@@ -1,14 +1,14 @@
 ---
 id: 0001
-status: ready-for-review
+status: approved
 owner: aitutor-architect
-inputs: [docs/intents/0001-register-an-account.md, docs/prd.md, docs/adr/0003-one-typescript-monorepo.md, docs/adr/0004-one-test-runner.md, docs/adr/0006-isolation-per-learner.md, docs/adr/0008-measurement-event-shape.md, docs/adr/0009-make-contract-for-ci.md, docs/adr/0010-ci-triggers-on-push.md, docs/adr/0011-merge-blocking-is-a-committed-ruleset.md, CLAUDE.md]
+inputs: [docs/intents/0001-register-an-account.md, docs/prd.md, docs/adr/0003-one-typescript-monorepo.md, docs/adr/0004-one-test-runner.md, docs/adr/0006-isolation-per-learner.md, docs/adr/0008-measurement-event-shape.md, docs/adr/0009-make-contract-for-ci.md, docs/adr/0010-ci-triggers-on-push.md, docs/adr/0011-merge-blocking-is-a-committed-ruleset.md, docs/adr/0012-hono-for-the-api-service.md, CLAUDE.md]
 updated: 2026-09-08
 ---
 
 # Spec 0001 — Register an account, and stand up the repository
 
-Implements intent 0001. Bound by ADR 0003, 0004, 0006, 0008, 0009, 0010, 0011.
+Implements intent 0001. Bound by ADR 0003, 0004, 0006, 0008, 0009, 0010, 0011, 0012.
 
 APPROACH:   Two things ship as one vertical slice because PRD §7 binds them: the repository
             must be installable and testable by a stranger before anything ships into it, and
