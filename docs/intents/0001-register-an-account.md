@@ -1,14 +1,14 @@
 ---
-id: 0002
-status: ready-for-review
+id: 0001
+status: approved
 owner: aitutor-pm
 inputs: [docs/prd.md]
 updated: 2026-09-08
 ---
 
-# Intent 0002 — Register an account
+# Intent 0001 — Register an account
 
-Derived from PRD requirement 0002, rank 2.
+Derived from PRD requirement 0001, rank 1.
 
 PROBLEM:  A learner in the corridor after a lecture, holding a file they want to keep, meets
           a signup form. That is where most of them leave — not because registering is
@@ -60,4 +60,4 @@ NOT NOW:  Institutional single sign-on. Verifying that a learner genuinely atten
   for letting a learner capture something and then securing it, but that shape means material
   exists briefly with no owner, which strains the privacy boundary.
 - Export is named above as a limit, but its shape is unsettled. What does a learner receive
-  when they take their material with them, and is that within 0002 or its own requirement?
+  when they take their material with them, and is that within 0001 or its own requirement?

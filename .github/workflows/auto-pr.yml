@@ -1,0 +1,91 @@
+name: Auto PR
+
+# Opens a pull request to main the first time a feature branch is pushed, so no work depends
+# on a human remembering to raise one. Idempotent: later pushes to the same branch find the
+# open pull request and do nothing.
+#
+# This needs the repository setting "Allow GitHub Actions to create and approve pull
+# requests" — which an organization policy can veto for every repository it owns, and does
+# for this one. When that is the case the job says so and exits green rather than failing
+# with a permissions error nobody can act on. The branch is pushed and CI still runs either
+# way; only the pull request has to be opened by hand. See docs/ci.md.
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - "dependabot/**"
+      - "gh-readonly-queue/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: auto-pr-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  open-pr:
+    name: open-pr
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Open a pull request to main if none is open
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          existing="$(gh pr list --head "$BRANCH" --base main --state open \
+                        --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            echo "Pull request #$existing is already open for $BRANCH. Nothing to do."
+            exit 0
+          fi
+
+          git fetch --quiet origin main
+          if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
+            echo "$BRANCH has no commits ahead of main. Nothing to pull request."
+            exit 0
+          fi
+
+          set +e
+          out="$(gh pr create --base main --head "$BRANCH" --fill 2>&1)"
+          rc=$?
+          set -e
+
+          if [ "$rc" -eq 0 ]; then
+            printf '%s\n' "$out"
+            exit 0
+          fi
+
+          case "$out" in
+            *"not allow GitHub Actions to create"*|*"not permitted to create"*|*"GitHub Actions is not permitted"*)
+              echo "::warning title=Auto-PR blocked by policy::$out"
+              {
+                echo "### Pull request not opened automatically"
+                echo
+                echo "GitHub Actions is not permitted to create pull requests in this"
+                echo "organization, so this branch has no pull request yet. CI has still run"
+                echo "against it, and its checks will satisfy the \`main\` ruleset as soon as"
+                echo "a pull request exists."
+                echo
+                echo "An organization owner can allow it in **Settings → Actions → General →"
+                echo "Workflow permissions**. Until then, open it by hand:"
+                echo
+                echo '```'
+                echo "gh pr create --base main --head $BRANCH --fill"
+                echo '```'
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+              ;;
+            *)
+              printf '%s\n' "$out" >&2
+              exit "$rc"
+              ;;
+          esac

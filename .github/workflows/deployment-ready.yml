@@ -1,0 +1,82 @@
+name: Deployment ready
+
+# Runs after a merge to main and answers one question: could this commit be deployed?
+#
+# It deploys nothing. No cloud provider is contacted, no credential is needed, and none is
+# stored — this repository is public, and deployment belongs to the platform-engineer role
+# per CLAUDE.md. What this produces is a named, verified commit for that role to deploy,
+# instead of "whatever main happens to be right now".
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write # to push the release-candidate tag
+
+concurrency:
+  group: deployment-ready
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: make build
+        run: make build
+
+      - name: make test
+        run: make test
+
+      - name: Required configuration is declared, and carries no real values
+        run: scripts/check-deployable.sh --config
+
+      - name: No credentials are committed
+        run: scripts/check-deployable.sh --secrets
+
+      - name: The container image builds
+        run: scripts/check-deployable.sh --image
+
+      - name: Tag the release candidate
+        id: tag
+        run: |
+          set -euo pipefail
+          TAG="rc-$(date -u +%Y.%m.%d)-$(git rev-parse --short HEAD)"
+
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists; leaving it alone."
+          else
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" -m "Deployment-ready candidate from $GITHUB_SHA"
+            git push origin "$TAG"
+            echo "Tagged $TAG."
+          fi
+          echo "name=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the build output
+        if: hashFiles('dist/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.tag.outputs.name }}
+          path: dist/
+          if-no-files-found: ignore
+
+      - name: Summary
+        run: |
+          {
+            echo "### Deployment ready"
+            echo
+            echo "Candidate: \`${{ steps.tag.outputs.name }}\`"
+            echo "Commit: \`$GITHUB_SHA\`"
+            echo
+            echo "This commit builds, passes its suite, declares its configuration without"
+            echo "leaking it, and produces a container image. Nothing has been deployed."
+          } >> "$GITHUB_STEP_SUMMARY"

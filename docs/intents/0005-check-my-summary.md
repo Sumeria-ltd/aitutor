@@ -1,14 +1,14 @@
 ---
-id: 0006
-status: ready-for-review
+id: 0005
+status: approved
 owner: aitutor-pm
 inputs: [docs/prd.md]
 updated: 2026-09-08
 ---
 
-# Intent 0006 — Check my summary
+# Intent 0005 — Check my summary
 
-Derived from PRD requirement 0006, rank 6.
+Derived from PRD requirement 0005, rank 5.
 
 PROBLEM:  A learner can read a slide deck through and finish it feeling they understood it.
           That feeling is famously unreliable. Recognition is not recall, and rereading

@@ -1,14 +1,14 @@
 ---
-id: 0007
-status: ready-for-review
+id: 0006
+status: approved
 owner: aitutor-pm
 inputs: [docs/prd.md]
 updated: 2026-09-08
 ---
 
-# Intent 0007 — Ask my course
+# Intent 0006 — Ask my course
 
-Derived from PRD requirement 0007, rank 7.
+Derived from PRD requirement 0006, rank 6.
 
 PROBLEM:  A learner has a question about their own course — what a term means, why one step
           follows another, what the instructor actually said about something. They have three

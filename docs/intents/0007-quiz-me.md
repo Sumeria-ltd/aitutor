@@ -1,14 +1,14 @@
 ---
-id: 0008
-status: ready-for-review
+id: 0007
+status: approved
 owner: aitutor-pm
 inputs: [docs/prd.md]
 updated: 2026-09-08
 ---
 
-# Intent 0008 — Quiz me
+# Intent 0007 — Quiz me
 
-Derived from PRD requirement 0008, rank 8.
+Derived from PRD requirement 0007, rank 7.
 
 PROBLEM:  A learner wants to know whether they can produce what their course expects, before
           somebody else tests them on it.
@@ -42,9 +42,9 @@ LIMITS:   Questions are drawn from the learner's material — never generic subj
           as readily as for many; the five-minute check before Tuesday's lecture matters as
           much as the exam cram. Results tell the learner what to do next, not merely how they
           scored. Getting questions wrong must feel like information rather than judgment, for
-          the same reason as 0006 — this is where honest self-assessment happens. Practice
+          the same reason as 0005 — this is where honest self-assessment happens. Practice
           tests what was taught, not what the subject contains in general: something the course
-          never covered is a coverage gap and belongs to 0009, not a question the learner
+          never covered is a coverage gap and belongs to 0008, not a question the learner
           should be marked wrong on.
 
 NOT NOW:  Spaced repetition or scheduled review. Shared, exported, or importable question

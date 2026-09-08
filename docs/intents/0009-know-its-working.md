@@ -1,14 +1,14 @@
 ---
-id: 0010
-status: ready-for-review
+id: 0009
+status: approved
 owner: aitutor-pm
 inputs: [docs/prd.md]
 updated: 2026-09-08
 ---
 
-# Intent 0010 — Know it's working
+# Intent 0009 — Know it's working
 
-Derived from PRD requirement 0010, rank 10.
+Derived from PRD requirement 0009, rank 9.
 
 PROBLEM:  AITutor is live with a cohort of learners, and the person running it cannot answer
           the only question that matters: is it working?
@@ -63,8 +63,8 @@ NOT NOW:  Any instructor-facing or institution-facing reporting. Billing, subscr
 ## Open questions
 - This is ranked last to build, but the measurements it reports have to be recorded from 0001
   onward or the first cohort produces no answers. Does that recording belong to each earlier
-  requirement as it ships, or to a separate slice ahead of them? It changes what 0002 through
-  0009 are each responsible for.
+  requirement as it ships, or to a separate slice ahead of them? It changes what 0001 through
+  0008 are each responsible for.
 - Below roughly twenty learners every share is noise. What does the operator actually look at
   in week one, when the cohort is too small for any percentage to mean anything? PRD open
   question 8.
