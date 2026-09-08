@@ -1,6 +1,6 @@
 ---
 id: 0005
-status: approved
+status: definitely-fine
 owner: aitutor-architect
 inputs: [docs/prd.md, docs/intents/0004-capture-a-session.md, docs/intents/0006-ask-my-course.md, docs/intents/0009-know-its-working.md, CLAUDE.md]
 updated: 2026-09-08
