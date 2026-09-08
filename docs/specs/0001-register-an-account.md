@@ -10,6 +10,17 @@ updated: 2026-09-08
 
 Implements intent 0001. Bound by ADR 0003, 0004, 0006, 0008, 0009, 0010, 0011, 0012.
 
+> **Amended 2026-09-08, after implementation.** Two defects in this spec surfaced only once
+> the code existed, which is what implementation is for. Both are corrected below and neither
+> reverses a decision, so this is an amendment rather than a superseding spec.
+>
+> 1. `.github/workflows/ci.yml` was listed as preserve-untouched while this spec also required
+>    the Make bodies to run the real toolchain. Those cannot both hold: the workflow has no
+>    dependency install, because the bodies it was written against were shell scripts. The
+>    gate went red on `error TS2688: Cannot find type definition file for 'node'`.
+> 2. `account.registration_started` was listed as an event this requirement emits. Nothing can
+>    emit it — see DATA.
+
 APPROACH:   Two things ship as one vertical slice because PRD §7 binds them: the repository
             must be installable and testable by a stranger before anything ships into it, and
             registration is the first thing to ship. The scaffold is not a separate
@@ -73,11 +84,16 @@ DATA:       Firestore, one database (CLAUDE.md).
             are the same key and cannot drift apart (ADR 0006).
 
             Events emitted by this requirement, and no others:
-              `account.registration_started`  `{}`
               `account.registered`            `{ secondsToComplete: number }`
               `account.signed_in`             `{}`
               `account.exported`              `{}`
               `account.deleted`               `{}`
+
+            `account.registration_started` was removed on amendment. Every event carries the
+            owning learner (ADR 0008), and at the moment registration starts there is no
+            learner to attribute one to; emitting it would need an unauthenticated fifth route
+            that INTERFACE does not name. `secondsToComplete` on `account.registered` carries
+            the timing signal that event would have provided.
 
             **Deliberately not stored:** any password or password hash — there is none; the
             learner's name; any institution, course provider or affiliation; IP address; user
@@ -123,15 +139,24 @@ SCOPE:      Create:
                         src/main.tsx,src/App.tsx,src/firebase.ts,src/screens/SignIn.tsx,
                         src/screens/Finish.tsx,src/screens/Home.tsx,src/App.test.tsx}
               tests/docs-invariants.test.ts         runs scripts/check-docs.sh, asserts exit 0
+              tests/ci-contract.test.ts             guards the workflow's install step
               README.md                             the written instructions PRD §7 counts
 
             Modify:
               Makefile                              replace the bodies of `build` and `test`
                                                     only; the target names are load-bearing
                                                     (ADR 0009) and must not change
+              .github/workflows/ci.yml              add a Node setup and a dependency install
+                                                    before each Make target. **Do not rename
+                                                    the jobs** — `build` and `test` are the
+                                                    check names the ruleset requires, and
+                                                    renaming one removes the merge gate with
+                                                    no error raised anywhere (ADR 0011)
 
             Preserve untouched:
-              .github/**, scripts/**, docs/**, CLAUDE.md, problem.txt
+              .github/rulesets/**, .github/workflows/auto-pr.yml,
+              .github/workflows/deployment-ready.yml, scripts/**, docs/**, CLAUDE.md,
+              problem.txt
 
 OUT:        No course, session, material, summary, question, practice or readiness behaviour —
             those are requirements 0002 through 0009. No model call of any kind; nothing in
@@ -173,6 +198,10 @@ ACCEPT:     A1  From a clean clone, the README's instructions reach a passing `m
                 it rather than writing it.                 -> ADR 0008
             A12 Every event name emitted by this requirement appears in the `EVENTS` registry,
                 and a test fails if an emitted name is missing from it.  -> ADR 0008
+            A13 The pipeline installs dependencies before invoking a Make target, and a test
+                fails if that step is ever removed from `ci.yml` — the failure ADR 0009 names,
+                where a gate stops checking without anything going red.
+                                                          -> PRD §7 scaffold constraint
 
 RISKS:      The deletion-anonymises-events decision is the one to check first. It is a privacy
             claim made by this spec, not by the PRD, and it can be wrong in two directions: if

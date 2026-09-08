@@ -58,7 +58,6 @@ describe("makeEvent", () => {
 describe("the registry", () => {
   it("holds only the events requirement 0001 emits", () => {
     expect([...EVENTS]).toEqual([
-      "account.registration_started",
       "account.registered",
       "account.signed_in",
       "account.exported",

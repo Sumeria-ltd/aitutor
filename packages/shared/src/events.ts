@@ -1,8 +1,10 @@
 /** The measurement event shape fixed by ADR 0008: one append-only stream, five fields,
  *  attributes restricted to scalars so an event can never carry learner content. */
 
+// account.registration_started is deliberately absent: every event carries the owning
+// learner (ADR 0008), and at the moment registration starts there is no learner to attribute
+// one to. secondsToComplete on account.registered carries the timing signal instead.
 export const EVENTS = [
-  "account.registration_started",
   "account.registered",
   "account.signed_in",
   "account.exported",
