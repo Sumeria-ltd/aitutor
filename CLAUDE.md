@@ -6,6 +6,77 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Pre-implementation. The repository contains `problem.txt` (the original product brief), `docs/PRD.md` (the product requirements), and this file. No code has been scaffolded, so there are no build, test, or lint commands yet — add them here when the project is scaffolded.
 
+## Roles and workflow
+
+This project is built by the five role skills **in this repository** at `.claude/SKILLS/`.
+Use those, never the same-named skills in `~/.claude/skills/` — those are a different,
+incompatible system that drafts product state into Jira and reads a
+`.claude/project-context.md` this project does not have.
+
+> **Name collision, currently unresolved.** Four of the five names are also defined at
+> `~/.claude/skills/`, and on a collision the user-level one wins — so invoking
+> `product-manager`, `product-architect`, `product-engineer` or `platform-engineer` loads
+> the *wrong* skill. Only `product-validator` resolves correctly. Tell them apart by the
+> description: the wrong one mentions `.claude/project-context.md`, Jira stories and
+> "Ready for Dev". If the wrong one loads, read `.claude/SKILLS/<role>/SKILL.md` directly
+> and follow that instead.
+
+| Role | Owns | Never touches |
+|---|---|---|
+| `product-manager` | `docs/prd.md`, `docs/intents/NNNN-<slug>.md` | architecture, specs, code |
+| `product-architect` | `docs/adr/NNNN-<slug>.md`, `docs/specs/NNNN-<slug>.md` | application code |
+| `product-engineer` | the code for **one** approved spec | the PRD, the intents, any upstream doc |
+| `platform-engineer` | deployment, observability, cost alerting, `deployment.md` | application code, specs |
+| `product-validator` | `docs/validation/NNNN-<slug>.md` | everything — it reports, never repairs |
+
+Work flows one direction, and every document carries `status:` frontmatter
+(`draft` → `ready-for-review` → `approved`, or `blocked`):
+
+```
+PRD → intent → ADR → spec → code → deployment → validation
+```
+
+Three rules hold the pipeline together:
+
+- **One requirement, one four-digit ID.** `0001` is assigned in a PRD row and carried
+  unchanged through its intent, spec, and validation record.
+- **No role approves its own output.** A role sets `ready-for-review`; only the user moves
+  a file to `approved`. A role that needs an unapproved input stops and says so.
+- **Never choose what to build next.** The architect and engineer act on an intent or spec
+  the user names. Picking one is a product decision.
+
+### Handover protocol — the four-line format
+
+Every role ends its turn with exactly these four lines, and nothing else dressed up as them:
+
+```
+DONE:   <what was produced, as file paths>
+STATE:  <the status set on each file, and what it now waits on>
+NEXT:   <which role acts next, and what it needs before it can>
+RISK:   <the thing most likely to be wrong, or "none found">
+```
+
+The engineer adds a fifth block, `Things I did that the spec did not ask for`, written out
+even when it is empty. The validator adds what it did *not* check, and why.
+
+<!-- The four-line format is defined here because all five role skills require it from
+     CLAUDE.md and it was previously unspecified anywhere. The skills read whatever this
+     section says, so adjust it freely. -->
+
+### Divergences to resolve
+
+The role skills expect filenames this repository does not yet use. Until these are
+reconciled, a role will look for a file that is not there:
+
+| Skill expects | Repository has | Note |
+|---|---|---|
+| `pitch.txt` | `problem.txt` | The original brief. Same role, different name. |
+| `docs/prd.md` | `docs/PRD.md` | Differs only in case, so it resolves on macOS but not in git. |
+| `docs/intents/` | `docs/intent/` (empty) | Plural vs singular; the old contents are in commit `fe3c550`. |
+| Four-digit IDs (`0001`) | `C1`–`C9` in `docs/PRD.md` | The existing PRD uses capability IDs, not numeric ones. |
+| "No technology anywhere" in the PRD | `docs/PRD.md` §11 names cost limits and model classes | The project PM skill forbids technology in the PRD; §11 carries it deliberately. |
+| `docs/adr/`, `docs/validation/` | absent | Created by the architect and validator on first use. |
+
 ## What this is
 
 AITutor is a per-course study space for learners. A learner creates a course, declares its **objectives**, and adds a **session** for each class as it happens, attaching material (slides, PDFs, photos of the board) or writing a summary in their own words. They can then question their own material and get answers cited back to the session they came from, generate practice questions, and see how ready they are against the course objectives.
