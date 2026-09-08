@@ -43,7 +43,12 @@ check_structure() {
 
   [ -f docs/prd.md ] && ok "docs/prd.md exists" || err "docs/prd.md is missing"
 
-  refs="$(grep -oE 'docs/intents/[0-9]{4}-[a-z0-9-]+\.md' docs/prd.md 2>/dev/null | sort -u || true)"
+  # Only the traceability table counts, which is why this reads table rows rather than the
+  # whole file. The PRD's prose legitimately names documents that do not exist — superseded
+  # versions of itself, and requirements it records as having been removed. Treating those as
+  # broken references makes the check cry wolf, and a check that cries wolf gets switched off.
+  refs="$(grep -E '^\|' docs/prd.md 2>/dev/null \
+            | grep -oE 'docs/intents/[0-9]{4}-[a-z0-9-]+\.md' | sort -u || true)"
   if [ -z "$refs" ]; then
     err "docs/prd.md names no intent files; its traceability table is missing or malformed"
     return
