@@ -2,7 +2,7 @@
 id: 0002
 status: approved
 owner: aitutor-architect
-inputs: [docs/prd.md, docs/intents/0007-ask-my-course.md, docs/adr/0001-structural-retrieval.md, CLAUDE.md]
+inputs: [docs/prd.md, docs/intents/0006-ask-my-course.md, docs/adr/0001-structural-retrieval.md, CLAUDE.md]
 updated: 2026-09-08
 ---
 
@@ -11,7 +11,7 @@ updated: 2026-09-08
 ## Context
 
 The PRD's Constraints table records that no outside guarantee of citation correctness exists
-for a learner's own documents. Requirement 0007's acceptance is unusually absolute: of twenty
+for a learner's own documents. Requirement 0006's acceptance is unusually absolute: of twenty
 questions asked against a chosen scope, the count of answers naming a session outside that
 scope must be zero, and the PRD says this is the one number that cannot be rounded. Its
 intent explains why the bar is set there — a confidently wrong citation teaches the learner
@@ -49,7 +49,7 @@ named a session badly. Both latency and cost rise on every retry. The learner so
 nothing where a less careful product would have shown them something plausible.
 
 **We gain:** citation accuracy becomes a property the code enforces rather than a hope, and
-requirement 0007's zero-tolerance acceptance line becomes mechanically checkable instead of
+requirement 0006's zero-tolerance acceptance line becomes mechanically checkable instead of
 a matter of judgement.
 
 **We will know it was wrong if:** the retry rate is high enough that withholding becomes the
@@ -60,7 +60,7 @@ shape, not the check.
 
 | Requirement ID | How this constrains it |
 |---|---|
-| 0007 | No answer is displayed until its cited sessions are verified against the sent scope; unverifiable answers are withheld entirely |
-| 0006 | Feedback that points at where something lives in a session is subject to the same check |
-| 0008 | A question attributed to a session must be attributed to one that was sent |
-| 0010 | Retry and withholding counts are operational events the operator must be able to see |
+| 0006 | No answer is displayed until its cited sessions are verified against the sent scope; unverifiable answers are withheld entirely |
+| 0005 | Feedback that points at where something lives in a session is subject to the same check |
+| 0007 | A question attributed to a session must be attributed to one that was sent |
+| 0009 | Retry and withholding counts are operational events the operator must be able to see |
