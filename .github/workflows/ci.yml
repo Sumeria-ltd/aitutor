@@ -1,0 +1,51 @@
+name: CI
+
+# Triggered on push, and deliberately not on pull_request.
+#
+# A pull request opened by a workflow using the built-in GITHUB_TOKEN does not fire
+# `pull_request` workflows — GitHub's guard against a workflow triggering itself forever.
+# Since .github/workflows/auto-pr.yml opens pull requests that way, a `pull_request` trigger
+# here would leave every auto-opened PR with no checks at all, and the main ruleset would
+# then block it permanently. The usual workaround is a personal access token; this is a
+# public repository, so we do not keep one.
+#
+# Instead: check runs attach to the head commit SHA, and a ruleset's required status checks
+# are evaluated against the pull request's head SHA. A push-triggered run therefore
+# satisfies the gate exactly as a pull_request-triggered one would, with no secret involved.
+#
+# Known limitation: pull requests from forks produce no checks and so cannot be merged.
+# It fails in the safe direction. See docs/ci.md.
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - "dependabot/**"
+      - "gh-readonly-queue/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The job names below are the check names the main ruleset requires. Renaming either one
+  # removes the merge gate without any error being raised anywhere. Don't.
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: make build
+        run: make build
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: make test
+        run: make test
