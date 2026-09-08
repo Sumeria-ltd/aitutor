@@ -13,21 +13,20 @@ Use those, never the same-named skills in `~/.claude/skills/` — those are a di
 incompatible system that drafts product state into Jira and reads a
 `.claude/project-context.md` this project does not have.
 
-> **Name collision, currently unresolved.** Four of the five names are also defined at
-> `~/.claude/skills/`, and on a collision the user-level one wins — so invoking
-> `product-manager`, `product-architect`, `product-engineer` or `platform-engineer` loads
-> the *wrong* skill. Only `product-validator` resolves correctly. Tell them apart by the
-> description: the wrong one mentions `.claude/project-context.md`, Jira stories and
-> "Ready for Dev". If the wrong one loads, read `.claude/SKILLS/<role>/SKILL.md` directly
-> and follow that instead.
+> **Why the names carry an `aitutor-` prefix.** `~/.claude/skills/` defines
+> `product-manager`, `product-architect`, `product-engineer` and `platform-engineer`, and on
+> a name collision the user-level skill wins — so the unprefixed names silently loaded the
+> Jira-based role instead of this project's. The prefix makes the collision impossible.
+> If a role ever loads talking about `.claude/project-context.md`, Jira epics, or
+> "Ready for Dev", it is the wrong skill: stop and read `.claude/SKILLS/<role>/SKILL.md`.
 
 | Role | Owns | Never touches |
 |---|---|---|
-| `product-manager` | `docs/prd.md`, `docs/intents/NNNN-<slug>.md` | architecture, specs, code |
-| `product-architect` | `docs/adr/NNNN-<slug>.md`, `docs/specs/NNNN-<slug>.md` | application code |
-| `product-engineer` | the code for **one** approved spec | the PRD, the intents, any upstream doc |
-| `platform-engineer` | deployment, observability, cost alerting, `deployment.md` | application code, specs |
-| `product-validator` | `docs/validation/NNNN-<slug>.md` | everything — it reports, never repairs |
+| `aitutor-pm` | `docs/prd.md`, `docs/intents/NNNN-<slug>.md` | architecture, specs, code |
+| `aitutor-architect` | `docs/adr/NNNN-<slug>.md`, `docs/specs/NNNN-<slug>.md` | application code |
+| `aitutor-engineer` | the code for **one** approved spec | the PRD, the intents, any upstream doc |
+| `aitutor-platform` | deployment, observability, cost alerting, `deployment.md` | application code, specs |
+| `aitutor-validator` | `docs/validation/NNNN-<slug>.md` | everything — it reports, never repairs |
 
 Work flows one direction, and every document carries `status:` frontmatter
 (`draft` → `ready-for-review` → `approved`, or `blocked`):
