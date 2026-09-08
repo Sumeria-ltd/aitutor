@@ -1,6 +1,6 @@
 ---
 id: 0006
-status: ready-for-review
+status: approved
 owner: aitutor-architect
 inputs: [docs/prd.md, docs/intents/0002-register-an-account.md, docs/intents/0010-know-its-working.md, CLAUDE.md]
 updated: 2026-09-08

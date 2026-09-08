@@ -1,6 +1,6 @@
 ---
 id: 0005
-status: ready-for-review
+status: approved
 owner: aitutor-architect
 inputs: [docs/prd.md, docs/intents/0005-capture-a-session.md, docs/intents/0007-ask-my-course.md, docs/intents/0010-know-its-working.md, CLAUDE.md]
 updated: 2026-09-08

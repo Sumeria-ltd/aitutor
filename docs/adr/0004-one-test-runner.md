@@ -1,6 +1,6 @@
 ---
 id: 0004
-status: ready-for-review
+status: approved
 owner: aitutor-architect
 inputs: [docs/prd.md, docs/intents/0001-scaffold-the-repository.md, docs/adr/0003-one-typescript-monorepo.md]
 updated: 2026-09-08

@@ -1,6 +1,6 @@
 ---
 id: 0003
-status: ready-for-review
+status: approved
 owner: aitutor-architect
 inputs: [docs/prd.md, docs/intents/0001-scaffold-the-repository.md, CLAUDE.md]
 updated: 2026-09-08

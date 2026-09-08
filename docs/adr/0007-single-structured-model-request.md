@@ -1,6 +1,6 @@
 ---
 id: 0007
-status: ready-for-review
+status: approved
 owner: aitutor-architect
 inputs: [docs/prd.md, docs/intents/0006-check-my-summary.md, docs/intents/0007-ask-my-course.md, docs/intents/0008-quiz-me.md, docs/intents/0009-see-my-readiness.md, docs/adr/0001-structural-retrieval.md, docs/adr/0002-citation-validated-against-scope.md, CLAUDE.md]
 updated: 2026-09-08

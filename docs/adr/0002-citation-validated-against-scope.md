@@ -1,6 +1,6 @@
 ---
 id: 0002
-status: ready-for-review
+status: approved
 owner: aitutor-architect
 inputs: [docs/prd.md, docs/intents/0007-ask-my-course.md, docs/adr/0001-structural-retrieval.md, CLAUDE.md]
 updated: 2026-09-08
