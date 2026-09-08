@@ -20,9 +20,9 @@ implementation, `CLAUDE.md` wins. No technology is named in this document's body
 anything technical a requirement forces appears in §7 as a note for the architect.
 
 **What it supersedes.** The capability-keyed PRD at `docs/PRD.md` (commit `116b918`) and,
-before it, nine intent files at `docs/intent/` (commit `fe3c550`). Requirement IDs have
-changed: the old `C1`–`C9` are now `0002`–`0010`, and a new requirement `0001` has been
-added ahead of them. §10 maps the old IDs to the new ones.
+before it, nine intent files at `docs/intent/` (commit `fe3c550`). The old `C1`–`C9` are now
+`0001`–`0008`; §10 maps them. A scaffold requirement briefly numbered `0001` was removed on
+2026-09-08 and became a constraint in §7 instead — see open question 6.
 
 ---
 
@@ -88,7 +88,7 @@ They arrive in four distinct situations, and the product is judged separately in
 
 ### The operator
 
-The person running AITutor during the first cohorts. A real user of requirement `0010` and
+The person running AITutor during the first cohorts. A real user of requirement `0009` and
 of nothing else. Not a learner, sees no learner content, and has no surface inside the
 product.
 
@@ -170,23 +170,25 @@ Every row gets an ID. That ID becomes the intent, the spec and the validation re
 
 | ID | Rank | Requirement | Serves journey | Intent |
 |---|---|---|---|---|
-| 0001 | 1 | A stranger can clone the repository and, from written instructions alone, install it, run its tests green, and start it | enables all | `docs/intents/0001-scaffold-the-repository.md` |
-| 0002 | 2 | A learner can create an account that makes their material durable, portable and private to them | J1 | `docs/intents/0002-register-an-account.md` |
-| 0003 | 3 | A learner can reach their material from any device, and can recover access without anything they left at home | J5 | `docs/intents/0003-sign-in-again.md` |
-| 0004 | 4 | A learner can create a course and declare, or confirm, what it is meant to teach | J1 | `docs/intents/0004-set-up-a-course.md` |
-| 0005 | 5 | A learner can record that a class happened, attach its material, and add their own account of it | J1, J2 | `docs/intents/0005-capture-a-session.md` |
-| 0006 | 6 | A learner can write what they took from a session and be told specifically what they missed or have wrong | J2 | `docs/intents/0006-check-my-summary.md` |
-| 0007 | 7 | A learner can ask a question against sessions they choose and get an answer attributed to one of them | J3 | `docs/intents/0007-ask-my-course.md` |
-| 0008 | 8 | A learner can practise against their own sessions and see what they can recall | J4 | `docs/intents/0008-quiz-me.md` |
-| 0009 | 9 | A learner can see, objective by objective, what the course expects beside what they have done about it | J4 | `docs/intents/0009-see-my-readiness.md` |
-| 0010 | 10 | The operator can see whether the loop is holding, and can help a stuck learner without that learner reconstructing the problem | J6 | `docs/intents/0010-know-its-working.md` |
+| 0001 | 1 | A learner can create an account that makes their material durable, portable and private to them | J1 | `docs/intents/0001-register-an-account.md` |
+| 0002 | 2 | A learner can reach their material from any device, and can recover access without anything they left at home | J5 | `docs/intents/0002-sign-in-again.md` |
+| 0003 | 3 | A learner can create a course and declare, or confirm, what it is meant to teach | J1 | `docs/intents/0003-set-up-a-course.md` |
+| 0004 | 4 | A learner can record that a class happened, attach its material, and add their own account of it | J1, J2 | `docs/intents/0004-capture-a-session.md` |
+| 0005 | 5 | A learner can write what they took from a session and be told specifically what they missed or have wrong | J2 | `docs/intents/0005-check-my-summary.md` |
+| 0006 | 6 | A learner can ask a question against sessions they choose and get an answer attributed to one of them | J3 | `docs/intents/0006-ask-my-course.md` |
+| 0007 | 7 | A learner can practise against their own sessions and see what they can recall | J4 | `docs/intents/0007-quiz-me.md` |
+| 0008 | 8 | A learner can see, objective by objective, what the course expects beside what they have done about it | J4 | `docs/intents/0008-see-my-readiness.md` |
+| 0009 | 9 | The operator can see whether the loop is holding, and can help a stuck learner without that learner reconstructing the problem | J6 | `docs/intents/0009-know-its-working.md` |
 
-**On the ranking.** `0001` is first because no other requirement can ship into a repository
-with no project in it. `0002`–`0005` are the foundation: they pay nothing back on their own,
-which is precisely why `0006` must follow immediately. `0006` precedes `0007` and `0008`
-because it is the most direct test of whether the product's central bet holds. `0009` cannot
-precede `0004` and `0006`, since it reads their output. `0010` is last to build but its
-measurement must be emitted from `0001` onward — see §8.
+**On the ranking.** `0001`–`0003` are the foundation: they pay nothing back on their own,
+which is precisely why `0004` must follow immediately. `0004` precedes `0005` and `0006`
+because it is the most direct test of whether the product's central bet holds. `0007` cannot
+precede `0002` and `0004`, since it reads their output. `0008` is last to build but its
+measurement must be emitted from the first commit onward — see §8.
+
+**A precondition sits ahead of all of them.** The repository must be installable, testable and
+runnable by a stranger before any requirement can ship into it. That has no user-visible
+outcome, so it is recorded as a constraint in §7 rather than as a requirement here.
 
 ---
 
@@ -197,40 +199,38 @@ than a measured fact, it says so.
 
 | ID | Countable criterion |
 |---|---|
-| 0001 | On a machine that has never built this project, a person following the written instructions reaches a green test run with no step they had to work out themselves. Count the undocumented steps: zero. |
-| 0001 | The same person starts the product and reaches a running page. Count the commands needed: no more than two. |
-| 0002 | Five people register on a phone while timed. Count those finishing in under 60 seconds: at least four of five. |
-| 0002 | Ask each of those five, unprompted, what the account is for. Count those who say the material is theirs and private: at least four of five. |
-| 0002 | Count the fields a learner must fill to finish registration. Every one beyond those needed for durable, recoverable access is a defect. |
-| 0002 | A learner exports their material and then deletes their account. Count what remains reachable afterwards: nothing. |
-| 0003 | On a device used once before, count the credentials a learner types to reach their material again: zero. |
-| 0003 | On a device the learner has never used and owns nothing on, they recover access using only what they can reach from that device. Count completions out of five attempts: five. |
-| 0003 | Time the recovery path end to end. Count the minutes: under three. |
-| 0004 | Time a learner from nothing to a course with at least one objective. Count the minutes: under five. |
-| 0004 | A learner uploads a syllabus. Count the objectives offered as an editable draft, and count the ones imposed without confirmation: the second number is zero. |
-| 0004 | Create a course with no objectives, then capture, ask and practise in it. Count the actions blocked: zero. Readiness says why it is unavailable. |
-| 0005 | On a phone on a throttled connection, time a capture with one file and no written account. Count the minutes: under two. |
-| 0005 | Capture a session with a file and nothing written. Count the errors and required fields: zero. |
-| 0005 | Attach material that exceeds the platform's ceiling. Count the cases where the learner is told what happened and what to do instead: all of them. |
-| 0005 | Three months after a capture, a learner finds that session's material. Count the steps: no more than three. |
-| 0006 | Submit a summary that omits a known point from the session. Count the feedback lines naming that specific omission and where it lives: at least one. |
-| 0006 | Submit a summary omitting something the session never covered. Count the times it is reported as the learner's error: zero. |
-| 0006 | Count what the product shows before the learner has submitted anything that would let them assemble a summary without recalling it: nothing. |
-| 0006 | Revise and resubmit a summary. Count the attempts permitted: more than one. |
-| 0007 | Ask twenty questions against a chosen scope. Count the answers citing a session outside that scope: zero. This one cannot be rounded. |
-| 0007 | Count the answers shown without an attributable session: zero. |
-| 0007 | Ask something the chosen material does not cover. Count the times the answer says so plainly and names what appears missing, rather than offering a guess: all of them. |
-| 0007 | Follow a citation. Count the clicks to the source material itself rather than a paraphrase of it: one. |
-| 0008 | Generate practice for a single session. Count the sessions required: one. |
-| 0008 | Show ten generated questions to a learner who attended that course. Count those they recognise as their own course rather than generic: at least eight. |
-| 0008 | Finish a practice run. Count the results that name what to do next, not only a score: all of them. |
-| 0009 | Open readiness on a course with objectives. Count the objectives shown with no material and no practice against them: all such objectives appear, none is omitted or pushed below what the learner has already invested in. |
-| 0009 | Count the grade predictions or score estimates shown: zero. |
-| 0009 | Open readiness on a course with no objectives. Count the times it says so and points at fixing it, rather than showing an empty page: all of them. |
-| 0010 | Ask the operator, for a given week, the share of active courses that added a session. Count the minutes to an answer: under five. |
-| 0010 | Break a learner's material processing deliberately. Count the hours before the operator can see it without being told: under 24. |
-| 0010 | Count the places in the operator's view where a learner's own words or material content are readable: zero. |
-| 0010 | Ask the operator what one learner cost to serve last month. Count the minutes to an answer: under five. |
+| 0001 | Five people register on a phone while timed. Count those finishing in under 60 seconds: at least four of five. |
+| 0001 | Ask each of those five, unprompted, what the account is for. Count those who say the material is theirs and private: at least four of five. |
+| 0001 | Count the fields a learner must fill to finish registration. Every one beyond those needed for durable, recoverable access is a defect. |
+| 0001 | A learner exports their material and then deletes their account. Count what remains reachable afterwards: nothing. |
+| 0002 | On a device used once before, count the credentials a learner types to reach their material again: zero. |
+| 0002 | On a device the learner has never used and owns nothing on, they recover access using only what they can reach from that device. Count completions out of five attempts: five. |
+| 0002 | Time the recovery path end to end. Count the minutes: under three. |
+| 0003 | Time a learner from nothing to a course with at least one objective. Count the minutes: under five. |
+| 0003 | A learner uploads a syllabus. Count the objectives offered as an editable draft, and count the ones imposed without confirmation: the second number is zero. |
+| 0003 | Create a course with no objectives, then capture, ask and practise in it. Count the actions blocked: zero. Readiness says why it is unavailable. |
+| 0004 | On a phone on a throttled connection, time a capture with one file and no written account. Count the minutes: under two. |
+| 0004 | Capture a session with a file and nothing written. Count the errors and required fields: zero. |
+| 0004 | Attach material that exceeds the platform's ceiling. Count the cases where the learner is told what happened and what to do instead: all of them. |
+| 0004 | Three months after a capture, a learner finds that session's material. Count the steps: no more than three. |
+| 0005 | Submit a summary that omits a known point from the session. Count the feedback lines naming that specific omission and where it lives: at least one. |
+| 0005 | Submit a summary omitting something the session never covered. Count the times it is reported as the learner's error: zero. |
+| 0005 | Count what the product shows before the learner has submitted anything that would let them assemble a summary without recalling it: nothing. |
+| 0005 | Revise and resubmit a summary. Count the attempts permitted: more than one. |
+| 0006 | Ask twenty questions against a chosen scope. Count the answers citing a session outside that scope: zero. This one cannot be rounded. |
+| 0006 | Count the answers shown without an attributable session: zero. |
+| 0006 | Ask something the chosen material does not cover. Count the times the answer says so plainly and names what appears missing, rather than offering a guess: all of them. |
+| 0006 | Follow a citation. Count the clicks to the source material itself rather than a paraphrase of it: one. |
+| 0007 | Generate practice for a single session. Count the sessions required: one. |
+| 0007 | Show ten generated questions to a learner who attended that course. Count those they recognise as their own course rather than generic: at least eight. |
+| 0007 | Finish a practice run. Count the results that name what to do next, not only a score: all of them. |
+| 0008 | Open readiness on a course with objectives. Count the objectives shown with no material and no practice against them: all such objectives appear, none is omitted or pushed below what the learner has already invested in. |
+| 0008 | Count the grade predictions or score estimates shown: zero. |
+| 0008 | Open readiness on a course with no objectives. Count the times it says so and points at fixing it, rather than showing an empty page: all of them. |
+| 0009 | Ask the operator, for a given week, the share of active courses that added a session. Count the minutes to an answer: under five. |
+| 0009 | Break a learner's material processing deliberately. Count the hours before the operator can see it without being told: under 24. |
+| 0009 | Count the places in the operator's view where a learner's own words or material content are readable: zero. |
+| 0009 | Ask the operator what one learner cost to serve last month. Count the minutes to an answer: under five. |
 
 ---
 
@@ -241,7 +241,7 @@ reopened every quarter.
 
 | Not building | Because |
 |---|---|
-| Sharing, shared course spaces, any social layer | A summary written to be seen by others is written to score well, not honestly — it would destroy the one signal `0006` depends on |
+| Sharing, shared course spaces, any social layer | A summary written to be seen by others is written to score well, not honestly — it would destroy the one signal `0005` depends on |
 | Instructor or institutional reporting | It inverts the customer. The moment an instructor is a reader, the learner starts performing |
 | Integration with an institution's course system | Requires an institutional agreement. v1 must stand alone without one, or it cannot be validated by a single motivated learner |
 | Recording or transcribing lecture audio | Would supply the learner's account of the session *for* them — the one thing that must stay theirs |
@@ -258,14 +258,15 @@ reopened every quarter.
 
 | Constraint | Source | Note for the architect |
 |---|---|---|
+| The repository must be installable, testable and runnable by a stranger from written instructions alone | engineering | Precedes every requirement. Countable: a person who has never built this project follows the instructions and reaches a passing test run — steps they had to work out themselves, zero; commands to start it, no more than two. This was briefly a requirement and is now a precondition; see open question 6 |
 | Serving one active learner must stay near $1–2 per month | budget | This is why scope is the learner's to set and why cross-course work is excluded. `CLAUDE.md` pins the model tier, the caching policy and the per-interaction budget; a change that multiplies tokens per interaction is a business decision, not a technical one |
 | Cost is driven by how many pages of material enter a request, not by file size | platform | One page bills roughly as one image. `CLAUDE.md` holds the detail. A "whole course" scope is not merely slower than a three-session scope, it is dramatically more expensive |
-| Attached material has hard ceilings on size and page count | platform | Exact ceilings are in `CLAUDE.md`. Requirement `0005` must fail legibly at the boundary rather than accept something that silently never becomes usable |
+| Attached material has hard ceilings on size and page count | platform | Exact ceilings are in `CLAUDE.md`. Requirement `0004` must fail legibly at the boundary rather than accept something that silently never becomes usable |
 | No outside guarantee of citation correctness exists for the learner's own documents | platform | Correctness is therefore this product's own responsibility to check, not something to request and trust. `CLAUDE.md` holds the enforcement mechanism and treats it as non-negotiable |
 | Answers may draw only on material the learner added themselves | product invariant | Never general knowledge, never blended quietly. "Your material doesn't cover this" is a correct outcome |
 | The learner's own account of a session must never be written for them | product invariant | Transcribing something they already have (objectives out of a syllabus) is fine. Producing their understanding is not |
 | Every act of capture must return something visible within seconds | product invariant | Delayed or invisible payoff is the exact condition that already stops learners reviewing |
-| A course belongs to one learner; nobody else reads their material | product invariant / privacy promise | Includes the operator. `0010` sees behaviour and operations only |
+| A course belongs to one learner; nobody else reads their material | product invariant / privacy promise | Includes the operator. `0009` sees behaviour and operations only |
 | The operator may see learner content only with that learner's consent for that case, recorded | privacy promise | Build the consent and the record, not a bypass |
 | Capture must complete on a phone, outdoors, on a poor connection | user | Plan for work that finishes after the learner has closed the page |
 | Structural retrieval over the learner's own organizing, not similarity matching over everything they own | product thesis | The learner has already said which session each piece of material belongs to; that act is the index. Replacing it is a thesis-level decision and needs a superseding ADR, not an optimisation |
@@ -279,7 +280,7 @@ reopened every quarter.
 |---|---|---|
 | Capture dies around week three, as it does in every note-taking product | High | Share of active courses adding at least one session in week 4 falls below 50%, or below 35% in week 6 |
 | The effort-and-payback loop is tried once and not repeated | High | Fewer than 40% of learners who check one summary check a second within seven days |
-| Courses end up with no objectives, silently disabling `0009` | High | Share of created courses carrying at least one objective falls below 70% |
+| Courses end up with no objectives, silently disabling `0008` | High | Share of created courses carrying at least one objective falls below 70% |
 | An answer cites the wrong session and nobody notices, teaching learners to stop checking | Medium — and catastrophic | A single surfaced answer citing a session outside the scope that was sent |
 | Generated practice reads as generic and gets dismissed | Medium | Practice runs abandoned partway, or learners reporting the questions are not their course |
 | Readiness is read and then ignored | Medium | Fewer than 30% of readiness views followed within 48 hours by capture or practice on a flagged objective |
@@ -304,27 +305,29 @@ first cohort; the shape of each risk is the committed part, not its constant.
    widening waits. Blocks the exact wording of two risk signals; blocks no requirement.
 2. **What is a session when nothing schedules one?** On a semester course it is a class that
    happened. Self-paced, the learner draws the boundary — and if they draw it badly (one
-   session for a whole module) then scope in `0007` goes coarse, attribution stops being
-   useful, and `0009` goes flat. Should the product shape that boundary, and if so how,
+   session for a whole module) then scope in `0006` goes coarse, attribution stops being
+   useful, and `0008` goes flat. Should the product shape that boundary, and if so how,
    without producing the learner's thinking for them?
-3. **What does `0004` offer a learner with no syllabus?** `0009` needs objectives; `0004` gets
+3. **What does `0003` offer a learner with no syllabus?** `0008` needs objectives; `0003` gets
    them most cheaply from a document the learner already has. Many do not have one, or have one
    listing topics rather than outcomes. If most courses end up with no objectives or poor ones,
-   `0009` degrades to an empty page and the learner never learns why. Blocks whether `0009`
+   `0008` degrades to an empty page and the learner never learns why. Blocks whether `0008`
    can be validated in the first cohort at all.
-4. **Should a low-confidence objective extraction be shown at all?** `0004` presents extracted
+4. **Should a low-confidence objective extraction be shown at all?** `0003` presents extracted
    objectives as a draft to confirm. If extraction is poor, the learner's first experience of
    the product's judgement is a bad one, before anything has paid back.
-5. **Is `0003` really rank 3?** A learner cannot return before they have something to return
-   to, which argues for ranking it after `0004` and `0005`. It is ranked third because the
+5. **Is `0002` really rank 3?** A learner cannot return before they have something to return
+   to, which argues for ranking it after `0003` and `0004`. It is ranked third because the
    cost of being locked out rises with every week of accumulated work, and retrofitting
    recovery onto an account system is worse than building it alongside. Worth challenging.
-6. **Is `0001` a requirement or a constraint?** It delivers nothing a learner can see, which
-   makes it a poor fit for a document about user-visible outcomes. It is a requirement here
-   because it has its own acceptance criteria, its own failure mode, and a stranger-can-build-it
-   property worth validating on its own. If that reads wrong, it becomes a constraint on `0002`
-   and the IDs shift.
-7. **Who is the operator, concretely?** `0010` assumes one person during the first cohorts.
+6. **Is the repository scaffold a requirement or a constraint?** *Decided 2026-09-08: a
+   constraint.* It delivers nothing a learner can see, so it does not belong in a document about
+   user-visible outcomes. It is recorded in §7 with its countable criteria intact, and it still
+   precedes every requirement. Requirement IDs shifted accordingly — what were `0002`–`0010`
+   are now `0001`–`0009`, and `docs/intents/0001-scaffold-the-repository.md` was removed.
+   Anything written before that date, including ADRs 0003 and 0004 and the published PRD
+   artifact, refers to the old numbering.
+7. **Who is the operator, concretely?** `0009` assumes one person during the first cohorts.
    Whether that is one named individual or a rotating role changes what the consent record in
    §7 has to capture.
 8. **How is an active learner counted before there is a cohort?** The definitions in §8 assume
@@ -360,11 +363,11 @@ toward being one it gets worse. Three claims hold it up:
 
 ```
    PREPARE ──▶ CAPTURE ──▶ UNDERSTAND ──▶ PRACTICE ──┐
-    0004        0005        0006, 0007      0008     │ repeats each session
+    0003        0004        0005, 0006      0007     │ repeats each session
       ▲           ▲             │             │      │
       └───────────┴──────┬──────┴─────────────┴──────┘
                          ▼
-                   ORIENTATE  0009
+                   ORIENTATE  0008
               objectives beside evidence
               ──▶ back to prepare / capture
 ```
@@ -380,11 +383,10 @@ Ordered, undated. Each exits on evidence, not on a date.
 
 | Phase | Requirements | Exits when |
 |---|---|---|
-| P0 | 0001 | A stranger builds and runs it from the written instructions alone |
-| P0 | 0002, 0003, 0004, 0005 | A learner completes J1 on a phone, and material processing failures are the exception. **Deliberately unrewarding** — nothing here pays back, which is why P1 must follow immediately and P0 must not be extended |
-| P1 | 0006, 0007, 0008 | `0006` in this order first. The repeat-use risk in §8 is measurable and inside threshold, and `0007` shows no out-of-scope attribution at all |
-| P2 | 0009 | The readiness risk in §8 is measurable |
-| P3 | 0010 | **Build last, measure from the start.** The signals in §8 must be emitted from `0001` onward or the first cohort produces no answers. The dashboard is late; the measurement is not |
+| P0 | 0001, 0002, 0003, 0004 | A learner completes J1 on a phone, and material processing failures are the exception. **Deliberately unrewarding** — nothing here pays back, which is why P1 must follow immediately and P0 must not be extended |
+| P1 | 0005, 0006, 0007 | `0005` in this order first. The repeat-use risk in §8 is measurable and inside threshold, and `0006` shows no out-of-scope attribution at all |
+| P2 | 0008 | The readiness risk in §8 is measurable |
+| P3 | 0009 | **Build last, measure from the start.** The signals in §8 must be emitted from `0001` onward or the first cohort produces no answers. The dashboard is late; the measurement is not |
 
 Deferred beyond v1: the companion layer in §6 (notifications, prompting, streaks). Deferred
 rather than cancelled, because it is the obvious lever on the week-three risk — and it must
@@ -395,19 +397,18 @@ mechanics mask whether the payback is real and the product ships on a false posi
 
 | Was | Now | Requirement |
 |---|---|---|
-| — | 0001 | Scaffold the repository (new) |
-| C1 | 0002 | Register an account |
-| C2 | 0003 | Sign in again |
-| C3 | 0004 | Set up a course |
-| C4 | 0005 | Capture a session |
-| C5 | 0006 | Check my summary |
-| C6 | 0007 | Ask my course |
-| C7 | 0008 | Quiz me |
-| C8 | 0009 | See my readiness |
-| C9 | 0010 | Know it's working |
+| C1 | 0001 | Register an account |
+| C2 | 0002 | Sign in again |
+| C3 | 0003 | Set up a course |
+| C4 | 0004 | Capture a session |
+| C5 | 0005 | Check my summary |
+| C6 | 0006 | Ask my course |
+| C7 | 0007 | Quiz me |
+| C8 | 0008 | See my readiness |
+| C9 | 0009 | Know it's working |
 
 The nine intent files at `docs/intent/` in commit `fe3c550` are the origin of requirements
-`0002`–`0010` and can be recovered with
+`0001`–`0009` and can be recovered with
 `git show fe3c550:docs/intent/<name>.md`. The nine specs beside them predate this document
 and are reference, not authority. UI mockups for every requirement except `0001` exist at
 `design/aitutor-ui/` in the same commit.

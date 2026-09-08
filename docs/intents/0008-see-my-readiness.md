@@ -1,14 +1,14 @@
 ---
-id: 0009
+id: 0008
 status: approved
 owner: aitutor-pm
 inputs: [docs/prd.md]
 updated: 2026-09-08
 ---
 
-# Intent 0009 — See my readiness
+# Intent 0008 — See my readiness
 
-Derived from PRD requirement 0009, rank 9.
+Derived from PRD requirement 0008, rank 8.
 
 PROBLEM:  "Am I ready for this course?" is the question every learner carries all term, and
           not one of them can answer it. What they have instead are proxies: how many lectures
@@ -54,8 +54,8 @@ NOT NOW:  Sharing readiness with instructors, institutions, or parents. Predicte
           the learner's week or scheduling their study time.
 
 ## Open questions
-- How is a piece of material or a practice result connected to an objective? Nothing in 0004,
-  0005 or 0008 asks the learner to make that link, and inferring it is the hard part of this
+- How is a piece of material or a practice result connected to an objective? Nothing in 0003,
+  0004 or 0007 asks the learner to make that link, and inferring it is the hard part of this
   requirement — possibly the hard part of the product.
 - If readiness says a learner is ready and the exam disagrees, this requirement is worse than
   useless: it replaced a vague accurate anxiety with a precise false comfort. What would tell us

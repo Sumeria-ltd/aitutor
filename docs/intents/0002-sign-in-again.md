@@ -1,14 +1,14 @@
 ---
-id: 0003
+id: 0002
 status: approved
 owner: aitutor-pm
 inputs: [docs/prd.md]
 updated: 2026-09-08
 ---
 
-# Intent 0003 — Sign in again
+# Intent 0002 — Sign in again
 
-Derived from PRD requirement 0003, rank 3.
+Derived from PRD requirement 0002, rank 2.
 
 PROBLEM:  By November a learner has a term of work inside AITutor: forty sessions, their own
           summaries, practice results, a readiness picture assembled over three months. That
@@ -55,7 +55,7 @@ NOT NOW:  Institutional single sign-on. Device management, session listings, or 
 - Recovery must not depend on anything left at home, and must not become a second door. Those
   two pull against each other, and the resolution is the whole design of this requirement.
 - Is this genuinely rank 3? A learner cannot return before they have something to return to,
-  which argues for placing it after 0004 and 0005. PRD open question 5 carries it.
+  which argues for placing it after 0003 and 0004. PRD open question 5 carries it.
 - What happens to a learner who loses access to whatever recovery depends on? There is a
   point past which their term of work is unreachable, and where that point sits is a product
   decision, not a technical one.

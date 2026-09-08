@@ -1,14 +1,14 @@
 ---
-id: 0004
+id: 0003
 status: approved
 owner: aitutor-pm
 inputs: [docs/prd.md]
 updated: 2026-09-08
 ---
 
-# Intent 0004 — Set up a course
+# Intent 0003 — Set up a course
 
-Derived from PRD requirement 0004, rank 4.
+Derived from PRD requirement 0003, rank 3.
 
 PROBLEM:  A learner is three weeks into a term carrying five courses, and none of them has a
           home. Slides sit in a downloads folder, notes are in a paper notebook, the syllabus
@@ -48,9 +48,9 @@ NOT NOW:  Importing courses or enrolment from an institution's system. A shared 
 
 ## Open questions
 - What does this offer a learner who has no syllabus, or has one listing topics rather than
-  outcomes? If most courses end up with no objectives or poor ones, 0009 degrades to an empty
+  outcomes? If most courses end up with no objectives or poor ones, 0008 degrades to an empty
   page and the learner never learns why. PRD open question 3 carries it, and it blocks whether
-  0009 can be validated at all.
+  0008 can be validated at all.
 - Should a low-confidence extraction be shown? A bad draft makes the learner's first
   experience of the product's judgement a bad one, before anything has paid back. PRD open
   question 4.
