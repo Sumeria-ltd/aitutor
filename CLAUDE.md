@@ -4,34 +4,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Pre-implementation. The repository currently contains `problem.txt` (the original product brief) and this file. No code has been scaffolded, so there are no build, test, or lint commands yet — add them here when the project is scaffolded.
+Pre-implementation. The repository contains `problem.txt` (the original product brief), `docs/PRD.md` (the product requirements), and this file. No code has been scaffolded, so there are no build, test, or lint commands yet — add them here when the project is scaffolded.
 
 ## What this is
 
-AITutor is a per-course study space for university students. A student creates a course, declares its **objectives**, and adds a **session** for each class as it happens, attaching material (slides, PDFs, photos of the board) or writing a summary in their own words. They can then question their own material and get answers cited back to the session they came from, generate practice questions, and see how ready they are against the course objectives.
+AITutor is a per-course study space for learners. A learner creates a course, declares its **objectives**, and adds a **session** for each class as it happens, attaching material (slides, PDFs, photos of the board) or writing a summary in their own words. They can then question their own material and get answers cited back to the session they came from, generate practice questions, and see how ready they are against the course objectives.
 
-Wedge user: university students (MENA). Positioning: a *co-learner* that runs the whole semester loop — prepare, capture, understand, organize, practice — not a document search tool.
+User: a learner taking a structured course — one that declares what it teaches and happens as sessions over time — wherever it runs (a training provider, a university, a structured online program). The **beachhead** is semester-shaped courses; see `docs/PRD.md` §2 and the open question at §9.1. Positioning: a *co-learner* that runs the whole course loop — prepare, capture, understand, organize, practice — not a document search tool.
 
-## Intent files
+## The PRD
 
-`docs/intent/` holds one file per feature, each stating a business requirement — who is stuck, and what changes when this works. Every file uses the same six headings, in order: **PROBLEM · USER · OUTCOME · SUCCESS · LIMITS · NOT NOW**.
+`docs/PRD.md` is the source of truth for **what** AITutor is and what it must do: the
+problem, the user, the thesis, the five product invariants, the nine v1 capabilities with
+their acceptance criteria and out-of-scope lists, the non-goals with their reasons, the
+success thresholds, the open questions, and the build phases.
 
-These must survive a total rewrite, so they contain no implementation detail: no stack, no schemas, no model names, no API behaviour. SUCCESS is written as measurable outcomes rather than shipped features. LIMITS is where the product invariants below get applied to a specific feature.
+This file is the source of truth for **how** it is built — stack, platform constraints,
+model selection, architecture. Where a spec disagrees with the PRD on product intent, the
+PRD wins; where the PRD strays into implementation, this file wins.
 
-New features get an intent file before they get a design. Read the relevant one before implementing anything.
+**Read the relevant capability in the PRD before implementing anything.** Every feature
+spec must trace to a capability there.
+
+It supersedes the nine intent files that were at `docs/intent/` (recoverable from commit
+`fe3c550`); their content is absorbed into PRD §6, and the traceability table in the PRD
+appendix maps each capability back to its origin file.
 
 ## Product invariants
 
 These are deliberate design decisions, not gaps. Do not "improve" the product by violating them.
 
-- **The student's effort is the mechanism, not friction.** Finding a resource, assigning it to a session, and putting it in their own words is generative work, and generative work is what produces retention. Never add a feature that removes the student's summarizing or self-testing work. Automating *transcription* (e.g. extracting objectives from an uploaded syllabus) is fine; automating *comprehension* is not.
-- **Effort must pay back immediately and visibly.** The corollary of the above. Every act of capture should return something the student can see — a check on their summary, a coverage bar moving, a quiz result.
-- **Single-user and private.** No shared course spaces, no crowd-sourced material, no social layer. A course belongs to one student.
-- **Answers are grounded in the student's own material.** Never answer from general model knowledge when the student is asking about their course. If the scoped material doesn't support an answer, say so.
+- **The learner's effort is the mechanism, not friction.** Finding a resource, assigning it to a session, and putting it in their own words is generative work, and generative work is what produces retention. Never add a feature that removes the learner's summarizing or self-testing work. Automating *transcription* (e.g. extracting objectives from an uploaded syllabus) is fine; automating *comprehension* is not.
+- **Effort must pay back immediately and visibly.** The corollary of the above. Every act of capture should return something the learner can see — a check on their summary, a coverage bar moving, a quiz result.
+- **Single-user and private.** No shared course spaces, no crowd-sourced material, no social layer. A course belongs to one learner.
+- **Answers are grounded in the learner's own material.** Never answer from general model knowledge when the learner is asking about their course. If the scoped material doesn't support an answer, say so.
 
 ## Architecture
 
-**Structure replaces retrieval.** There is deliberately no vector database, embedding pipeline, or semantic search. The student has already told us which session each material belongs to, so retrieval is a scope query (`WHERE session_id IN (...)`) and the selected documents go into context directly. This is both simpler and a truer expression of the product thesis: the student's organizing effort is literally what makes retrieval work.
+**Structure replaces retrieval.** There is deliberately no vector database, embedding pipeline, or semantic search. The learner has already told us which session each material belongs to, so retrieval is a scope query (`WHERE session_id IN (...)`) and the selected documents go into context directly. This is both simpler and a truer expression of the product thesis: the learner's organizing effort is literally what makes retrieval work.
 
 **Stack** (all Google Cloud):
 
@@ -79,4 +89,4 @@ Deliberately excluded — do not implement without an explicit decision to expan
 
 Default to a Flash-class Gemini model; reserve Pro-class for grounded Q&A and explanation, and only after an eval shows Flash-class is insufficient. Pin exact model IDs — the version landscape (3 / 3.1 / 3.5 / 3.6 / 3.7, Flash and Pro) prices very differently and several tiers carry introductory rates. Confirm against Google's official Vertex AI pricing page rather than any figure quoted in project docs.
 
-Unit economics are the reason this product can work at MENA price points: Flash-class puts an active student in roughly the $1–2/month range of model spend. Changes that multiply token usage per interaction are business decisions, not just technical ones.
+Unit economics are the reason this product can work at the price points learners will bear (MENA, where the beachhead sits, is the tightest case): Flash-class puts an active learner in roughly the $1–2/month range of model spend. Changes that multiply token usage per interaction are business decisions, not just technical ones.
