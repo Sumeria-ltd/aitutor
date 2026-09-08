@@ -62,19 +62,22 @@ even when it is empty. The validator adds what it did *not* check, and why.
      CLAUDE.md and it was previously unspecified anywhere. The skills read whatever this
      section says, so adjust it freely. -->
 
-### Divergences to resolve
+### Document map
 
-The role skills expect filenames this repository does not yet use. Until these are
-reconciled, a role will look for a file that is not there:
-
-| Skill expects | Repository has | Note |
+| Document | Owner | Status |
 |---|---|---|
-| `pitch.txt` | `problem.txt` | The original brief. Same role, different name. |
-| `docs/prd.md` | `docs/PRD.md` | Differs only in case, so it resolves on macOS but not in git. |
-| `docs/intents/` | `docs/intent/` (empty) | Plural vs singular; the old contents are in commit `fe3c550`. |
-| Four-digit IDs (`0001`) | `C1`–`C9` in `docs/PRD.md` | The existing PRD uses capability IDs, not numeric ones. |
-| "No technology anywhere" in the PRD | `docs/PRD.md` §11 names cost limits and model classes | The project PM skill forbids technology in the PRD; §11 carries it deliberately. |
-| `docs/adr/`, `docs/validation/` | absent | Created by the architect and validator on first use. |
+| `problem.txt` | — | The original brief. This is what the role skills call `pitch.txt`. |
+| `docs/prd.md` | `aitutor-pm` | Nine-section PRD, ten ranked requirements `0001`–`0010`. Carries no technology by design — anything technical a requirement forces is a note for the architect in §7. |
+| `docs/intents/NNNN-<slug>.md` | `aitutor-pm` | One per requirement, six fields, countable SUCCESS. |
+| `docs/adr/NNNN-<slug>.md` | `aitutor-architect` | Created on first use. One decision per ADR, two rejected options minimum. |
+| `docs/specs/NNNN-<slug>.md` | `aitutor-architect` | One per intent, written only when that intent is named to start. |
+| `docs/validation/NNNN-<slug>.md` | `aitutor-validator` | Created on first use. |
+| `deployment.md` | `aitutor-platform` | Created on first deploy. |
+
+Superseded and removed from the working tree, recoverable from commit `fe3c550`:
+`docs/intent/` (singular — the nine pre-PRD intent files) and `docs/specs/` (nine specs that
+predate `docs/prd.md` and are reference, not authority). UI mockups remain at
+`design/aitutor-ui/` in that commit.
 
 ## What this is
 
