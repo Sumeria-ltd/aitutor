@@ -1,7 +1,12 @@
 # Design — CI and CD on GitHub Actions
 
 Date: 2026-09-08
-Status: implemented on branch `ci/github-actions-pipeline`
+Status: **superseded**
+Superseded-by: `docs/adr/0009-make-contract-for-ci.md`, `docs/adr/0010-ci-triggers-on-push.md`, `docs/adr/0011-merge-blocking-is-a-committed-ruleset.md`
+
+> Its three load-bearing decisions were promoted to ADRs on 2026-09-08, as this file
+> asked. The record is kept for its verification notes and its account of what was tried,
+> which the ADRs do not carry. It is no longer authoritative.
 
 Written under the brainstorming skill, which places design records here. **This is not an
 ADR.** ADRs are owned by `aitutor-architect` per `CLAUDE.md`, and this was produced outside
