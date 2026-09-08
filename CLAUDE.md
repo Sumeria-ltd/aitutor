@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Pre-implementation. The repository contains `problem.txt` (the original product brief), `docs/PRD.md` (the product requirements), and this file. No code has been scaffolded, so there are no build, test, or lint commands yet — add them here when the project is scaffolded.
+Pre-implementation. The repository contains `problem.txt` (the original product brief), `docs/prd.md` (the product requirements), and this file. No code has been scaffolded, so there are no build, test, or lint commands yet — add them here when the project is scaffolded.
 
 ## Roles and workflow
 
@@ -28,39 +28,87 @@ incompatible system that drafts product state into Jira and reads a
 | `aitutor-platform` | deployment, observability, cost alerting, `deployment.md` | application code, specs |
 | `aitutor-validator` | `docs/validation/NNNN-<slug>.md` | everything — it reports, never repairs |
 
-Work flows one direction, and every document carries `status:` frontmatter
-(`draft` → `ready-for-review` → `approved`, or `blocked`):
+## Artifact chain and handover protocol
+
+Reproduced from `.claude/HANDOVER.md`, which instructs that it be pasted here unchanged.
+**One deviation:** the role names below carry the `aitutor-` prefix explained above;
+`HANDOVER.md` still uses the unprefixed originals. Nothing else is altered.
+
+This project is built by a chain of roles. Each role reads files, writes files, and
+stops. **No role calls another role.** The artifact is the interface.
+
+### The chain
 
 ```
-PRD → intent → ADR → spec → code → deployment → validation
+problem.txt                                              (HANDOVER.md calls this pitch.txt)
+   └─ aitutor-pm        → docs/prd.md
+                        → docs/intents/NNNN-<slug>.md      (one per requirement)
+      └─ aitutor-architect → docs/adr/NNNN-<slug>.md       (decisions, product-wide)
+                           → docs/specs/NNNN-<slug>.md     (one per intent, on request)
+         └─ aitutor-engineer   → source code and tests
+            └─ aitutor-platform → deployment.md, live URL
+               └─ aitutor-validator → docs/validation/NNNN-<slug>.md
 ```
 
-Three rules hold the pipeline together:
+`docs/prd.md` is the root document. Every requirement in it has an ID. That ID travels:
+requirement `0003` becomes intent `0003`, spec `0003`, validation `0003`. Anything without
+a traceable ID does not belong in this repository.
 
-- **One requirement, one four-digit ID.** `0001` is assigned in a PRD row and carried
-  unchanged through its intent, spec, and validation record.
-- **No role approves its own output.** A role sets `ready-for-review`; only the user moves
-  a file to `approved`. A role that needs an unapproved input stops and says so.
-- **Never choose what to build next.** The architect and engineer act on an intent or spec
-  the user names. Picking one is a product decision.
+### Every artifact carries a status header
 
-### Handover protocol — the four-line format
+Every generated document starts with this block, and nothing else may precede it:
 
-Every role ends its turn with exactly these four lines, and nothing else dressed up as them:
-
-```
-DONE:   <what was produced, as file paths>
-STATE:  <the status set on each file, and what it now waits on>
-NEXT:   <which role acts next, and what it needs before it can>
-RISK:   <the thing most likely to be wrong, or "none found">
+```yaml
+---
+id: 0003
+status: draft             # draft | ready-for-review | approved | blocked | superseded
+owner: aitutor-architect  # the role that produced it
+inputs: [docs/prd.md, docs/intents/0003-capture-summary.md]
+updated: 2026-09-08
+---
 ```
 
-The engineer adds a fifth block, `Things I did that the spec did not ask for`, written out
-even when it is empty. The validator adds what it did *not* check, and why.
+### The handover rules
 
-<!-- The four-line format is defined here because all five role skills require it from
-     CLAUDE.md and it was previously unspecified anywhere. The skills read whatever this
-     section says, so adjust it freely. -->
+1. **A role may only start when every input it needs is `approved`.**
+   If any input is `draft`, `ready-for-review` or `blocked`, stop and say which file and
+   what state it is in. Do not proceed on an unapproved input.
+
+2. **A role may never set its own output to `approved`.**
+   When you finish, set `status: ready-for-review` and stop. Approval is a human act.
+   This is the gate. Marking your own work approved removes it.
+
+3. **Hand over only when the task is ready.**
+   Before setting `ready-for-review`, verify your own skill's "Done when" list and state
+   the result item by item. If any item fails, set `status: blocked`, write why under an
+   `## Blocked on` heading, and stop.
+
+4. **Unanswered questions block the chain.**
+   If you cannot complete the artifact without a decision that is not yours to make, set
+   `status: blocked` and list the questions. Never guess and continue.
+
+5. **Stay in your lane.**
+   Write only the artifacts your role owns. If you find a fault in an upstream document,
+   report it — do not edit it. Corrections go back to the role that owns that file.
+
+6. **Traceability is mandatory.**
+   Every artifact names its `inputs` and shares the `id` of the requirement it serves.
+   An artifact whose ID appears nowhere upstream is scope drift, and gets reported.
+
+7. **Superseding, never overwriting.**
+   When a decision changes, set the old artifact to `superseded`, add
+   `superseded-by: <path>`, and write a new one. History is evidence.
+
+### What to say at the end of every run
+
+Finish every run with exactly these four lines:
+
+```
+ARTIFACT:  <path you wrote>
+STATUS:    ready-for-review | blocked
+DONE-WHEN: <each item, met or not met>
+NEXT:      <the role that should run next, and what it needs from the human first>
+```
 
 ### Document map
 
@@ -83,14 +131,14 @@ predate `docs/prd.md` and are reference, not authority). UI mockups remain at
 
 AITutor is a per-course study space for learners. A learner creates a course, declares its **objectives**, and adds a **session** for each class as it happens, attaching material (slides, PDFs, photos of the board) or writing a summary in their own words. They can then question their own material and get answers cited back to the session they came from, generate practice questions, and see how ready they are against the course objectives.
 
-User: a learner taking a structured course — one that declares what it teaches and happens as sessions over time — wherever it runs (a training provider, a university, a structured online program). The **beachhead** is semester-shaped courses; see `docs/PRD.md` §2 and the open question at §9.1. Positioning: a *co-learner* that runs the whole course loop — prepare, capture, understand, organize, practice — not a document search tool.
+User: a learner taking a structured course — one that declares what it teaches and happens as sessions over time — wherever it runs (a training provider, a university, a structured online program). The **beachhead** is semester-shaped courses; see `docs/prd.md` §2 and open question 1. Positioning: a *co-learner* that runs the whole course loop — prepare, capture, understand, organize, practice — not a document search tool.
 
 ## The PRD
 
-`docs/PRD.md` is the source of truth for **what** AITutor is and what it must do: the
-problem, the user, the thesis, the five product invariants, the nine v1 capabilities with
-their acceptance criteria and out-of-scope lists, the non-goals with their reasons, the
-success thresholds, the open questions, and the build phases.
+`docs/prd.md` is the source of truth for **what** AITutor is and what it must do: the
+problem, the users, the six journeys, ten ranked requirements `0001`–`0010` with countable
+acceptance criteria, out of scope with the reason for each, the constraints table, the
+risks with their early signals, the open questions, and the build phases.
 
 This file is the source of truth for **how** it is built — stack, platform constraints,
 model selection, architecture. Where a spec disagrees with the PRD on product intent, the
@@ -99,9 +147,11 @@ PRD wins; where the PRD strays into implementation, this file wins.
 **Read the relevant capability in the PRD before implementing anything.** Every feature
 spec must trace to a capability there.
 
-It supersedes the nine intent files that were at `docs/intent/` (recoverable from commit
-`fe3c550`); their content is absorbed into PRD §6, and the traceability table in the PRD
-appendix maps each capability back to its origin file.
+Per-requirement detail lives in `docs/intents/NNNN-<slug>.md`, not in the PRD. Requirement
+IDs changed on 2026-09-08: the capability IDs `C1`–`C9` used by the superseded `docs/PRD.md`
+(commit `116b918`) are now `0002`–`0010`, and a new `0001` sits ahead of them. PRD §10 maps
+the old IDs to the new ones. Anything written before that date — including the published
+PRD artifact — still uses `C1`–`C9`.
 
 ## Product invariants
 
