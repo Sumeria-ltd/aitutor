@@ -1,14 +1,14 @@
 ---
-id: 0005
+id: 0004
 status: approved
 owner: aitutor-pm
 inputs: [docs/prd.md]
 updated: 2026-09-08
 ---
 
-# Intent 0005 — Capture a session
+# Intent 0004 — Capture a session
 
-Derived from PRD requirement 0005, rank 5.
+Derived from PRD requirement 0004, rank 4.
 
 PROBLEM:  The lecture ends. The learner walks out holding two things: a file — emailed,
           downloaded, or photographed off the whiteboard — and a fresh but fragile
@@ -55,8 +55,8 @@ NOT NOW:  Recording or transcribing lecture audio. Reminders, streaks, or any pr
 
 ## Open questions
 - What is a session when nothing schedules one? On a semester course it is a class that
-  happened; self-paced, the learner draws the boundary, and a badly drawn one makes 0007 coarse
-  and 0009 flat. PRD open question 2.
+  happened; self-paced, the learner draws the boundary, and a badly drawn one makes 0006 coarse
+  and 0008 flat. PRD open question 2.
 - Capture must finish in under two minutes on a bad connection, but material has to be read
   before it is useful. What does the learner see in between, and what have they been promised
   once they close the page?
