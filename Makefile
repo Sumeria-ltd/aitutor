@@ -6,8 +6,9 @@
 # ADR, not to a CI file. When it is made, replace the *bodies* below and leave the *names*
 # alone. Renaming a target silently removes the merge gate.
 #
-# Today the bodies check the only thing this repository contains: its documents. See
-# scripts/check-docs.sh and docs/ci.md.
+# The bodies now run the real toolchain, as ADR 0009 requires. The document checks were not
+# dropped: they became tests inside the suite (tests/docs-invariants.test.ts), because ADR 0009
+# says the workflows invoke build and test and nothing else. See docs/ci.md.
 
 BUILD_DIR ?= dist
 
@@ -18,10 +19,10 @@ help: ## Show the available targets
 	@grep -hE '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sort | awk -F':.*?## ' '{printf "  %-10s %s\n", $$1, $$2}'
 
 build: ## Assemble the project. Required check on every pull request.
-	@scripts/check-docs.sh --structure
+	@npm run build --workspaces --if-present
 
 test: ## Run the automated suite. Required check on every pull request.
-	@scripts/check-docs.sh --invariants
+	@npx vitest run
 
 check: ## Everything CI runs on a pull request, in one command
 	@$(MAKE) --no-print-directory build

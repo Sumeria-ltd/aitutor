@@ -34,11 +34,23 @@ concurrency:
 jobs:
   # The job names below are the check names the main ruleset requires. Renaming either one
   # removes the merge gate without any error being raised anywhere. Don't.
+  #
+  # The install step is load-bearing for the same reason. The Make bodies ran shell scripts
+  # when this file was written and needed nothing installed; they now run tsc, vite and
+  # vitest. Remove the install and every job fails on a missing type definition, which is at
+  # least loud — but remove it together with a Make body and the gate goes quiet instead.
+  # tests/ci-contract.test.ts is what stops that.
   build:
     name: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: install
+        run: npm ci
       - name: make build
         run: make build
 
@@ -47,5 +59,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: install
+        run: npm ci
       - name: make test
         run: make test
