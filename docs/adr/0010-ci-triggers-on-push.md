@@ -1,6 +1,6 @@
 ---
 id: 0010
-status: ready-for-review
+status: approved
 owner: aitutor-architect
 inputs: [docs/prd.md, docs/adr/0009-make-contract-for-ci.md, docs/superpowers/specs/2026-09-08-github-actions-cicd-design.md]
 updated: 2026-09-08

@@ -1,6 +1,6 @@
 ---
 id: 0008
-status: ready-for-review
+status: approved
 owner: aitutor-architect
 inputs: [docs/prd.md, docs/intents/0009-know-its-working.md, docs/adr/0006-isolation-per-learner.md, CLAUDE.md]
 updated: 2026-09-08

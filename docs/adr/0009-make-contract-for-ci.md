@@ -1,6 +1,6 @@
 ---
 id: 0009
-status: ready-for-review
+status: approved
 owner: aitutor-architect
 inputs: [docs/prd.md, docs/adr/0003-one-typescript-monorepo.md, docs/adr/0004-one-test-runner.md, docs/superpowers/specs/2026-09-08-github-actions-cicd-design.md]
 updated: 2026-09-08
