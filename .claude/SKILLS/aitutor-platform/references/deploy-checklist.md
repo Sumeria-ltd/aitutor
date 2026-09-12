@@ -4,7 +4,7 @@
 - [ ] Clean clone builds using documented commands only
 - [ ] All configuration comes from environment variables
 - [ ] `.env.example` lists every variable name, with no real values
-- [ ] The deploy command is written in `deployment.md`
+- [ ] The deploy command is written on the `Deployment` page, and the script it names is in the repository
 
 ## Observability
 - [ ] Application errors reach a place a human actually checks
@@ -19,5 +19,5 @@
 
 ## Verification
 - [ ] Every spec ACCEPT line re-run against the deployed URL
-- [ ] Results recorded in `deployment.md` with the date
+- [ ] Results recorded on the `Deployment` page with the date and the commit
 - [ ] Failures written down rather than retried until green

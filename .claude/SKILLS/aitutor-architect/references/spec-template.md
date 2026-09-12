@@ -1,10 +1,12 @@
----
-id: <NNNN>
-status: draft
-owner: aitutor-architect
-inputs: [docs/intents/<NNNN>-<slug>.md, docs/prd.md, docs/adr/0001-..., CLAUDE.md]
-updated: <date>
----
+<!-- Page title: `Spec <NNNN> · <feature name>`. The table below is the status header; nothing may precede it. -->
+
+| | |
+|---|---|
+| **id** | <NNNN> |
+| **status** | `draft` |
+| **owner** | `aitutor-architect` |
+| **inputs** | [Intent <NNNN> · <title>](…), [PRD — AITutor](…), [ADR 0001 · …](…), … , `CLAUDE.md` |
+| **updated** | <date> |
 
 # Spec <NNNN> — <feature name>
 
