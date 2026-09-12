@@ -4,7 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Pre-implementation. The repository contains `problem.txt` (the original product brief), `docs/prd.md` (the product requirements), and this file. No code has been scaffolded, so there are no build, test, or lint commands yet — add them here when the project is scaffolded.
+Requirement `0001` — register an account — is implemented and merged (PR #2). It is **not
+deployed and not validated**: no cloud project exists yet, so `aitutor-platform` has not run,
+and the validator needs a deployed URL. The repository is a TypeScript monorepo per ADR 0003 —
+`packages/shared`, `apps/api`, `apps/web` — with repository-level checks in `tests/`.
+
+| Command | Does |
+|---|---|
+| `npm ci` | install; Node 24, pinned in `.nvmrc` |
+| `make test` | the whole suite — one Vitest run at the root (ADR 0004), document invariants included |
+| `make build` | typecheck every workspace and build the web app |
+| `make check` | both, which is what CI runs on a pull request |
+| `npm run dev` | API on :8080, web on :5173 |
+| `npm run lint` | Biome |
+
+The GitHub Actions workflows call only `make build` and `make test` (ADR 0009). **Renaming a
+target removes the merge gate silently** — change the bodies, never the names.
+`tests/ci-contract.test.ts` goes red if the workflow stops installing dependencies or a job is
+renamed.
 
 ## Roles and workflow
 
@@ -115,17 +132,17 @@ NEXT:      <the role that should run next, and what it needs from the human firs
 | Document | Owner | Status |
 |---|---|---|
 | `problem.txt` | — | The original brief. This is what the role skills call `pitch.txt`. |
-| `docs/prd.md` | `aitutor-pm` | Nine-section PRD, ten ranked requirements `0001`–`0010`. Carries no technology by design — anything technical a requirement forces is a note for the architect in §7. |
+| `docs/prd.md` | `aitutor-pm` | Nine-section PRD, nine ranked requirements `0001`–`0009`; the repository scaffold is a §7 constraint, not a requirement. Carries no technology by design — anything technical a requirement forces is a note for the architect in §7. |
 | `docs/intents/NNNN-<slug>.md` | `aitutor-pm` | One per requirement, six fields, countable SUCCESS. |
 | `docs/adr/NNNN-<slug>.md` | `aitutor-architect` | Created on first use. One decision per ADR, two rejected options minimum. |
 | `docs/specs/NNNN-<slug>.md` | `aitutor-architect` | One per intent, written only when that intent is named to start. |
 | `docs/validation/NNNN-<slug>.md` | `aitutor-validator` | Created on first use. |
 | `deployment.md` | `aitutor-platform` | Created on first deploy. |
 
-Superseded and removed from the working tree, recoverable from commit `fe3c550`:
-`docs/intent/` (singular — the nine pre-PRD intent files) and `docs/specs/` (nine specs that
-predate `docs/prd.md` and are reference, not authority). UI mockups remain at
-`design/aitutor-ui/` in that commit.
+Superseded and removed from the working tree, all recoverable from commit `fe3c550`:
+`docs/intent/` (singular — the nine pre-PRD intent files), the nine specs that predated
+`docs/prd.md` (reference, not authority; `docs/specs/` now holds only live specs), and the UI
+mockups at `design/aitutor-ui/`.
 
 ## What this is
 
@@ -136,7 +153,7 @@ User: a learner taking a structured course — one that declares what it teaches
 ## The PRD
 
 `docs/prd.md` is the source of truth for **what** AITutor is and what it must do: the
-problem, the users, the six journeys, ten ranked requirements `0001`–`0010` with countable
+problem, the users, the six journeys, nine ranked requirements `0001`–`0009` with countable
 acceptance criteria, out of scope with the reason for each, the constraints table, the
 risks with their early signals, the open questions, and the build phases.
 
@@ -147,11 +164,11 @@ PRD wins; where the PRD strays into implementation, this file wins.
 **Read the relevant capability in the PRD before implementing anything.** Every feature
 spec must trace to a capability there.
 
-Per-requirement detail lives in `docs/intents/NNNN-<slug>.md`, not in the PRD. Requirement
-IDs changed on 2026-09-08: the capability IDs `C1`–`C9` used by the superseded `docs/PRD.md`
-(commit `116b918`) are now `0002`–`0010`, and a new `0001` sits ahead of them. PRD §10 maps
-the old IDs to the new ones. Anything written before that date — including the published
-PRD artifact — still uses `C1`–`C9`.
+Per-requirement detail lives in `docs/intents/NNNN-<slug>.md`, not in the PRD. The
+capability IDs `C1`–`C9` used by the superseded `docs/PRD.md` (commit `116b918`) map one to
+one onto `0001`–`0009`; PRD §10 has the table. A scaffold requirement was briefly numbered
+`0001` on 2026-09-08 and then made a §7 constraint — see PRD open question 6. The published
+PRD artifact predates all of this and still says `C1`–`C9`.
 
 ## Product invariants
 
