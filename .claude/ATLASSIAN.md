@@ -14,6 +14,32 @@ the engineering notes that belong beside code (`docs/ci.md`, `docs/diagrams/`).
 **If the Atlassian MCP is not connected, a role stops.** It says so, and does not fall back
 to writing files. There is no file fallback: the pages are the artifacts.
 
+## Connecting
+
+The server is declared in [`.mcp.json`](../.mcp.json) at the repository root — project
+scope, committed, no secrets — and enabled for everyone by `enabledMcpjsonServers` in
+[`.claude/settings.json`](settings.json), which also pre-approves the `mcp__atlassian__*`
+tools (the three delete tools stay behind a prompt). It runs `uvx mcp-atlassian`, so
+[`uv`](https://docs.astral.sh/uv/) must be installed.
+
+Credentials come from your shell environment, expanded by Claude Code when it starts the
+server:
+
+```sh
+export ATLASSIAN_EMAIL="you@sumerialtd.co.uk"
+export ATLASSIAN_API_TOKEN="…"        # id.atlassian.com → Security → API tokens; one token serves Jira and Confluence
+```
+
+Put those in your shell profile (`~/.zshenv`, so non-interactive shells see them too), then
+restart Claude Code. `/mcp` should show `atlassian` connected. The site URLs default to
+`sumerialtd.atlassian.net`; override `JIRA_URL` / `CONFLUENCE_URL` only for another site.
+`JIRA_PROJECTS_FILTER=AIT` and `CONFLUENCE_SPACES_FILTER=AI` scope searches to this project
+by default; pass an explicit filter to a tool to look elsewhere.
+
+A user-level definition of the same server in `~/.claude.json` (`claude mcp add … -s user`)
+still works and takes precedence if both exist, but it is invisible to anyone else who
+clones the repository — prefer the project one.
+
 ## Confluence — the page tree
 
 ```

@@ -1,0 +1,13 @@
+{
+  "enabledMcpjsonServers": ["atlassian"],
+  "permissions": {
+    "allow": [
+      "mcp__atlassian"
+    ],
+    "deny": [
+      "mcp__atlassian__jira_delete_issue",
+      "mcp__atlassian__confluence_delete_page",
+      "mcp__atlassian__confluence_delete_attachment"
+    ]
+  }
+}
