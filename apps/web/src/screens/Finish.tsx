@@ -28,7 +28,7 @@ export function Finish({ completeSignIn, apiOrigin, onSignedIn, startedAt }: Fin
         const body = (await res.json()) as { learner: Learner };
         if (!cancelled) onSignedIn(body.learner);
       } catch {
-        if (!cancelled) setError("That link has expired. Ask for a new one.");
+        if (!cancelled) setError("Ask for a new one.");
       }
     })();
     return () => {
@@ -36,5 +36,25 @@ export function Finish({ completeSignIn, apiOrigin, onSignedIn, startedAt }: Fin
     };
   }, [completeSignIn, apiOrigin, onSignedIn, startedAt]);
 
-  return <main>{error ? <p role="alert">{error}</p> : <p>Signing you in…</p>}</main>;
+  return (
+    <main className="page">
+      <div className="spread">
+        <div className="margin">
+          <span className="label">AITutor</span>
+        </div>
+        <div className="column">
+          {error ? (
+            <div className="alert" role="alert">
+              <p className="ui strong">That link has expired.</p>
+              <p className="note">{error}</p>
+            </div>
+          ) : (
+            <div className="working" aria-live="polite">
+              <p className="ui">Signing you in…</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
 }

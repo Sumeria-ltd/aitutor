@@ -11,7 +11,6 @@
 <link rel="stylesheet" href="base.css">
 <style>
 /* This page only: the furniture for showing the system. Nothing here is a primitive. */
-.h { font-family: var(--font-ui); font-size: var(--text-title); line-height: var(--leading-title); font-weight: var(--weight-ui-strong); color: var(--text); letter-spacing: -0.01em; }
 .section-head { display: grid; gap: var(--space-1); }
 .spread--top { align-items: start; }
 /* A demo spread inside the column keeps the reading column readable. */
@@ -49,8 +48,6 @@
 .shapes .shape i { display: block; inline-size: 3rem; block-size: 2.5rem; border: 1px solid var(--edge-control); background: var(--surface-inset); }
 .measure-demo { display: grid; gap: var(--space-2); margin-block-start: var(--space-5); }
 
-.stack { display: grid; gap: var(--space-5); }
-.stack--tight { gap: var(--space-3); }
 .states { display: grid; gap: var(--space-2); }
 .states .row { display: flex; align-items: center; gap: var(--space-3); min-height: 1.75rem; }
 .banner--demo { position: static; padding-inline: var(--space-4); border-block-start: var(--rule); }
@@ -76,7 +73,7 @@ footer { margin-block-start: var(--space-9); padding-block-start: var(--space-4)
         <span class="note">Light only · English, RTL-ready</span>
       </div>
       <div class="column section-head">
-        <h1 class="h">AITutor Foundation</h1>
+        <h1 class="ui ui--title">AITutor Foundation</h1>
         <p class="ui thesis">Two inks on paper. Black ink is text. The second ink has two jobs. And the serif is not decoration — if it is in the serif, it came from the learner or their material.</p>
       </div>
     </div>
@@ -174,6 +171,7 @@ footer { margin-block-start: var(--space-9); padding-block-start: var(--space-4)
           <div class="row"><span class="read read--display">Thermodynamics</span><span class="note num spec">display · 36 / 1.1 / 300</span></div>
           <div class="row"><span class="read read--title">Heat engines and the Carnot cycle</span><span class="note num spec">title · 24 / 1.25 / 500</span></div>
           <div class="row"><span class="read">No engine between two reservoirs can beat a reversible one; that is the whole of Carnot’s theorem.</span><span class="note num spec">read · 18 / 1.6 / 400</span></div>
+          <div class="row"><span class="ui ui--title">Check your email</span><span class="note num spec">ui title · 24 / 1.25 / 500</span></div>
           <div class="row"><span class="ui">Choose which sessions to ask against. Answers cite the session they came from.</span><span class="note num spec">ui · 15 / 1.5 / 400</span></div>
           <div class="row"><span class="note">Slides · 24 pages — added Sun 14 Sep</span><span class="note num spec">note · 13 / 1.45 / 400</span></div>
           <div class="row"><span class="label">Session 4</span><span class="note num spec">label · 13 / 500 / +6% tracking</span></div>
