@@ -1,0 +1,16 @@
+# Only what the Dockerfile COPYs matters; everything else is noise in the build context.
+# Keeping node_modules out is what makes `npm ci` inside the image the only install.
+node_modules
+**/node_modules
+**/dist
+.git
+.github
+.claude
+.env
+.env.*
+!.env.example
+docs
+tests
+apps/web
+**/*.test.ts
+**/*.test.tsx

@@ -5,7 +5,12 @@ name: Deployment ready
 # It deploys nothing. No cloud provider is contacted, no credential is needed, and none is
 # stored — this repository is public, and deployment belongs to the platform-engineer role
 # per CLAUDE.md. What this produces is a named, verified commit for that role to deploy,
-# instead of "whatever main happens to be right now".
+# instead of "whatever main happens to be right now". Deploying is .github/workflows/deploy.yml,
+# run by hand from main or from the rc-* tag this produces.
+#
+# The install step is load-bearing: `make build` runs tsc, which needs the toolchain
+# installed. This workflow ran without it from 2026-09-12 to 2026-09-19 and failed on every
+# merge; tests/ci-contract.test.ts now checks this file too.
 
 on:
   push:
@@ -29,6 +34,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: install
+        run: npm ci
+
       - name: make build
         run: make build
 
@@ -43,6 +56,9 @@ jobs:
 
       - name: The container image builds
         run: scripts/check-deployable.sh --image
+
+      - name: The container starts and answers
+        run: scripts/check-deployable.sh --run
 
       - name: Tag the release candidate
         id: tag
@@ -78,5 +94,6 @@ jobs:
             echo "Commit: \`$GITHUB_SHA\`"
             echo
             echo "This commit builds, passes its suite, declares its configuration without"
-            echo "leaking it, and produces a container image. Nothing has been deployed."
+            echo "leaking it, and produces a container image that starts. Nothing has been"
+            echo "deployed: run the Deploy workflow from this tag to do that."
           } >> "$GITHUB_STEP_SUMMARY"

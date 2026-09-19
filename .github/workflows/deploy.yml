@@ -1,0 +1,66 @@
+name: Deploy
+
+# Deploys what is checked out to GCP. Triggered by hand, never by a push.
+#
+# Run it from the Actions tab after a merge to main — from `main` itself, or from an
+# `rc-YYYY.MM.DD-<sha>` tag that "Deployment ready" produced, which is the same commit with
+# a name. Anything else is refused twice: by the first step here, and by the identity
+# provider in GCP, which only exchanges tokens minted for main or an rc-* tag of this
+# repository (scripts/gcp-bootstrap.sh sets that condition).
+#
+# No credential is stored. The job asks GitHub for an OIDC token and Workload Identity
+# Federation exchanges it for a short-lived credential as the deployer service account.
+# This repository is public; a stored key here would be the largest secret it holds.
+#
+# Per ADR 0009 the workflow names no toolchain. What "deploy" means is `make deploy`, whose
+# body is scripts/deploy.sh — the same command you would run from a laptop. The four values
+# below are repository *variables*, not secrets: none of them is one. See docs/ci.md.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # to mint the OIDC token that Workload Identity Federation exchanges
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false # never abandon a half-finished deploy
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.web_url }}
+    steps:
+      - name: Refuse anything but main or a release-candidate tag
+        run: |
+          case "$GITHUB_REF" in
+            refs/heads/main|refs/tags/rc-*) echo "Deploying $GITHUB_REF at $GITHUB_SHA" ;;
+            *) echo "::error::Deploy runs only from main or an rc-* tag, not $GITHUB_REF"; exit 1 ;;
+          esac
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: install
+        run: npm ci
+
+      - name: Authenticate to GCP (Workload Identity Federation, no stored key)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+
+      - name: make deploy
+        id: deploy
+        env:
+          GOOGLE_CLOUD_PROJECT: ${{ vars.GOOGLE_CLOUD_PROJECT }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+        run: make deploy
