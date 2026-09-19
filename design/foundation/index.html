@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AITutor Foundation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,300..500;1,7..72,400&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="base.css">
+<style>
+/* This page only: the furniture for showing the system. Nothing here is a primitive. */
+.h { font-family: var(--font-ui); font-size: var(--text-title); line-height: var(--leading-title); font-weight: var(--weight-ui-strong); color: var(--text); letter-spacing: -0.01em; }
+.section-head { display: grid; gap: var(--space-1); }
+.spread--top { align-items: start; }
+/* A demo spread inside the column keeps the reading column readable. */
+.column > .spread { --margin-w: 7rem; column-gap: var(--space-5); }
+.thesis { max-width: 40ch; }
+.rule-line { border-block-start: var(--rule); padding-block-start: var(--space-4); margin-block-start: var(--space-5); }
+
+.inks { display: grid; grid-template-columns: 3rem minmax(0, 1fr) auto; gap: var(--space-3) var(--space-4); align-items: center; }
+.inks .chip { block-size: 3rem; border-radius: var(--radius-control); border: var(--rule); }
+.inks .who { display: grid; gap: 2px; }
+.inks .val { text-align: end; display: grid; gap: 2px; }
+@media (max-width: 45rem) {
+  .inks { grid-template-columns: 2.5rem minmax(0, 1fr); }
+  .inks .chip { grid-row: span 2; block-size: auto; align-self: stretch; }
+  .inks .val { grid-column: 2; text-align: start; display: flex; flex-wrap: wrap; gap: 0 var(--space-3); }
+}
+.two-jobs { display: grid; gap: var(--space-3); margin-block-start: var(--space-5); }
+.two-jobs .row { display: flex; align-items: baseline; gap: var(--space-4); flex-wrap: wrap; }
+
+.scale { display: grid; gap: var(--space-4); }
+.scale .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-4); align-items: baseline; }
+.scale .spec { text-align: end; white-space: nowrap; }
+@media (max-width: 45rem) {
+  .scale .row { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+  .scale .spec { text-align: start; }
+}
+.voices { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--space-5); }
+.voices ul { display: grid; gap: var(--space-2); }
+
+.spaces { display: grid; gap: var(--space-2); }
+.spaces .row { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: var(--space-3); align-items: center; }
+.spaces i { display: block; block-size: 4px; background: var(--text); border-radius: 1px; }
+.shapes { display: flex; gap: var(--space-5); align-items: flex-end; flex-wrap: wrap; margin-block-start: var(--space-5); }
+.shapes .shape { display: grid; gap: var(--space-2); justify-items: start; }
+.shapes .shape i { display: block; inline-size: 3rem; block-size: 2.5rem; border: 1px solid var(--edge-control); background: var(--surface-inset); }
+.measure-demo { display: grid; gap: var(--space-2); margin-block-start: var(--space-5); }
+
+.stack { display: grid; gap: var(--space-5); }
+.stack--tight { gap: var(--space-3); }
+.states { display: grid; gap: var(--space-2); }
+.states .row { display: flex; align-items: center; gap: var(--space-3); min-height: 1.75rem; }
+.banner--demo { position: static; padding-inline: var(--space-4); border-block-start: var(--rule); }
+.tokens { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-1) var(--space-4); align-items: baseline; }
+.tokens code { font-family: var(--font-ui); font-size: var(--text-note); color: var(--text); }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; padding: var(--space-3) var(--space-4); background: var(--surface-inset); border-radius: var(--radius-control); font-size: var(--text-note); line-height: 1.6; }
+pre code { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); }
+.rules { display: grid; gap: var(--space-3); counter-reset: rule; }
+.rules li { display: grid; grid-template-columns: 1.75rem minmax(0, 1fr); gap: var(--space-2); }
+.rules li::before { counter-increment: rule; content: counter(rule); font-variant-numeric: tabular-nums; color: var(--text-muted); font-size: var(--text-note); line-height: var(--leading-ui); }
+footer { margin-block-start: var(--space-9); padding-block-start: var(--space-4); border-block-start: var(--rule); }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <!-- ===================================================================== -->
+  <header class="section" style="padding-block-start:0">
+    <div class="spread">
+      <div class="margin">
+        <span class="label">Foundation</span>
+        <span class="note num">v0.1 · 19 Sep 2026</span>
+        <span class="note">Light only · English, RTL-ready</span>
+      </div>
+      <div class="column section-head">
+        <h1 class="h">AITutor Foundation</h1>
+        <p class="ui thesis">Two inks on paper. Black ink is text. The second ink has two jobs. And the serif is not decoration — if it is in the serif, it came from the learner or their material.</p>
+      </div>
+    </div>
+
+    <!-- The thesis, demonstrated: one real session block, set by the rules. -->
+    <div class="spread" style="margin-block-start: var(--space-7)">
+      <div class="margin">
+        <span class="label">Session 5</span>
+        <span class="note num">Sun 14 Sep</span>
+        <div class="evidence-row">
+          <span class="evidence" role="img" aria-label="Material added and your words written; not yet practised"><i class="is-on"></i><i class="is-on"></i><i></i></span>
+          <span class="note">Material · your words</span>
+        </div>
+      </div>
+      <div class="column">
+        <h2 class="read read--title">Entropy and the second law</h2>
+        <p class="read" style="margin-block-start: var(--space-3)">Entropy always goes up in a closed system, so heat only moves one way on its own. The Carnot engine is the best you can do between two temperatures, and even that can’t reach 100%.</p>
+        <p class="note" style="margin-block-start: var(--space-3)">Slides · 24 pages — Board photo</p>
+        <div class="rule-line">
+          <p class="ui">Everything in the margin is the product speaking, in the sans. Everything in the column is the learner’s — their title, their words — in the serif. The margin never gets louder than the column.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <section class="section">
+    <div class="spread spread--top">
+      <div class="margin section-head">
+        <span class="label">Paper and inks</span>
+        <span class="note">Warm, never cream. Every neutral is tinted; nothing is pure white or black.</span>
+      </div>
+      <div class="column">
+        <div class="inks">
+          <i class="chip" style="background: var(--paper)"></i>
+          <div class="who"><span class="ui strong">Paper</span><span class="note">The page</span></div>
+          <div class="val"><span class="note num">oklch(97.8% 0.006 90)</span><span class="note num">#F9F8F3</span></div>
+
+          <i class="chip" style="background: var(--paper-inset)"></i>
+          <div class="who"><span class="ui strong">Paper, inset</span><span class="note">Fields and quiet surfaces</span></div>
+          <div class="val"><span class="note num">oklch(95.5% 0.009 88)</span><span class="note num">#F3F0E9</span></div>
+
+          <i class="chip" style="background: var(--hairline)"></i>
+          <div class="who"><span class="ui strong">Hairline</span><span class="note">Separators — decorative only</span></div>
+          <div class="val"><span class="note num">oklch(88.5% 0.011 85)</span><span class="note num">#DCD9D1</span></div>
+
+          <i class="chip" style="background: var(--line)"></i>
+          <div class="who"><span class="ui strong">Line</span><span class="note">Control edges · 3.4:1 on paper</span></div>
+          <div class="val"><span class="note num">oklch(62% 0.012 70)</span><span class="note num">#8B857F</span></div>
+
+          <i class="chip" style="background: var(--ink-faint)"></i>
+          <div class="who"><span class="ui strong">Ink, faint</span><span class="note">Disabled controls and the evidence track — never text</span></div>
+          <div class="val"><span class="note num">oklch(70% 0.012 70)</span><span class="note num">#A39D97</span></div>
+
+          <i class="chip" style="background: var(--ink-muted)"></i>
+          <div class="who"><span class="ui strong">Ink, muted</span><span class="note">The margin’s voice · 5.9:1</span></div>
+          <div class="val"><span class="note num">oklch(49% 0.016 60)</span><span class="note num">#685E58</span></div>
+
+          <i class="chip" style="background: var(--ink)"></i>
+          <div class="who"><span class="ui strong">Ink</span><span class="note">Text · 15.5:1</span></div>
+          <div class="val"><span class="note num">oklch(24% 0.012 60)</span><span class="note num">#241E1A</span></div>
+
+          <i class="chip" style="background: var(--board-wash)"></i>
+          <div class="who"><span class="ui strong">Board, wash</span><span class="note">An open citation, a selection</span></div>
+          <div class="val"><span class="note num">oklch(95% 0.012 160)</span><span class="note num">#E8F1EC</span></div>
+
+          <i class="chip" style="background: var(--board)"></i>
+          <div class="who"><span class="ui strong">Board</span><span class="note">The second ink · 8.4:1 on paper, paper on it 8.4:1</span></div>
+          <div class="val"><span class="note num">oklch(40% 0.075 165)</span><span class="note num">#13543D</span></div>
+
+          <i class="chip" style="background: var(--board-deep)"></i>
+          <div class="who"><span class="ui strong">Board, deep</span><span class="note">Hover and pressed</span></div>
+          <div class="val"><span class="note num">oklch(33% 0.07 165)</span><span class="note num">#00402C</span></div>
+        </div>
+
+        <div class="two-jobs">
+          <p class="ui"><span class="strong">The second ink has exactly two jobs.</span> It is the colour of the board the course was taught on, and it appears nowhere decorative.</p>
+          <div class="row"><button type="button" class="btn">Add a session</button><span class="note">One — you can press this.</span></div>
+          <div class="row"><p class="read">…as your slides put it <a class="cite" href="#cite">Session 5 · p. 12</a>.</p><span class="note">Two — this proves the answer.</span></div>
+          <p class="note">There is no red and no amber anywhere. A gap is shown as unfilled, an error is said in plain words, so green never has to mean “correct”.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <section class="section">
+    <div class="spread spread--top">
+      <div class="margin section-head">
+        <span class="label">Two voices</span>
+        <span class="note">Literata for the learner. IBM Plex Sans for the product. Five sizes, fixed.</span>
+      </div>
+      <div class="column stack">
+        <div class="scale">
+          <div class="row"><span class="read read--display">Thermodynamics</span><span class="note num spec">display · 36 / 1.1 / 300</span></div>
+          <div class="row"><span class="read read--title">Heat engines and the Carnot cycle</span><span class="note num spec">title · 24 / 1.25 / 500</span></div>
+          <div class="row"><span class="read">No engine between two reservoirs can beat a reversible one; that is the whole of Carnot’s theorem.</span><span class="note num spec">read · 18 / 1.6 / 400</span></div>
+          <div class="row"><span class="ui">Choose which sessions to ask against. Answers cite the session they came from.</span><span class="note num spec">ui · 15 / 1.5 / 400</span></div>
+          <div class="row"><span class="note">Slides · 24 pages — added Sun 14 Sep</span><span class="note num spec">note · 13 / 1.45 / 400</span></div>
+          <div class="row"><span class="label">Session 4</span><span class="note num spec">label · 13 / 500 / +6% tracking</span></div>
+        </div>
+
+        <div class="voices">
+          <div>
+            <p class="ui strong" style="margin-block-end: var(--space-3)">In the serif — it came from you or your material</p>
+            <ul class="ui">
+              <li>The course and session titles</li>
+              <li>The objectives</li>
+              <li>Your summary, as you wrote it</li>
+              <li>Your question</li>
+              <li>The answer drawn from your slides</li>
+              <li>A practice question, and a citation</li>
+            </ul>
+          </div>
+          <div>
+            <p class="ui strong" style="margin-block-end: var(--space-3)">In the sans — the product speaking</p>
+            <ul class="ui">
+              <li>Labels, dates, counts and file names</li>
+              <li>Buttons and fields</li>
+              <li>What you left out, and where it lives</li>
+              <li>“Your material doesn’t cover this”</li>
+              <li>An explanation of an empty page</li>
+              <li>Anything that went wrong</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="note">Body text stays fixed — no fluid type in an app. The Arabic build pairs Literata with Noto Naskh Arabic and Plex Sans with IBM Plex Sans Arabic; nothing else changes. Numbers in columns are tabular; numbers in a sentence are not.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <section class="section">
+    <div class="spread spread--top">
+      <div class="margin section-head">
+        <span class="label">Space and shape</span>
+        <span class="note">A 4px base. Rhythm comes from varying it, not repeating it.</span>
+      </div>
+      <div class="column">
+        <div class="spaces">
+          <div class="row"><span class="note num">space-1 · 4</span><i style="inline-size: 4px"></i></div>
+          <div class="row"><span class="note num">space-2 · 8</span><i style="inline-size: 8px"></i></div>
+          <div class="row"><span class="note num">space-3 · 12</span><i style="inline-size: 12px"></i></div>
+          <div class="row"><span class="note num">space-4 · 16</span><i style="inline-size: 16px"></i></div>
+          <div class="row"><span class="note num">space-5 · 24</span><i style="inline-size: 24px"></i></div>
+          <div class="row"><span class="note num">space-6 · 32</span><i style="inline-size: 32px"></i></div>
+          <div class="row"><span class="note num">space-7 · 48</span><i style="inline-size: 48px"></i></div>
+          <div class="row"><span class="note num">space-8 · 64</span><i style="inline-size: 64px"></i></div>
+          <div class="row"><span class="note num">space-9 · 96</span><i style="inline-size: 96px"></i></div>
+        </div>
+
+        <div class="measure-demo">
+          <p class="ui"><span class="strong">The spread.</span> A margin of <span class="num">7.5–12rem</span> where the product speaks, a gap of <span class="num">2rem</span>, and a reading column of <span class="num">38rem</span> — about 61 characters of the serif. Page gutters are <span class="num">1–2.5rem</span>, fluid. Below <span class="num">45rem</span> the margin folds above its column.</p>
+          <p class="note">Nothing in the system says left or right. Inline-start and inline-end only, so the Arabic build mirrors without a redraw.</p>
+        </div>
+
+        <div class="shapes">
+          <div class="shape"><i style="border-radius: var(--radius-mark)"></i><span class="note num">mark · 3px</span></div>
+          <div class="shape"><i style="border-radius: var(--radius-control)"></i><span class="note num">control · 6px</span></div>
+          <div class="shape"><i style="border-radius: var(--radius-panel)"></i><span class="note num">panel · 10px</span></div>
+          <div class="shape"><i style="border: 0; border-block-start: var(--rule); block-size: 1px; inline-size: 6rem; background: none"></i><span class="note">rule · 1px, never a shadow</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <section class="section">
+    <div class="spread spread--top">
+      <div class="margin section-head">
+        <span class="label">Controls</span>
+        <span class="note">44px tall; 52px on a touch screen. One primary per screen.</span>
+      </div>
+      <div class="column stack">
+        <div class="actions">
+          <button type="button" class="btn">Add a session</button>
+          <button type="button" class="btn btn--quiet">Keep editing</button>
+          <button type="button" class="btn btn--text">Ask this course</button>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn" disabled>Add a session</button>
+          <button type="button" class="btn" aria-busy="true"><span class="btn-label">Sending your link…</span></button>
+          <span class="note">Disabled, and busy. A busy button says what it is doing.</span>
+        </div>
+        <p class="note">Labels name the outcome: “Add a session”, “Send me a sign-in link”, “Delete my account and everything in it”. Never OK, Submit or Yes. Focus is a 2px ring in the second ink, 2px off the edge, on every control.</p>
+      </div>
+    </div>
+
+    <div class="spread spread--top" style="margin-block-start: var(--space-7)">
+      <div class="margin section-head">
+        <span class="label">Fields</span>
+        <span class="note">A visible label, always. Errors are sentences in ink.</span>
+      </div>
+      <div class="column stack">
+        <div class="field">
+          <label for="f-email">Email address</label>
+          <input class="input" id="f-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@university.edu">
+          <span class="hint">You’ll get a link; there is no password to choose.</span>
+        </div>
+
+        <div class="field" data-invalid>
+          <label for="f-email-2">Email address</label>
+          <input class="input" id="f-email-2" name="email" type="email" value="mariam@uni" aria-invalid="true" aria-describedby="f-email-2-err">
+          <p class="error" id="f-email-2-err">That address needs a domain after the dot. Example: mariam@uni.edu.jo</p>
+        </div>
+
+        <div class="field">
+          <label for="f-summary">What you took from Session 5, in your own words</label>
+          <textarea class="input input--read" id="f-summary" name="summary" rows="6" placeholder="Start anywhere. You don’t need to be right yet."></textarea>
+          <span class="hint">Nothing from your slides is shown here, on purpose. Write what you remember; you’ll be told what you missed and where it lives.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <section class="section" id="cite">
+    <div class="spread spread--top">
+      <div class="margin section-head">
+        <span class="label">The citation</span>
+        <span class="note">Never smaller than the sentence it supports. The one thing to press.</span>
+      </div>
+      <div class="column stack">
+        <div class="spread">
+          <div class="margin"><span class="label">You asked</span></div>
+          <div class="column"><p class="read">Why can’t heat flow from cold to hot on its own?</p></div>
+
+          <div class="margin"><span class="label">Answer</span><span class="note">From 2 of the 3 sessions you chose</span></div>
+          <div class="column">
+            <p class="read">Because it would lower the total entropy of the two bodies together, and the second law says the entropy of an isolated system never decreases. Your slides state it as ΔS ≥ 0 for any spontaneous process <a class="cite" href="#cite" aria-expanded="true">Session 5 · p. 12</a>, and the board photo works through the two-reservoir case <a class="cite" href="#cite">Session 5 · board</a>.</p>
+            <div class="sources">
+              <span class="label">From</span>
+              <a class="cite" href="#cite">Session 5 · slides, p. 12</a>
+              <a class="cite" href="#cite">Session 5 · board photo</a>
+            </div>
+          </div>
+        </div>
+
+        <p class="note">An open citation sits on the board wash and loses its underline; one tap more and the slide itself is beside the answer. An answer that cannot name a session is never shown.</p>
+
+        <div class="spread">
+          <div class="margin"><span class="label">You asked</span></div>
+          <div class="column"><p class="read">What is the Gibbs free energy?</p></div>
+
+          <div class="margin"><span class="label">Answer</span></div>
+          <div class="column">
+            <p class="ui strong">Your material doesn’t cover this.</p>
+            <p class="ui" style="margin-block-start: var(--space-2)">Nothing in Sessions 4, 5 and 6 mentions free energy or Gibbs. It may be in a session you haven’t added yet, or later in the course.</p>
+            <div class="actions" style="margin-block-start: var(--space-3)"><button type="button" class="btn btn--text">Ask against every session</button></div>
+          </div>
+        </div>
+
+        <p class="note">This is a correct outcome, so it is said in the product’s voice, plainly, with what appears to be missing — not styled as an error, and never guessed at in the serif.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <section class="section">
+    <div class="spread spread--top">
+      <div class="margin section-head">
+        <span class="label">Evidence</span>
+        <span class="note">Three stages, never a score. Filled is ink; unfilled is a lighter step of the same ink.</span>
+      </div>
+      <div class="column stack">
+        <div class="states">
+          <div class="row"><span class="evidence" role="img" aria-label="Nothing yet"><i></i><i></i><i></i></span><span class="note">Nothing behind it yet</span></div>
+          <div class="row"><span class="evidence" role="img" aria-label="Material added"><i class="is-on"></i><i></i><i></i></span><span class="note">Material</span></div>
+          <div class="row"><span class="evidence" role="img" aria-label="Material added and your words written"><i class="is-on"></i><i class="is-on"></i><i></i></span><span class="note">Material · your words</span></div>
+          <div class="row"><span class="evidence" role="img" aria-label="Material added, your words written, and practised"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i></span><span class="note">Material · your words · practised</span></div>
+        </div>
+        <p class="note">A gap reads as unfilled, never as red. The label is always there — the strip is never the only carrier.</p>
+
+        <div class="spread">
+          <div class="margin">
+            <span class="label">Session 4</span>
+            <span class="note num">Sun 7 Sep</span>
+            <div class="evidence-row"><span class="evidence" role="img" aria-label="Material added, your words written, and practised"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i></span><span class="note">Practised</span></div>
+          </div>
+          <div class="column">
+            <h3 class="read read--title">Heat engines and the Carnot cycle</h3>
+            <p class="read" style="margin-block-start: var(--space-3)">Efficiency is 1 − T<sub>c</sub>/T<sub>h</sub> and only depends on the two temperatures. The colder the sink or the hotter the source, the better.</p>
+            <p class="note" style="margin-block-start: var(--space-3)">Slides · 18 pages</p>
+          </div>
+
+          <div class="margin">
+            <span class="label">Session 6</span>
+            <span class="note num">Sun 21 Sep</span>
+            <div class="evidence-row"><span class="evidence" role="img" aria-label="Material added"><i class="is-on"></i><i></i><i></i></span><span class="note">Material</span></div>
+          </div>
+          <div class="column">
+            <h3 class="read read--title">Free energy</h3>
+            <p class="ui" style="margin-block-start: var(--space-3)">You haven’t written what you took from this one yet.</p>
+            <div class="actions" style="margin-block-start: var(--space-2)"><button type="button" class="btn btn--text">Write it now</button></div>
+          </div>
+        </div>
+
+        <p class="note">Two sessions in a course. The one with nothing written invites — in the product’s voice — and never fills the gap for them.</p>
+
+        <div class="spread">
+          <div class="margin">
+            <span class="label">Objective</span>
+            <div class="evidence-row"><span class="evidence" role="img" aria-label="Nothing yet"><i></i><i></i><i></i></span><span class="note">Nothing yet</span></div>
+          </div>
+          <div class="column">
+            <p class="read read--title">Explain why entropy is a state function</p>
+            <p class="ui" style="margin-block-start: var(--space-3)">No session you’ve added mentions this.</p>
+            <div class="actions" style="margin-block-start: var(--space-2)"><button type="button" class="btn btn--text">Add the session that covered it</button></div>
+          </div>
+        </div>
+
+        <p class="note">On the readiness page, untouched objectives come first and largest. Worked-on ones collapse to a quiet list below.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <section class="section">
+    <div class="spread spread--top">
+      <div class="margin section-head">
+        <span class="label">States</span>
+        <span class="note">Empty is explained. Working is specific. Wrong is plain. Offline keeps working.</span>
+      </div>
+      <div class="column stack">
+        <div class="empty">
+          <p class="ui strong">No courses yet.</p>
+          <p class="ui">A course is a place for one class you’re taking — its objectives, then a session for each time it meets. Start with the one whose slides you’re holding.</p>
+          <div class="actions"><button type="button" class="btn">Create a course</button></div>
+        </div>
+
+        <div class="working" aria-live="polite">
+          <p class="ui">Reading your slides — 24 pages.</p>
+          <p class="note">You can leave. This finishes on its own.</p>
+        </div>
+
+        <div class="alert" role="alert">
+          <p class="ui strong">That sign-in link has expired.</p>
+          <p class="note">Links work once, for fifteen minutes.</p>
+          <div class="actions"><button type="button" class="btn btn--text">Send a new link</button></div>
+        </div>
+
+        <div class="banner banner--demo" role="status">You’re offline. What you add now stays on this phone and is sent when you’re back.</div>
+
+        <p class="note">None of these has a colour. The working line moves; with reduced motion it is a still rule.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <section class="section">
+    <div class="spread spread--top">
+      <div class="margin section-head">
+        <span class="label">Motion</span>
+        <span class="note">State changes only. Transform and opacity; rows, never height.</span>
+      </div>
+      <div class="column stack">
+        <div class="tokens">
+          <code>--dur-instant</code><span class="note">120ms — a press, a colour</span>
+          <code>--dur-state</code><span class="note">240ms — something opening</span>
+          <code>--dur-layout</code><span class="note">360ms — a section growing</span>
+          <code>--ease-out</code><span class="note num">cubic-bezier(0.25, 1, 0.5, 1) — entering</span>
+          <code>--ease-in</code><span class="note num">cubic-bezier(0.7, 0, 0.84, 0) — leaving</span>
+        </div>
+
+        <div class="stack--tight stack">
+          <div class="actions"><button type="button" class="btn btn--quiet" id="reveal-btn" aria-expanded="false" aria-controls="reveal-1">Show where this came from</button></div>
+          <div class="reveal" id="reveal-1">
+            <div>
+              <div class="sources" style="margin-block-start: 0; padding-block-start: var(--space-2)">
+                <span class="label">From</span>
+                <a class="cite" href="#cite">Session 5 · slides, p. 12</a>
+                <a class="cite" href="#cite">Session 4 · slides, p. 3</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="note">Nothing bounces. With <span class="num">prefers-reduced-motion</span>, every duration is 1ms.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <section class="section">
+    <div class="spread spread--top">
+      <div class="margin section-head">
+        <span class="label">Using it</span>
+        <span class="note">Two stylesheets and one font link. The rules are the part to remember.</span>
+      </div>
+      <div class="column stack">
+<pre><code>&lt;link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:ital,opsz,wght@0,7..72,300..500;1,7..72,400&amp;display=swap"&gt;
+
+@import "design/foundation/tokens.css";
+@import "design/foundation/base.css";</code></pre>
+        <ol class="rules ui">
+          <li><span>If it is in the serif, it came from the learner or their material. The product never speaks in the serif.</span></li>
+          <li><span>The learner’s words are the largest text on any page they appear on. The margin is never louder than the column.</span></li>
+          <li><span>The second ink marks what can be pressed and what proves an answer. Nowhere else.</span></li>
+          <li><span>No red, no amber, no green-as-correct. A gap is unfilled; an error is a sentence in ink.</span></li>
+          <li><span>A citation is never smaller than the sentence it supports, and is one tap from the source.</span></li>
+          <li><span>“Your material doesn’t cover this” is an answer, in the product’s voice, with what appears to be missing.</span></li>
+          <li><span>Before the learner has written, nothing of theirs is shown — and the emptiness is explained.</span></li>
+          <li><span>No scores, streaks, badges, predictions or celebrations. The evidence strip has three stages and no number.</span></li>
+          <li><span>Rules of 1px, never shadows. Radii of 3, 6 and 10. Not everything is in a box; almost nothing is.</span></li>
+          <li><span>Logical properties only. 44px controls, 52px on touch. Every control has a visible focus ring.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer class="spread">
+    <div class="margin"><span class="note">Foundation v0.1</span></div>
+    <div class="column"><p class="note">Written 19 Sep 2026 with the <span class="num">frontend-design</span> skill, from the design context in <span class="num">.impeccable.md</span>. Supersedes the 5 Sep mockup style sheet. Lives at <span class="num">design/foundation/</span> in the repository.</p></div>
+  </footer>
+
+</main>
+
+<script>
+(function () {
+  var btn = document.getElementById('reveal-btn');
+  var panel = document.getElementById('reveal-1');
+  if (!btn || !panel) return;
+  btn.addEventListener('click', function () {
+    var open = panel.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.textContent = open ? 'Hide the sources' : 'Show where this came from';
+  });
+  document.querySelectorAll('a.cite').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var open = a.getAttribute('aria-expanded') === 'true';
+      a.setAttribute('aria-expanded', open ? 'false' : 'true');
+    });
+  });
+})();
+</script>
+</body>
+</html>

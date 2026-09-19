@@ -1,0 +1,307 @@
+/* AITutor foundation — base and primitives
+ *
+ * Requires tokens.css. Element defaults first, then the handful of primitives every
+ * screen is built from: the two voices, the spread (margin + column), controls,
+ * fields, the citation, the evidence strip, and the states. Logical properties
+ * throughout — nothing here says left or right, so the Arabic build mirrors.
+ */
+
+/* ---- Element defaults ------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { background: var(--surface); }
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  font-weight: var(--weight-ui);
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, p, ul, ol, dl, dd, figure, blockquote { margin: 0; }
+ul, ol { padding-inline-start: 0; list-style: none; }
+img, svg, video { max-width: 100%; display: block; }
+button, input, textarea, select { font: inherit; color: inherit; }
+
+a { color: var(--action); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { color: var(--action-deep); }
+
+:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-offset); border-radius: var(--radius-mark); }
+::selection { background: var(--surface-wash); }
+
+/* ---- The two voices -------------------------------------------------------- */
+/* If it is in the serif, it came from the learner or their material. */
+.read {
+  font-family: var(--font-read);
+  font-size: var(--text-read);
+  line-height: var(--leading-read);
+  font-weight: var(--weight-read);
+  font-optical-sizing: auto;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.read--title {
+  font-size: var(--text-title);
+  line-height: var(--leading-title);
+  font-weight: var(--weight-read-title);
+  text-wrap: balance;
+}
+.read--display {
+  font-size: var(--text-display);
+  line-height: var(--leading-display);
+  font-weight: var(--weight-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.read em, .read i { font-style: italic; }
+
+/* The product's voice. */
+.ui   { font-family: var(--font-ui); font-size: var(--text-ui); line-height: var(--leading-ui); color: var(--text); }
+.note { font-family: var(--font-ui); font-size: var(--text-note); line-height: var(--leading-note); color: var(--text-muted); }
+.label {
+  font-family: var(--font-ui);
+  font-size: var(--text-note);
+  line-height: var(--leading-note);
+  font-weight: var(--weight-ui-strong);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.strong { font-weight: var(--weight-ui-strong); color: var(--text); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Prose spacing inside a reading block */
+.read + .read { margin-block-start: var(--space-4); }
+
+/* ---- The spread: margin + column ------------------------------------------- */
+/* The margin is where the product speaks; the column is where the learner does.
+ * Pairs of .margin / .column children land on one row. Below 45rem the margin
+ * folds above its column as a note. */
+.spread {
+  display: grid;
+  grid-template-columns: minmax(0, var(--margin-w)) minmax(0, var(--measure));
+  column-gap: var(--space-6);
+  row-gap: var(--space-2);
+  align-items: baseline;
+}
+.spread > .margin { grid-column: 1; min-width: 0; }
+.spread > .column { grid-column: 2; min-width: 0; }
+.spread > .margin + .column { margin-block-end: var(--space-6); }
+.spread > .margin:last-of-type + .column { margin-block-end: 0; }
+
+.margin { display: grid; gap: var(--space-2); align-content: start; }
+.margin > .actions { margin-block-start: var(--space-2); }
+
+@media (max-width: 45rem) {
+  .spread { grid-template-columns: minmax(0, var(--measure)); row-gap: var(--space-1); }
+  .spread > .margin, .spread > .column { grid-column: 1; }
+  .spread > .margin + .column { margin-block-end: var(--space-5); }
+  .margin { gap: var(--space-1); }
+}
+
+/* Page frame */
+.page {
+  padding-inline: var(--gutter);
+  padding-block: var(--space-6) var(--space-9);
+  max-width: calc(var(--margin-w) + var(--space-6) + var(--measure) + 2 * var(--gutter));
+  margin-inline: auto;
+}
+.section { padding-block: var(--space-7) 0; }
+.section + .section { border-block-start: var(--rule); margin-block-start: var(--space-7); }
+
+/* ---- Controls -------------------------------------------------------------- */
+.btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-h);
+  padding-inline: var(--space-5);
+  padding-block: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: var(--action);
+  color: var(--on-action);
+  font-family: var(--font-ui);
+  font-size: var(--text-ui);
+  font-weight: var(--weight-ui-strong);
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--dur-instant) var(--ease-out),
+              color var(--dur-instant) var(--ease-out),
+              transform var(--dur-instant) var(--ease-out);
+}
+.btn:hover { background: var(--action-deep); color: var(--on-action); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled, .btn[aria-disabled="true"] {
+  background: var(--surface-inset);
+  color: var(--text-disabled);
+  border-color: var(--edge-hairline);
+  cursor: not-allowed;
+  transform: none;
+}
+.btn[aria-busy="true"] { cursor: progress; }
+.btn[aria-busy="true"] > .btn-label { opacity: 0.7; }
+
+.btn--quiet { background: var(--surface); color: var(--text); border-color: var(--edge-control); }
+.btn--quiet:hover { background: var(--surface-inset); color: var(--text); }
+
+.btn--text { background: transparent; color: var(--action); border-color: transparent; padding-inline: var(--space-2); }
+.btn--text:hover { background: transparent; color: var(--action-deep); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+
+.btn--wide { inline-size: 100%; }
+
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+
+/* ---- Fields ---------------------------------------------------------------- */
+.field { display: grid; gap: var(--space-2); }
+.field > label {
+  font-family: var(--font-ui);
+  font-size: var(--text-note);
+  line-height: var(--leading-note);
+  font-weight: var(--weight-ui-strong);
+  color: var(--text);
+}
+.field > .hint { font-size: var(--text-note); line-height: var(--leading-note); color: var(--text-muted); }
+
+.input {
+  inline-size: 100%;
+  min-height: var(--control-h);
+  padding-inline: var(--space-3);
+  padding-block: var(--space-2);
+  background: var(--surface-inset);
+  border: 1px solid var(--edge-control);
+  border-radius: var(--radius-control);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  transition: border-color var(--dur-instant) var(--ease-out);
+}
+.input::placeholder { color: var(--text-muted); }
+.input:focus-visible { outline: var(--focus-ring); outline-offset: 0; border-color: var(--focus); }
+.input:disabled { color: var(--text-disabled); border-color: var(--edge-hairline); cursor: not-allowed; }
+textarea.input { min-height: calc(var(--control-h) * 2.5); resize: vertical; }
+
+/* The learner writing. Paper, not a box: nothing between them and the page. */
+.input--read {
+  background: var(--surface);
+  border: 0;
+  border-block-end: 1px solid var(--edge-control);
+  border-radius: 0;
+  padding-inline: 0;
+  padding-block: var(--space-2) var(--space-3);
+  font-family: var(--font-read);
+  font-size: var(--text-read);
+  line-height: var(--leading-read);
+  min-height: calc(var(--leading-read) * var(--text-read) * 6);
+}
+.input--read:focus-visible { outline: 0; border-block-end: 2px solid var(--focus); padding-block-end: calc(var(--space-3) - 1px); }
+
+/* Invalid: the edge turns to ink and a sentence says what to do. Never red. */
+.field[data-invalid] .input { border-color: var(--text); border-width: 2px; }
+.field[data-invalid] .input--read { border-width: 0 0 2px; }
+.field > .error { font-size: var(--text-ui); line-height: var(--leading-ui); color: var(--text); }
+
+/* ---- The citation ---------------------------------------------------------- */
+/* Never smaller than the sentence it supports. The one thing to press. */
+.cite {
+  font-family: var(--font-read);
+  font-size: inherit;
+  line-height: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--cite);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  border-radius: var(--radius-mark);
+  padding-inline: 0.15em;
+  margin-inline: -0.15em;
+  white-space: nowrap;
+  transition: background-color var(--dur-instant) var(--ease-out);
+}
+.cite:hover { background: var(--surface-wash); color: var(--cite); }
+.cite[aria-expanded="true"], .cite.is-open { background: var(--surface-wash); text-decoration: none; }
+
+/* The line under an answer that names where it came from */
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-4);
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-3);
+  border-block-start: var(--rule);
+}
+
+/* ---- The evidence strip ---------------------------------------------------- */
+/* Three stages, never a score: material · your words · practised.
+ * Filled is ink, unfilled is a lighter step of the same ink. Always with a label. */
+.evidence {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1.125rem);
+  gap: 2px;
+  vertical-align: middle;
+}
+.evidence > i { display: block; block-size: var(--evidence-h); background: var(--evidence-track); border-radius: 1px; }
+.evidence > i.is-on { background: var(--evidence-fill); }
+.evidence-row { display: flex; align-items: center; gap: var(--space-2); }
+
+/* ---- States ---------------------------------------------------------------- */
+/* Emptiness is explained, in the product's voice. */
+.empty { display: grid; gap: var(--space-3); max-width: 46ch; }
+
+/* Working: a specific sentence and a line that moves. */
+.working { display: grid; gap: var(--space-2); }
+.working::after {
+  content: "";
+  display: block;
+  block-size: 2px;
+  background: linear-gradient(90deg, var(--edge-hairline) 0 40%, var(--text) 50%, var(--edge-hairline) 60% 100%);
+  background-size: 250% 100%;
+  animation: sweep 1.4s linear infinite;
+}
+@keyframes sweep { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .working::after { animation: none; background: var(--text); }
+}
+
+/* Something went wrong: plain words, in ink, between two rules. */
+.alert {
+  display: grid;
+  gap: var(--space-2);
+  padding-block: var(--space-3);
+  border-block: 1px solid var(--edge-control);
+  color: var(--text);
+}
+.alert > .actions { margin-block-start: var(--space-1); }
+
+/* Offline: a banner the page can keep working under. */
+.banner {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--z-banner);
+  padding-inline: var(--gutter);
+  padding-block: var(--space-2);
+  background: var(--surface-inset);
+  border-block-end: var(--rule);
+  color: var(--text);
+  font-size: var(--text-note);
+  line-height: var(--leading-note);
+}
+
+/* Reveal: grid-template-rows, never height */
+.reveal { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur-layout) var(--ease-out); }
+.reveal > * { overflow: hidden; }
+.reveal.is-open { grid-template-rows: 1fr; }
+
+/* Screen-reader only */
+.sr-only { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
