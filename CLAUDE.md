@@ -54,6 +54,13 @@ not connected.
 | `aitutor-platform` | `Deployment` | `NNNN · Deploy` | application code, specs |
 | `aitutor-validator` | `Validation NNNN · …` | `NNNN · Validate` | everything — it reports, never repairs |
 
+Three third-party **design** skills sit beside the role skills: `teach-impeccable`,
+`frontend-design` and `critique`, from Impeccable (Apache-2.0), pinned and documented in
+`.claude/SKILLS/IMPECCABLE.md`. They are not roles and move nothing in Jira. `frontend-design`
+guides how UI is built and `critique` reviews it; both read the design context that
+`teach-impeccable` writes once to `.impeccable.md` at the repository root. `aitutor-engineer`
+applies `frontend-design` when a spec touches `apps/web`.
+
 ## Artifact chain and handover protocol
 
 This project is built by a chain of roles. Each role reads pages, writes pages, moves its
