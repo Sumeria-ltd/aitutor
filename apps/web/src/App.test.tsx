@@ -1,9 +1,9 @@
 import { PRIVACY_PROMISE, ROUTES } from "@aitutor/shared";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Finish } from "./screens/Finish.js";
-import { Home } from "./screens/Home.js";
-import { SignIn } from "./screens/SignIn.js";
+import { Finish } from "./screens/Finish.tsx";
+import { Home } from "./screens/Home.tsx";
+import { SignIn } from "./screens/SignIn.tsx";
 
 afterEach(cleanup);
 

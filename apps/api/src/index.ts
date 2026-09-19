@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
-import { firebaseVerifier } from "./auth.js";
-import { type FirestoreLike, firestoreStore } from "./firestore.js";
-import { createApp } from "./routes/me.js";
+import { firebaseVerifier } from "./auth.ts";
+import { type FirestoreLike, firestoreStore } from "./firestore.ts";
+import { createApp } from "./routes/me.ts";
 
 const { getFirestore } = await import("firebase-admin/firestore");
 const { initializeApp, getApps } = await import("firebase-admin/app");

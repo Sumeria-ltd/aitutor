@@ -1,8 +1,8 @@
 import { ROUTES } from "@aitutor/shared";
 import { beforeEach, describe, expect, it } from "vitest";
-import { fakeVerifier } from "../auth.js";
-import { inMemoryStore, type Store } from "../firestore.js";
-import { createApp } from "./me.js";
+import { fakeVerifier } from "../auth.ts";
+import { inMemoryStore, type Store } from "../firestore.ts";
+import { createApp } from "./me.ts";
 
 const IDENTITIES = {
   "tok-a": { uid: "uid-a", email: "a@example.com" },

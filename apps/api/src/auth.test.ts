@@ -1,7 +1,7 @@
 import { ROUTES } from "@aitutor/shared";
 import { Hono } from "hono";
 import { describe, expect, it } from "vitest";
-import { type AuthedEnv, fakeVerifier, requireAuth } from "./auth.js";
+import { type AuthedEnv, fakeVerifier, requireAuth } from "./auth.ts";
 
 const verifier = fakeVerifier({ "tok-a": { uid: "uid-a", email: "a@example.com" } });
 

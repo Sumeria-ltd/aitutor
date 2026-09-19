@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EVENTS, isScalarAttributes, MAX_ATTRIBUTE_STRING, makeEvent } from "./events.js";
+import { EVENTS, isScalarAttributes, MAX_ATTRIBUTE_STRING, makeEvent } from "./events.ts";
 
 // A11 — the guard refuses anything that could carry learner content.
 describe("isScalarAttributes", () => {

@@ -1,9 +1,9 @@
 import type { Learner } from "@aitutor/shared";
 import { ROUTES } from "@aitutor/shared";
 import { Hono } from "hono";
-import { type AuthedEnv, bearerToken, requireAuth, type TokenVerifier } from "../auth.js";
-import { emitter } from "../events.js";
-import type { Store } from "../firestore.js";
+import { type AuthedEnv, bearerToken, requireAuth, type TokenVerifier } from "../auth.ts";
+import { emitter } from "../events.ts";
+import type { Store } from "../firestore.ts";
 
 export type Deps = {
   store: Store;
