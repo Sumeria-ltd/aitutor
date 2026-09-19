@@ -1,13 +1,17 @@
 {
-  "enabledMcpjsonServers": ["atlassian"],
+  "enabledMcpjsonServers": ["atlassian", "github", "gcloud"],
   "permissions": {
     "allow": [
-      "mcp__atlassian"
+      "mcp__atlassian",
+      "mcp__github"
     ],
     "deny": [
       "mcp__atlassian__jira_delete_issue",
       "mcp__atlassian__confluence_delete_page",
-      "mcp__atlassian__confluence_delete_attachment"
+      "mcp__atlassian__confluence_delete_attachment",
+      "mcp__github__merge_pull_request",
+      "mcp__github__push_files",
+      "mcp__github__create_or_update_file"
     ]
   }
 }

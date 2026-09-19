@@ -22,17 +22,19 @@ scope, committed, no secrets — and enabled for everyone by `enabledMcpjsonServ
 tools (the three delete tools stay behind a prompt). It runs `uvx mcp-atlassian`, so
 [`uv`](https://docs.astral.sh/uv/) must be installed.
 
-Credentials come from your shell environment, expanded by Claude Code when it starts the
-server:
+Credentials come from a git-ignored **`.env` at the repository root**, or from your shell
+environment — whichever you prefer; an exported variable wins over `.env`:
 
 ```sh
-export ATLASSIAN_EMAIL="you@sumerialtd.co.uk"
-export ATLASSIAN_API_TOKEN="…"        # id.atlassian.com → Security → API tokens; one token serves Jira and Confluence
+ATLASSIAN_EMAIL=you@sumerialtd.co.uk
+ATLASSIAN_API_TOKEN=…        # id.atlassian.com → Security → API tokens; one token serves Jira and Confluence
 ```
 
-Put those in your shell profile (`~/.zshenv`, so non-interactive shells see them too), then
-restart Claude Code. `/mcp` should show `atlassian` connected. The site URLs default to
-`sumerialtd.atlassian.net`; override `JIRA_URL` / `CONFLUENCE_URL` only for another site.
+Claude Code itself cannot read `.env` — it expands `${VAR}` in `.mcp.json` from its own
+environment only — so `.mcp.json` starts every server through `scripts/mcp-env.sh`, which
+loads `.env` and then execs the real command. After editing `.env`, reconnect with `/mcp`
+(or restart Claude Code); `atlassian` should show connected. The site URLs default to
+`sumerialtd.atlassian.net`; set `JIRA_URL` / `CONFLUENCE_URL` only for another site.
 `JIRA_PROJECTS_FILTER=AIT` and `CONFLUENCE_SPACES_FILTER=AI` scope searches to this project
 by default; pass an explicit filter to a tool to look elsewhere.
 

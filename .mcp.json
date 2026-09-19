@@ -1,16 +1,36 @@
 {
   "mcpServers": {
+    "gcloud": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@google-cloud/gcloud-mcp"
+      ]
+    },
+    "github": {
+      "type": "stdio",
+      "command": "scripts/mcp-env.sh",
+      "args": [
+        "docker",
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ]
+    },
     "atlassian": {
       "type": "stdio",
-      "command": "uvx",
-      "args": ["mcp-atlassian"],
+      "command": "scripts/mcp-env.sh",
+      "args": [
+        "uvx",
+        "mcp-atlassian"
+      ],
       "env": {
         "JIRA_URL": "${JIRA_URL:-https://sumerialtd.atlassian.net}",
         "CONFLUENCE_URL": "${CONFLUENCE_URL:-https://sumerialtd.atlassian.net/wiki}",
-        "JIRA_USERNAME": "${ATLASSIAN_EMAIL}",
-        "CONFLUENCE_USERNAME": "${ATLASSIAN_EMAIL}",
-        "JIRA_API_TOKEN": "${ATLASSIAN_API_TOKEN}",
-        "CONFLUENCE_API_TOKEN": "${ATLASSIAN_API_TOKEN}",
         "JIRA_PROJECTS_FILTER": "AIT",
         "CONFLUENCE_SPACES_FILTER": "AI"
       }
