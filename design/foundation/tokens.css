@@ -1,0 +1,139 @@
+/* AITutor foundation — tokens
+ *
+ * Two inks on paper. Everything the interface is made of is here, and nothing else
+ * should introduce a colour, size, radius or duration. Primitives are named for what
+ * they are (--paper, --ink, --board); the semantic layer below is what components use,
+ * so a future dark theme redefines only that layer.
+ *
+ * Reads with .impeccable.md. Verified 2026-09-19: every text pairing below meets
+ * WCAG 2.2 AA (ink/paper 15.5:1, ink-muted/paper 5.9:1, board/paper 8.4:1,
+ * paper/board 8.4:1, ink/board-wash 14.1:1); --edge-control meets 3:1 for control
+ * boundaries. --ink-faint (2.5:1) is for disabled controls only, never for text.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Primitives: the material ------------------------------------------- */
+  --paper:        oklch(97.8% 0.006 90);   /* #F9F8F3  the page */
+  --paper-inset:  oklch(95.5% 0.009 88);   /* #F3F0E9  fields, quiet surfaces */
+  --hairline:     oklch(88.5% 0.011 85);   /* #DCD9D1  decorative separators */
+  --line:         oklch(62%   0.012 70);   /* #8B857F  control boundaries, 3.4:1 */
+  --ink:          oklch(24%   0.012 60);   /* #241E1A  text */
+  --ink-muted:    oklch(49%   0.016 60);   /* #685E58  secondary text, 5.9:1 */
+  --ink-faint:    oklch(70%   0.012 70);   /* #A39D97  disabled only; evidence track */
+
+  /* The second ink. Board green — the chalkboard the course was taught on.
+   * It has exactly two jobs: what can be pressed, and what proves an answer.
+   * There is no red anywhere in the product, so this never reads as "correct". */
+  --board:        oklch(40%   0.075 165);  /* #13543D  8.4:1 on paper */
+  --board-deep:   oklch(33%   0.07  165);  /* #00402C  hover / pressed */
+  --board-wash:   oklch(95%   0.012 160);  /* #E8F1EC  an open citation, a selection */
+
+  /* ---- Semantic layer: what components use -------------------------------- */
+  --surface:        var(--paper);
+  --surface-inset:  var(--paper-inset);
+  --surface-wash:   var(--board-wash);
+
+  --text:           var(--ink);
+  --text-muted:     var(--ink-muted);
+  --text-disabled:  var(--ink-faint);
+
+  --edge-hairline:  var(--hairline);
+  --edge-control:   var(--line);
+
+  --action:         var(--board);   /* job one: you can press this */
+  --action-deep:    var(--board-deep);
+  --on-action:      var(--paper);
+  --cite:           var(--board);   /* job two: this proves the answer */
+  --focus:          var(--board);
+
+  --evidence-track: var(--ink-faint);
+  --evidence-fill:  var(--ink);
+
+  /* ---- Type: two voices ---------------------------------------------------- */
+  /* The reading voice. Anything set in it came from the learner or their material:
+   * the course and session titles, the objectives, their summary, their question,
+   * the answer drawn from their slides, a citation. Literata is a screen-reading
+   * serif (Google Play Books); it has a true italic and optical sizes 7–72.
+   * Arabic companion for the mirrored build: "Noto Naskh Arabic". */
+  --font-read: "Literata", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+
+  /* The interface voice. Everything the product says: labels, controls, dates,
+   * explanations, and the plain statement that material doesn't cover something.
+   * Chosen because "IBM Plex Sans Arabic" exists for the mirrored build. */
+  --font-ui: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+
+  /* Five sizes. Fixed rem, not fluid — this is an app, and containers need to
+   * know how tall a line is. */
+  --text-note:     0.8125rem;   /* 13  the margin: dates, labels, metadata */
+  --text-ui:       0.9375rem;   /* 15  controls and the product's sentences */
+  --text-read:     1.125rem;    /* 18  the learner's words, answers */
+  --text-title:    1.5rem;      /* 24  a session, an objective */
+  --text-display:  2.25rem;     /* 36  the course */
+
+  --leading-note:     1.45;
+  --leading-ui:       1.5;
+  --leading-read:     1.6;
+  --leading-title:    1.25;
+  --leading-display:  1.1;
+
+  --weight-read:        400;
+  --weight-read-title:  500;
+  --weight-display:     300;
+  --weight-ui:          400;
+  --weight-ui-strong:   500;
+
+  --tracking-label: 0.06em;
+
+  /* ---- Space: 4px base ----------------------------------------------------- */
+  --space-1: 0.25rem;   /*  4 */
+  --space-2: 0.5rem;    /*  8 */
+  --space-3: 0.75rem;   /* 12 */
+  --space-4: 1rem;      /* 16 */
+  --space-5: 1.5rem;    /* 24 */
+  --space-6: 2rem;      /* 32 */
+  --space-7: 3rem;      /* 48 */
+  --space-8: 4rem;      /* 64 */
+  --space-9: 6rem;      /* 96 */
+
+  --gutter:    clamp(1rem, 4vw, 2.5rem);     /* page side padding */
+  --measure:   38rem;                        /* the reading column, ~61 characters at 18px */
+  --margin-w:  clamp(7.5rem, 18vw, 12rem);   /* the margin column, where the product speaks */
+
+  /* ---- Shape --------------------------------------------------------------- */
+  --radius-mark:     3px;   /* a citation, a small mark */
+  --radius-control:  6px;   /* buttons, fields */
+  --radius-panel:    10px;  /* the rare bounded panel (a popover) */
+  --rule: 1px solid var(--edge-hairline);
+
+  --control-h: 2.75rem;     /* 44px; 52px on touch, see below */
+  --evidence-h: 6px;
+
+  --focus-ring: 2px solid var(--focus);
+  --focus-offset: 2px;
+
+  /* ---- Motion: state changes only ------------------------------------------ */
+  --dur-instant: 120ms;     /* press, colour */
+  --dur-state:   240ms;     /* open, reveal */
+  --dur-layout:  360ms;     /* a section growing */
+  --ease-out:    cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ---- Stacking ------------------------------------------------------------ */
+  --z-banner:  10;
+  --z-popover: 20;
+}
+
+@media (pointer: coarse) {
+  :root { --control-h: 3.25rem; } /* 52px — the corridor */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 1ms;
+    --dur-state:   1ms;
+    --dur-layout:  1ms;
+  }
+}
