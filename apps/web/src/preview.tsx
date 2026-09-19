@@ -3,9 +3,9 @@
  *  Resize the window below 45rem to see the margin fold above the column. */
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Finish } from "./screens/Finish.js";
-import { Home } from "./screens/Home.js";
-import { SignIn } from "./screens/SignIn.js";
+import { Finish } from "./screens/Finish.tsx";
+import { Home } from "./screens/Home.tsx";
+import { SignIn } from "./screens/SignIn.tsx";
 import "./styles.css";
 
 const never = () => new Promise<string>(() => {});

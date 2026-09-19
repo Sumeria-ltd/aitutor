@@ -1,9 +1,9 @@
 import type { Learner } from "@aitutor/shared";
 import { useCallback, useState } from "react";
-import { completeSignIn, isReturningFromLink, sendLink } from "./firebase.js";
-import { Finish } from "./screens/Finish.js";
-import { Home } from "./screens/Home.js";
-import { SignIn } from "./screens/SignIn.js";
+import { completeSignIn, isReturningFromLink, sendLink } from "./firebase.ts";
+import { Finish } from "./screens/Finish.tsx";
+import { Home } from "./screens/Home.tsx";
+import { SignIn } from "./screens/SignIn.tsx";
 
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ?? "";
 

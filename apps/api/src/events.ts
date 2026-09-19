@@ -1,5 +1,5 @@
 import { type EventAttributes, makeEvent } from "@aitutor/shared";
-import type { Store } from "./firestore.js";
+import type { Store } from "./firestore.ts";
 
 /** Every event this service writes is stamped with the requirement that caused it. */
 export const REQUIREMENT = "0001";
