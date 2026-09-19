@@ -1,10 +1,12 @@
----
-id: <NNNN>
-status: draft
-owner: aitutor-pm
-inputs: [docs/prd.md]
-updated: <date>
----
+<!-- Page title: `Intent <NNNN> · <requirement name>`. The table below is the status header; nothing may precede it. -->
+
+| | |
+|---|---|
+| **id** | <NNNN> |
+| **status** | `draft` |
+| **owner** | `aitutor-pm` |
+| **inputs** | [PRD — AITutor](…) |
+| **updated** | <date> |
 
 # Intent <NNNN> — <requirement name>
 

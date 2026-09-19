@@ -1,0 +1,42 @@
+%% Data model — Firestore, one database. Built today: LEARNER and EVENT (spec 0001).
+%% Declared, not built: COURSE, SESSION, MATERIAL, SUMMARY — the four collections spec 0001's
+%% export payload names. Their fields are only what ADRs already require: the owner key
+%% (ADR 0006), the session as index (ADR 0001), the gs:// URI (CLAUDE.md), the read state
+%% (ADR 0005). Nothing else is decided yet.
+erDiagram
+  LEARNER ||--o{ EVENT : "emits — anonymised, not deleted, on account deletion"
+  LEARNER ||--o{ COURSE : owns
+  COURSE ||--o{ SESSION : "has, in order"
+  SESSION ||--o{ MATERIAL : "has — the learner's assignment is the index"
+  SESSION ||--o{ SUMMARY : "has — the learner's own words"
+
+  LEARNER {
+    string id "Firebase Auth uid; the owner key every record carries"
+    string email "the one field registration asks for"
+    string createdAt
+  }
+  EVENT {
+    string name "dotted, from the one registry in packages/shared"
+    string occurredAt
+    string learner "uid, or a random token after deletion"
+    string requirement "four digits: which requirement emitted it"
+    map attributes "flat scalars only; never learner text or filenames"
+  }
+  COURSE {
+    string learner "owner"
+    list objectives "declared or confirmed by the learner (0003)"
+  }
+  SESSION {
+    string learner "owner"
+    string course
+  }
+  MATERIAL {
+    string learner "owner"
+    string session "the scope query key"
+    string gsUri "gs:// object in Cloud Storage"
+    string readState "not yet read, read, or failed with a reason"
+  }
+  SUMMARY {
+    string learner "owner"
+    string session
+  }

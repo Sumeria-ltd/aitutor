@@ -1,0 +1,27 @@
+%% Capture a session (requirement 0004) — acknowledge first, read the material afterwards.
+%% Derived from ADR 0005 (acknowledge before processing), ADR 0006 (owner on every write),
+%% ADR 0008 (event in the same write), CLAUDE.md (gs:// URIs, page-count ceilings).
+sequenceDiagram
+  autonumber
+  actor L as Learner — phone, poor connection
+  participant W as apps/web
+  participant A as apps/api
+  participant S as Cloud Storage
+  participant F as Firestore
+  participant P as Processing — outside the learner's request<br/>(mechanism decided in spec 0004)
+
+  L->>W: choose the course and session, attach a file,<br/>optionally write what they took from it
+  W->>A: capture — Bearer ID token
+  A->>S: store the file
+  S-->>A: gs:// URI
+  A->>F: one write — Session, Material { learner, session, gs://, read state: not yet read }, and the event (ADR 0008)
+  A-->>W: acknowledged within seconds — ADR 0005  ·  independent of document size
+  W-->>L: the session exists and is usable  ·  its material shows as being read
+  Note over L,P: the learner can close the page here and nothing is lost
+  P->>S: read the material — page count, size and page ceilings (CLAUDE.md)
+  alt inside the ceilings, read succeeds
+    P->>F: Material read state → read
+  else over a ceiling, or processing fails
+    P->>F: Material read state → failed, with the reason  ·  an operational event for 0009
+    Note over W,F: 0004 tells the learner what happened and what to do instead<br/>0006 never treats unread material as read  ·  0008 never counts it as evidence
+  end

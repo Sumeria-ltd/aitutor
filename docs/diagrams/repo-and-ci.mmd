@@ -1,0 +1,29 @@
+%% Repository layout and the merge gate.
+%% Derived from ADR 0003 (monorepo), 0004 (one runner), 0009 (Make contract),
+%% 0010 (CI on push), 0011 (ruleset), 0012 (Hono), docs/ci.md and the Makefile.
+flowchart TB
+  subgraph gh["GitHub — Sumeria-ltd/aitutor"]
+    direction LR
+    PUSH["push to any branch"] --> CI["CI workflow — on push, ADR 0010<br/>jobs named build and test — never rename them"]
+    CI -->|"both green"| RS[".github/rulesets/main.json — ADR 0011<br/>requires the checks named build and test<br/>applied by scripts/apply-ruleset.sh, never by hand"]
+    RS -->|"squash merge"| MAIN["main"]
+    MAIN --> DR["deployment-ready workflow<br/>tags rc-YYYY.MM.DD-sha"]
+  end
+  subgraph make["The Make contract — ADR 0009: workflows name targets, never a toolchain"]
+    direction LR
+    B["make build<br/>npm run build --workspaces<br/>typechecks every workspace, builds the web app"]
+    TT["make test<br/>npx vitest run<br/>one runner across every workspace — ADR 0004"]
+    B ~~~ TT
+  end
+  subgraph repo["One TypeScript monorepo — ADR 0003 · Node 24, npm workspaces"]
+    direction LR
+    SH["packages/shared<br/>Learner · ROUTES · EVENTS registry<br/>makeEvent · isScalarAttributes"]
+    API["apps/api — Hono on Node, ADR 0012<br/>auth middleware · routes<br/>Firestore port · event emitter"]
+    WEB["apps/web — React + Vite<br/>SignIn · Finish · Home"]
+    T["tests/<br/>docs-invariants · ci-contract"]
+    SH --> API
+    SH --> WEB
+    WEB ~~~ T
+  end
+  gh -->|"each job runs one target and nothing else"| make
+  make -.->|"every workspace, and tests/, in one run"| repo
