@@ -37,8 +37,16 @@ restart Claude Code. `/mcp` should show `atlassian` connected. The site URLs def
 by default; pass an explicit filter to a tool to look elsewhere.
 
 A user-level definition of the same server in `~/.claude.json` (`claude mcp add … -s user`)
-still works and takes precedence if both exist, but it is invisible to anyone else who
-clones the repository — prefer the project one.
+does **not** take precedence: Claude Code resolves local → project → user, so inside this
+repository `.mcp.json` wins. If the two variables above are not exported, the server starts
+with empty credentials and **fails quietly** — Confluence reads return 403, but Jira
+searches return an empty list rather than an error, so a role could mistake "unauthenticated"
+for "no issues".
+
+**Every role therefore checks it is authenticated before doing anything else:**
+`confluence_get_page(page_id="330039466")` (the space home) must return the page, not an
+error. If it errors, stop and report that the Atlassian MCP is unauthenticated — the fix is
+the two exports, not a retry.
 
 ## Confluence — the page tree
 
