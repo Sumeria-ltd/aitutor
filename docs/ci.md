@@ -1,8 +1,9 @@
 # Continuous integration and delivery
 
-Three workflows and one ruleset. Together they enforce that nothing reaches `main` except
-through a pull request whose build and tests are green, and that every commit which does
-reach `main` is proven deployable and named.
+Four workflows and one ruleset. Together they enforce that nothing reaches `main` except
+through a pull request whose build and tests are green, that every commit which does reach
+`main` is proven deployable and named, and that deploying it is a deliberate act by a person
+with no credential stored anywhere.
 
 ```
 push feature branch ──▶ Auto PR ─────▶ pull request to main
@@ -16,6 +17,11 @@ push feature branch ──▶ Auto PR ─────▶ pull request to main
                                           │
                                           ▼
                               Deployment ready ──▶ rc-YYYY.MM.DD-<sha>
+                                                          │
+                                        a person, Actions tab, "Run workflow"
+                                                          │
+                                                          ▼
+                                      Deploy ──▶ make deploy ──▶ Cloud Run + Firebase Hosting
 ```
 
 ## The contract
@@ -105,7 +111,10 @@ and tests on the merged commit, then checks that
   placeholder, and that `.env` itself is not tracked;
 - nothing credential-shaped is committed — private key headers, service-account JSON, and
   the token formats used by Google, GitHub and OpenAI-style APIs;
-- the Cloud Run container image builds.
+- the Cloud Run container image builds;
+- the container starts and answers on `$PORT` with no credential — an image that builds but
+  exits on startup is the failure the build check cannot see, and it is what Cloud Run would
+  report as a revision that never became ready.
 
 On success it tags the commit `rc-YYYY.MM.DD-<short-sha>` and uploads `dist/` if it is not
 empty.
@@ -118,6 +127,43 @@ instead of "whatever `main` happens to be right now".
 Checks whose subject does not exist yet — no `.env.example`, no `Dockerfile` — report as
 skipped and pass. They begin enforcing the moment the file appears, with nobody having to
 remember to switch them on.
+
+## Deploying
+
+`deploy.yml` takes a commit to GCP: `apps/api` as a container to Cloud Run, `apps/web` to
+Firebase Hosting, with Hosting rewriting `/api/**` to the Cloud Run service so the two share
+one origin. It runs only when a person triggers it — **Actions → Deploy → Run workflow** —
+from `main`, or from an `rc-*` tag that `deployment-ready.yml` produced. Anything else is
+refused twice: by the workflow's first step, and by the identity provider in GCP, which only
+exchanges tokens minted for `main` or an `rc-*` tag of this repository.
+
+**No credential is stored.** The job asks GitHub for an OIDC token and Workload Identity
+Federation exchanges it for a short-lived credential as the `github-deployer` service
+account, whose roles are the deploy-only set. The four values the workflow reads —
+`GOOGLE_CLOUD_PROJECT`, `GCP_REGION`, `GCP_WORKLOAD_IDENTITY_PROVIDER`,
+`GCP_DEPLOYER_SERVICE_ACCOUNT` — are repository *variables*, because none is a secret.
+
+Per ADR 0009 the workflow names no toolchain. It calls `make deploy`, whose body is
+`scripts/deploy.sh` — the same command from a laptop:
+
+```
+GOOGLE_CLOUD_PROJECT=<project-id> make deploy
+```
+
+That script builds the image, pushes it to Artifact Registry tagged with the commit SHA,
+deploys it to Cloud Run as the `aitutor-api` runtime service account, reads the Firebase web
+config from the project (never from the repository — the secret scan treats a Firebase API
+key in the tree as a leak), builds the web app with it, deploys Hosting, and smoke-checks
+that `/api/me` answers `401` through the rewrite and `/` answers `200`. The smoke check is
+not the acceptance criteria; those are re-run by hand against the live URL and recorded on
+the `Deployment` page in Confluence.
+
+The project itself is prepared once by `scripts/gcp-bootstrap.sh`, run by a project owner:
+APIs, the Artifact Registry repository, the two service accounts and their roles, the
+identity pool and provider, the Firebase link, web app, Hosting site and email-link sign-in,
+the Firestore database (whose location is permanent), and the budget with its named
+recipient. It is idempotent — re-run it to bring a project back in line — and it prints the
+four variables above at the end.
 
 ## Proving the gate bites
 
@@ -171,8 +217,13 @@ Each workflow declares its own `permissions:` block, so the repository-wide defa
 | `.github/workflows/ci.yml` | The `build` and `test` checks, on push to any branch but `main` |
 | `.github/workflows/auto-pr.yml` | Opens a pull request to `main` on the first push of a branch |
 | `.github/workflows/deployment-ready.yml` | Post-merge verification and release-candidate tagging |
+| `.github/workflows/deploy.yml` | Manual, keyless deployment of `main` or an `rc-*` tag to GCP |
 | `.github/rulesets/main.json` | The merge gate, as code |
 | `scripts/apply-ruleset.sh` | Pushes that JSON into repository settings |
 | `scripts/check-docs.sh` | The current bodies of `make build` and `make test` |
 | `scripts/check-deployable.sh` | The deployment-readiness checks |
+| `scripts/deploy.sh` | The body of `make deploy` |
+| `scripts/gcp-bootstrap.sh` | One-time, idempotent preparation of the GCP project |
+| `Dockerfile` | The Cloud Run image for `apps/api` |
+| `firebase.json` | Hosting: serve `apps/web/dist`, rewrite `/api/**` to Cloud Run |
 | `Makefile` | The contract the workflows call |

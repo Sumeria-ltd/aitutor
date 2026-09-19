@@ -14,7 +14,7 @@
 BUILD_DIR ?= dist
 
 .DEFAULT_GOAL := help
-.PHONY: help build test check clean protect unprotect
+.PHONY: help build test check deploy clean protect unprotect
 
 help: ## Show the available targets
 	@grep -hE '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | sort | awk -F':.*?## ' '{printf "  %-10s %s\n", $$1, $$2}'
@@ -29,6 +29,9 @@ check: ## Everything CI runs on a pull request, in one command
 	@$(MAKE) --no-print-directory build
 	@echo
 	@$(MAKE) --no-print-directory test
+
+deploy: ## Take HEAD to GCP: the API to Cloud Run, the web app to Firebase Hosting. Needs GOOGLE_CLOUD_PROJECT.
+	@scripts/deploy.sh
 
 clean: ## Remove build output
 	@rm -rf $(BUILD_DIR)

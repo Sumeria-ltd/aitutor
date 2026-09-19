@@ -125,12 +125,64 @@ check_image() {
   fi
 }
 
+# --- the container starts and answers ----------------------------------------------------------
+#
+# An image that builds but exits on startup is the failure --image cannot see, and it is
+# what Cloud Run would report as a revision that never became ready. So: run it with no
+# credential and a placeholder project, and require an HTTP answer on $PORT within a few
+# seconds. Any status is fine — the API answers 401 or 404 without touching Firestore or
+# Firebase, because both clients are lazy — what matters is that a process is listening.
+check_run() {
+  echo "Run"
+
+  if [ ! -f Dockerfile ]; then
+    skip "no Dockerfile yet; nothing to run"
+    return
+  fi
+
+  if ! command -v docker >/dev/null 2>&1; then
+    err "Dockerfile exists but docker is not available to prove the container starts"
+    return
+  fi
+
+  if ! docker image inspect aitutor-deployment-check >/dev/null 2>&1; then
+    docker build --quiet --tag aitutor-deployment-check . >/dev/null || { err "Dockerfile does not build"; return; }
+  fi
+
+  local name="aitutor-deployment-check-$$" port=18080 code=000 i
+  # Not --rm: an exited container must still be there for `docker logs` to explain itself.
+  docker run --detach --name "$name" --publish "$port:8080" \
+    --env GOOGLE_CLOUD_PROJECT=deployment-check aitutor-deployment-check >/dev/null
+
+  # curl prints 000 itself when nothing is listening; `|| true` only keeps set -e quiet. An
+  # answer is a real three-digit status — checked as such, so a doubled fallback like
+  # "000000" can never read as success.
+  for i in $(seq 1 20); do
+    code="$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:$port/api/me" 2>/dev/null || true)"
+    case "$code" in [1-9][0-9][0-9]) break ;; esac
+    [ "$(docker inspect -f '{{.State.Running}}' "$name" 2>/dev/null)" = "true" ] || break # it exited
+    sleep 0.5
+  done
+
+  case "$code" in
+  [1-9][0-9][0-9])
+    ok "container starts and answers on \$PORT (GET /api/me → $code)"
+    ;;
+  *)
+    err "container did not answer on \$PORT; its output was:"
+    docker logs "$name" 2>&1 | head -12 | sed 's/^/        /' >&2
+    ;;
+  esac
+  docker rm -f "$name" >/dev/null 2>&1 || true
+}
+
 case "${1:---all}" in
   --config)  check_config ;;
   --secrets) check_secrets ;;
   --image)   check_image ;;
-  --all)     check_config; echo; check_secrets; echo; check_image ;;
-  *) echo "usage: $0 [--all|--config|--secrets|--image]" >&2; exit 2 ;;
+  --run)     check_run ;;
+  --all)     check_config; echo; check_secrets; echo; check_image; echo; check_run ;;
+  *) echo "usage: $0 [--all|--config|--secrets|--image|--run]" >&2; exit 2 ;;
 esac
 
 if [ "$FAIL" -ne 0 ]; then
