@@ -1,10 +1,12 @@
----
-id: prd
-status: draft
-owner: aitutor-pm
-inputs: [pitch.txt, CLAUDE.md]
-updated: <date>
----
+<!-- Page title: `PRD — <product name>`. The table below is the status header; nothing may precede it. -->
+
+| | |
+|---|---|
+| **id** | prd |
+| **status** | `draft` |
+| **owner** | `aitutor-pm` |
+| **inputs** | `problem.txt`, `CLAUDE.md` |
+| **updated** | <date> |
 
 # PRD — <product name>
 
@@ -22,12 +24,12 @@ updated: <date>
 <End state: what the user has when this completes.>
 
 ## 4. Requirements
-Every row gets an ID. That ID becomes the intent, the spec and the validation.
+Every row gets an ID. That ID becomes the intent, the spec, the validation and the Jira epic.
 
 | ID | Rank | Requirement | Serves journey | Intent |
 |------|------|-------------|----------------|--------|
-| 0001 | 1    |             |                | docs/intents/0001-<slug>.md |
-| 0002 | 2    |             |                | docs/intents/0002-<slug>.md |
+| 0001 | 1    |             |                | [Intent 0001 · <title>](…) |
+| 0002 | 2    |             |                | [Intent 0002 · <title>](…) |
 
 ## 5. Acceptance
 | ID | Countable criterion |

@@ -5,9 +5,12 @@ and adds a session for each class as it happens — attaching material or writin
 their own words. They can then question their own material and get answers cited back to the
 session they came from.
 
-What the product is and must do: [`docs/prd.md`](docs/prd.md).
-How it is built — stack, constraints, architecture: [`CLAUDE.md`](CLAUDE.md).
-Why each technical decision was made: [`docs/adr/`](docs/adr/).
+What the product is and must do: the [PRD](https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/330465281)
+in the Confluence space `AI`.
+How it is built — stack, constraints, architecture: [`CLAUDE.md`](CLAUDE.md) and the
+[Architecture Overview](https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/330268820).
+Why each technical decision was made: the [Decision log](https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/330235908).
+Work in flight: Jira project [AIT](https://sumerialtd.atlassian.net/jira/software/projects/AIT/boards).
 
 ## Running it
 
@@ -33,8 +36,8 @@ make check   # both, which is what CI runs on a pull request
 ```
 
 `make test` runs [Vitest](https://vitest.dev) once at the repository root across all three
-workspaces (ADR 0004). It includes the document-invariant checks, so a malformed ADR or a
-requirement whose id disagrees with its filename fails the suite like any other bug.
+workspaces (ADR 0004), plus the repository-level checks in `tests/` — including the one that
+fails if the CI workflow ever stops installing dependencies or renames a job.
 
 The GitHub Actions workflows call only `make build` and `make test` (ADR 0009). **Renaming a
 target silently removes the merge gate** — change the bodies, never the names.
@@ -46,7 +49,7 @@ packages/shared   types and logic both surfaces need; the route contract lives h
 apps/api          the Cloud Run service — Hono, Firebase Admin
 apps/web          the Firebase Hosting app — React, Vite
 tests             repository-level checks that belong to no single workspace
-docs              the requirement chain: prd, intents, adr, specs
+docs              engineering notes that belong beside the code: ci.md, diagrams/
 scripts           the bodies behind the Make targets
 ```
 
@@ -55,9 +58,11 @@ no build ordering to remember and no compiled artifact to go stale.
 
 ## How work reaches this repository
 
-Every change traces to a four-digit requirement id, from `docs/prd.md` through its intent,
-spec and validation record. The roles that produce those documents live in `.claude/SKILLS/`,
-and the handover protocol they follow is in [`CLAUDE.md`](CLAUDE.md).
+Every change traces to a four-digit requirement id, from the PRD through its intent, spec
+and validation record — all pages in the Confluence space `AI` — and to a Jira epic in `AIT`
+whose tasks are the chain's steps. The roles that produce those pages live in
+`.claude/SKILLS/`; the handover protocol they follow is in [`CLAUDE.md`](CLAUDE.md), and the
+Atlassian conventions in [`.claude/ATLASSIAN.md`](.claude/ATLASSIAN.md).
 
 Nothing is committed directly to `main`: branch, open a pull request, and merge once the
 checks are green (ADR 0010, ADR 0011).

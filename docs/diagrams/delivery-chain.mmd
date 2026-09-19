@@ -1,0 +1,29 @@
+%% The delivery chain — who writes what, and the gate between each step.
+%% Derived from .claude/HANDOVER.md as reproduced in CLAUDE.md.
+%%{init: {"flowchart": {"wrappingWidth": 520}}}%%
+flowchart LR
+  P[/"problem.txt<br/>the brief"/]
+  subgraph PM["aitutor-pm"]
+    PRD["docs/prd.md<br/>docs/intents/NNNN-slug.md<br/>one per requirement"]
+  end
+  subgraph AR["aitutor-architect"]
+    ADR["docs/adr/NNNN-slug.md — decisions, product-wide<br/>docs/specs/NNNN-slug.md — one per intent, on request"]
+  end
+  subgraph EN["aitutor-engineer"]
+    CODE["code and tests for one spec<br/>one failing test per ACCEPT line, then green"]
+  end
+  subgraph PL["aitutor-platform"]
+    DEP["deployment.md · live URL<br/>observability · cost alert"]
+  end
+  subgraph VA["aitutor-validator"]
+    VAL["docs/validation/NNNN-slug.md<br/>conformance to spec and PRD, then fidelity to intent"]
+  end
+  P --> PM
+  PM -->|"human approves"| AR
+  AR -->|"human approves"| EN
+  EN -->|"PR merged — build and test green"| PL
+  PL -->|"deployed"| VA
+  VA -. "a fault goes back to the role that owns the file — never repaired in place" .-> PM
+  RULES["every artifact carries id · status · owner · inputs · updated<br/>draft → ready-for-review → approved (a human, never the role) — or blocked, or superseded<br/>no role starts on an unapproved input · no role calls another role · the artifact is the interface"]
+  classDef rules fill:#fff8e1,stroke:#b58900,color:#333
+  class RULES rules

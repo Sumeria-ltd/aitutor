@@ -6,9 +6,10 @@
 # ADR, not to a CI file. When it is made, replace the *bodies* below and leave the *names*
 # alone. Renaming a target silently removes the merge gate.
 #
-# The bodies now run the real toolchain, as ADR 0009 requires. The document checks were not
-# dropped: they became tests inside the suite (tests/docs-invariants.test.ts), because ADR 0009
-# says the workflows invoke build and test and nothing else. See docs/ci.md.
+# The bodies now run the real toolchain, as ADR 0009 requires. The document-invariant checks
+# that once lived here were retired on 2026-09-12 when the requirement chain moved to
+# Confluence (see .claude/ATLASSIAN.md); the suite still carries the CI-contract test. See
+# docs/ci.md.
 
 BUILD_DIR ?= dist
 

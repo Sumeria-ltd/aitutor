@@ -1,10 +1,12 @@
----
-id: <NNNN>
-status: draft
-owner: aitutor-validator
-inputs: [docs/specs/<NNNN>-<slug>.md, docs/prd.md, docs/intents/<NNNN>-<slug>.md, deployment.md]
-updated: <date>
----
+<!-- Page title: `Validation <NNNN> · <requirement name>`. The table below is the status header; nothing may precede it. -->
+
+| | |
+|---|---|
+| **id** | <NNNN> |
+| **status** | `draft` |
+| **owner** | `aitutor-validator` |
+| **inputs** | [Spec <NNNN> · <title>](…), [PRD — AITutor](…), [Intent <NNNN> · <title>](…), [Deployment](…) |
+| **updated** | <date> |
 
 # Validation <NNNN> — <requirement name>
 
@@ -19,7 +21,7 @@ Commit: <sha>
 | PRD acceptance <NNNN> |  | met / partial / missing |  |
 
 ### Scope drift
-| File changed | In spec SCOPE? | Note |
+| File changed (from the merged PR's diff) | In spec SCOPE? | Note |
 |--------------|----------------|------|
 |              | yes / no       |      |
 
@@ -27,7 +29,7 @@ Commit: <sha>
 - <anything present that no spec or PRD line asked for>
 
 ## Pass two — fidelity
-Read only `docs/intents/<NNNN>`. The PRD and the spec are closed.
+Read only the `Intent <NNNN>` page. The PRD and the spec are closed.
 
 **PROBLEM:** <quote it> — is that person measurably less stuck?
 <answer>

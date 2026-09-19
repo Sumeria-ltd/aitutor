@@ -1,0 +1,25 @@
+%% System context — where each part of AITutor runs, and what talks to what.
+%% Derived from CLAUDE.md (stack, platform constraints), ADR 0003, ADR 0006, ADR 0012.
+flowchart LR
+  L(["Learner<br/>phone or browser"])
+  subgraph fb["Firebase"]
+    WEB["apps/web · React<br/>served by Firebase Hosting"]
+    AUTH["Firebase Auth<br/>email sign-in link — no password"]
+  end
+  subgraph gcp["Google Cloud — one project"]
+    API["apps/api · Hono on Cloud Run<br/>verifies the ID token, resolves the learner,<br/>asserts the owner on every read and write"]
+    FS[("Firestore — the one database<br/>learners · events · courses · sessions · materials · summaries")]
+    GCS[("Cloud Storage<br/>material files — the gs:// URI lives on the Material record")]
+    GEM["Vertex AI · Gemini<br/>Flash-class by default"]
+  end
+  OP(["Operator — requirement 0009, later<br/>counts and events only, never content"])
+
+  L --> WEB
+  WEB -- "sign-in link" --> AUTH
+  WEB -- "JSON over HTTPS<br/>Authorization: Bearer ID token" --> API
+  API -- "verify token" --> AUTH
+  API -- "owner-asserted reads and writes<br/>ADR 0006" --> FS
+  API -- "store material" --> GCS
+  API -- "one structured request per action — ADR 0007<br/>documents passed by gs:// URI<br/>credential: the service account (ADC), no API key" --> GEM
+  GEM -. "reads the file in place" .-> GCS
+  OP -. "aggregates of the event stream — ADR 0008" .-> FS

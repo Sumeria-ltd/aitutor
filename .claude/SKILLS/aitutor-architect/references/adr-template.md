@@ -1,10 +1,12 @@
----
-id: <NNNN>
-status: draft
-owner: aitutor-architect
-inputs: [docs/prd.md, docs/intents/...]
-updated: <date>
----
+<!-- Page title: `ADR <NNNN> · <the decision, as a short statement>`. The table below is the status header; nothing may precede it. -->
+
+| | |
+|---|---|
+| **id** | <NNNN> |
+| **status** | `draft` |
+| **owner** | `aitutor-architect` |
+| **inputs** | [PRD — AITutor](…), [Intent NNNN · …](…) — the pages this decision answers |
+| **updated** | <date> |
 
 # ADR <NNNN> — <the decision, as a short statement>
 
