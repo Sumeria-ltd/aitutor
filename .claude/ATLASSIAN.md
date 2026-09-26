@@ -126,7 +126,8 @@ the page body as `![…](<name>.png)`. Uploading a file with the same name repla
 
 Within an epic the tasks are linked `Spec` *blocks* `Implement` *blocks* `Deploy` *blocks*
 `Validate`. Across epics, only what the PRD states: 0001 → 0002; 0002 and 0004 → 0007;
-0003 → 0008.
+0003 → 0008; and 0004 → 0010 → 0005, 0006, 0007, 0008, because `0010` defines what every
+requirement that reads a learner's material is permitted to read.
 
 Find your task with `jira_search(jql='project = AIT AND summary ~ "0002 · Spec"')`.
 
@@ -166,6 +167,14 @@ the human moves a story to `Done` when they accept the evidence.
 | 0007 | AIT-7 | AIT-32…34 | AIT-66 | AIT-67 | AIT-68 | AIT-69 | 330530817 | — |
 | 0008 | AIT-8 | AIT-35…37 | AIT-70 | AIT-71 | AIT-72 | AIT-73 | 330399769 | — |
 | 0009 | AIT-9 | AIT-38…41 | AIT-74 | AIT-75 | AIT-76 | AIT-77 | 330563585 | — |
+| 0010 | AIT-78 | AIT-79…82 | AIT-83 | AIT-84 | AIT-85 | AIT-86 | 339116033 | — |
+
+Requirement `0010` — answer from my current material only — was added on 2026-09-25 at rank 5,
+which moved `0005`–`0009` to ranks 6–10. Its journey is J7. Two issues under `AIT-78` are **not**
+chain tasks and deliberately break the table above: **`AIT-87`** is a demo prototype of J7,
+labelled `demo` with no `role-*` label, which needs no approved spec because it ships no product
+behaviour; and `AIT-88` is a second story on `AIT-6` (not `AIT-78`) added when requirement
+`0006`'s acceptance criteria were restated on 2026-09-26.
 
 Page IDs are `https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/<id>`.
 
@@ -174,6 +183,7 @@ Page IDs are `https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/<id>`.
 | aitutor Home | 330039466 | | Architecture Overview | 330268820 |
 | Product | 330203138 | | Decision log | 330235908 |
 | PRD — AITutor | 330465281 | | ADR 0001 … 0012 | 330268696, 330465332, 330203207, 330334242, 330432516, 330465362, 330596398, 330268730, 330563609, 330268760, 330039649, 330268788 |
+| Intent 0010 | 339116033 | | ADR 0013, ADR 0014 | 339542019, 339804161 |
 | Intents | 330268676 | | Specs | 330235928 |
 | Architecture | 330301441 | | Delivery | 330366977 |
 | Workflow | 330432548 | | Repository & CI | 330498073 |
