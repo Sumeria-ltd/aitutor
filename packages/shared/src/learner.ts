@@ -15,4 +15,18 @@ export const ROUTES = {
   session: "/api/auth/session",
   me: "/api/me",
   export: "/api/me/export",
+  // Phase D. The learner id never appears in a path — it comes from the verified token,
+  // so a path cannot be edited into someone else's material (ADR 0006).
+  courses: "/api/courses",
+  course: "/api/courses/:courseId",
+  courseSessions: "/api/courses/:courseId/sessions",
+  courseSession: "/api/courses/:courseId/sessions/:sessionId",
+} as const;
+
+/** Client-side path builders, so the web app never hand-assembles a URL. */
+export const paths = {
+  course: (courseId: string) => `/api/courses/${encodeURIComponent(courseId)}`,
+  courseSessions: (courseId: string) => `/api/courses/${encodeURIComponent(courseId)}/sessions`,
+  courseSession: (courseId: string, sessionId: string) =>
+    `/api/courses/${encodeURIComponent(courseId)}/sessions/${encodeURIComponent(sessionId)}`,
 } as const;

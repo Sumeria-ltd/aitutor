@@ -8,13 +8,29 @@ import {
 
 const EMAIL_KEY = "aitutor.pendingEmail";
 
+let cached: ReturnType<typeof getAuth> | null = null;
+
+/** Memoised: initializeApp throws if called twice with the same name, and every helper
+ *  here needs the same instance. */
 function auth() {
-  const app = initializeApp({
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  });
-  return getAuth(app);
+  if (!cached) {
+    const app = initializeApp({
+      apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    });
+    cached = getAuth(app);
+  }
+  return cached;
+}
+
+/** A fresh token for every API call. The SDK caches and refreshes it, so this is cheap and
+ *  is the only place the web app answers "who is asking" — the server never takes the
+ *  learner's identity from anything else. */
+export async function idToken(): Promise<string> {
+  const user = auth().currentUser;
+  if (!user) throw new Error("not signed in");
+  return await user.getIdToken();
 }
 
 /** There is no password. The link is the credential, which is why recovery and
