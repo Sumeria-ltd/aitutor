@@ -21,13 +21,11 @@ const bucket = process.env.MATERIAL_BUCKET ?? `${project}-material`;
 
 const app = createApp({ store, verifier });
 mountCourses(app, { store, verifier });
-mountMaterial(app, {
-  store,
-  verifier,
-  files: await cloudStorageFiles(bucket),
-  ai: await vertexAi({ project }),
-});
-mountChat(app, { store, verifier, ai: await vertexAi({ project }) });
+// Both are lazy: nothing here resolves a credential or reaches the network, so the service
+// listens even when Vertex or the bucket is unreachable. Only the routes that need them fail.
+const ai = vertexAi({ project });
+mountMaterial(app, { store, verifier, files: cloudStorageFiles(bucket), ai });
+mountChat(app, { store, verifier, ai });
 
 const port = Number(process.env.PORT ?? 8080);
 serve({ fetch: app.fetch, port });

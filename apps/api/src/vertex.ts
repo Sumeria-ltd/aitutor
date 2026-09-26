@@ -117,8 +117,24 @@ Rules:
 - Do not mention document numbers in "text" — the learner is shown the sources separately.`;
 }
 
-export async function vertexAi(config: VertexConfig): Promise<Ai> {
-  const token = await adcToken();
+/** Synchronous, and it resolves no credential until something actually calls the model.
+ *
+ *  This was a bug once, caught by tests/api-starts.test.ts: resolving ADC here at module
+ *  load meant the whole API refused to listen when credentials were missing, so a blip at
+ *  boot took the service down instead of degrading the features that need a model. The
+ *  routes, the health of the process and everything that does not touch Vertex must not
+ *  depend on this succeeding. */
+export function vertexAi(config: VertexConfig): Ai {
+  let pending: Promise<TokenSource> | null = null;
+  const token: TokenSource = async () => {
+    // Not cached on failure: a transient credential problem must not poison the client for
+    // the life of the process.
+    pending ??= adcToken().catch((cause) => {
+      pending = null;
+      throw cause;
+    });
+    return await (await pending)();
+  };
   const embedLocation = config.embedLocation ?? EMBED_LOCATION;
   const chatLocation = config.chatLocation ?? CHAT_LOCATION;
 

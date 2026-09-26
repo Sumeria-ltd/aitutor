@@ -29,18 +29,36 @@ export function inMemoryFiles(): Files & { held(): string[] } {
   };
 }
 
-export async function cloudStorageFiles(bucketName: string): Promise<Files> {
-  const { getStorage } = await import("firebase-admin/storage");
-  const bucket = getStorage().bucket(bucketName);
+/** Synchronous, and it touches nothing until a file is actually stored or removed. Same
+ *  reason as vertexAi: the API must start and serve every route that does not need a
+ *  bucket, even when the bucket or its credentials are unavailable. */
+export function cloudStorageFiles(bucketName: string): Files {
+  let pending: Promise<{ file(key: string): BucketFile }> | null = null;
+  const bucket = async () => {
+    pending ??= import("firebase-admin/storage")
+      .then((m) => m.getStorage().bucket(bucketName) as unknown as { file(k: string): BucketFile })
+      .catch((cause) => {
+        pending = null;
+        throw cause;
+      });
+    return await pending;
+  };
   return {
     async put(key, body, contentType) {
-      await bucket.file(key).save(Buffer.from(body), { contentType, resumable: false });
+      const b = await bucket();
+      await b.file(key).save(Buffer.from(body), { contentType, resumable: false });
       return `gs://${bucketName}/${key}`;
     },
     async remove(key) {
+      const b = await bucket();
       // ignoreNotFound: deletion must be idempotent, because the caller may be retrying
       // after a partial failure and must not be blocked from finishing the job.
-      await bucket.file(key).delete({ ignoreNotFound: true });
+      await b.file(key).delete({ ignoreNotFound: true });
     },
   };
 }
+
+type BucketFile = {
+  save(body: Buffer, opts: { contentType: string; resumable: boolean }): Promise<unknown>;
+  delete(opts: { ignoreNotFound: boolean }): Promise<unknown>;
+};
