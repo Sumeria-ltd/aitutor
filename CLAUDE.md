@@ -4,10 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Requirement `0001` — register an account — is implemented and merged (PR #2). It is **not
-deployed and not validated**: no cloud project exists yet, so `aitutor-platform` has not run,
-and the validator needs a deployed URL. The repository is a TypeScript monorepo per ADR 0003 —
-`packages/shared`, `apps/api`, `apps/web` — with repository-level checks in `tests/`.
+Requirement `0001` — register an account — is implemented, merged (PR #2) and **deployed**:
+the API runs on Cloud Run in `aitutor-509111` and the web app on Firebase Hosting at
+`https://aitutor-509111.web.app`, verified serving 2026-09-26. It is **not yet validated** —
+`AIT-45` is untouched and `aitutor-platform` has not written the `Deployment` page, so
+`AIT-44` is still `In Progress`. Getting there needed PR #10 (the keyless deploy workflow) and
+PR #11 (relative imports naming the `.ts` file that exists, so the container starts under Node
+type stripping). The repository is a TypeScript monorepo per ADR 0003 — `packages/shared`,
+`apps/api`, `apps/web` — with repository-level checks in `tests/`.
+
+**Retrieval changed on 2026-09-26.** The structural-retrieval thesis was reversed by business
+decision: see `## Architecture` and `## The citation invariant` below, PRD §7 and §10, and
+ADR 0013 and ADR 0014. Anything written before that date — ADR 0001 and ADR 0007 in
+particular — describes the retrieval model this file no longer specifies.
 
 **Since 2026-09-12 the requirement chain lives in Atlassian, not in `docs/`.** The PRD, the
 nine intents, the twelve ADRs and spec 0001 are pages in the Confluence space `AI`; the work
@@ -217,12 +226,38 @@ These are deliberate design decisions, not gaps. Do not "improve" the product by
 - **The learner's effort is the mechanism, not friction.** Finding a resource, assigning it to a session, and putting it in their own words is generative work, and generative work is what produces retention. Never add a feature that removes the learner's summarizing or self-testing work. Automating *transcription* (e.g. extracting objectives from an uploaded syllabus) is fine; automating *comprehension* is not.
 - **Effort must pay back immediately and visibly.** The corollary of the above. Every act of capture should return something the learner can see — a check on their summary, a coverage bar moving, a quiz result.
 - **Single-user and private.** No shared course spaces, no crowd-sourced material, no social layer. A course belongs to one learner.
-- **Answers are grounded in the learner's own material.** Never answer from general model knowledge when the learner is asking about their course. If the scoped material doesn't support an answer, say so.
+- **Answers are grounded in the learner's own material.** Never answer from general model knowledge
+  when the learner is asking about their course. If nothing the learner owns supports an answer, say
+  so. Retrieval may reach beyond the sessions they named — never beyond that learner's own material,
+  and never without telling them.
 
 ## Architecture
 
-**Structure replaces retrieval.** There is deliberately no vector database, embedding pipeline, or semantic search. The learner has already told us which session each material belongs to, so retrieval is a scope query (`WHERE session_id IN (...)`) and the selected documents go into context directly. This is both simpler and a truer expression of the product thesis: the learner's organizing effort is literally what makes retrieval work.
+**Retrieval is a managed hybrid index, scoped to one learner.** Changed 2026-09-26 by business
+decision; until then this section said the opposite — structural retrieval only, no vector database,
+no embedding pipeline, no semantic search. Each learner's material is imported into a Vertex AI RAG
+Engine corpus **dedicated to that learner**, chunked and embedded at import, carrying `learner_id`,
+`course_id`, `session_id` and `material_id` as chunk metadata. A question is answered by a dense
+(similarity) and a sparse (keyword) pass whose results are rank-fused, optionally filtered to the
+sessions the learner named.
 
+The learner's session assignment is still mandatory and still load-bearing — it is what an answer is
+attributed to, what the learner opens to verify it, and what requirement 0010's currency and ownership
+guarantees are founded on. It is no longer what makes retrieval work. See ADR 0013 and ADR 0014 in
+Confluence, and PRD §7 and §10.
+
+**Three mechanisms are not optional**, because the product's two unroundable acceptance lines depend
+on them:
+
+1. **Corpus identity comes from the authenticated caller, never from request input.** One corpus per
+   learner, not one shared corpus with a `learner_id` filter — requirement 0010 tolerates zero
+   cross-learner answers, and a filter is one missed predicate away from a leak.
+2. **A post-retrieval assertion** rejects the response if any returned chunk carries a `learner_id`
+   other than the caller's.
+3. **A query-time exclusion filter on deleted `material_id`s**, applied on every retrieval call,
+   independent of corpus deletion. Firestore is the authority on what exists; the index is a cache
+   that may lag. Requirement 0010 allows zero retries on deletion, so correctness must never depend
+   on corpus deletion having completed.
 **Stack** (all Google Cloud):
 
 | Layer | Choice |
@@ -230,7 +265,8 @@ These are deliberate design decisions, not gaps. Do not "improve" the product by
 | Frontend | Firebase Hosting |
 | Backend | Cloud Run |
 | Auth | Firebase Auth |
-| Data | Firestore — **one database only**; do not add Cloud SQL alongside it |
+| Data | Firestore — **one database only**; do not add Cloud SQL alongside it. Firestore stays the authority on what exists; the retrieval index is a derived cache, never a second source of truth |
+| Retrieval | Vertex AI RAG Engine — **one corpus per learner**; hybrid dense + sparse, rank-fused |
 | Files | Cloud Storage; the `gs://` URI is stored on the Material record |
 | AI | Gemini via Vertex AI |
 
@@ -242,17 +278,37 @@ Cloud Run's service account is the Vertex credential (ADC) — there is no AI AP
 - **PDF pages are billed and tokenized as images** — one page ≈ one image. Page count, not file size, drives cost.
 - **Context caching is a per-study-session tool, never semester-long.** Minimum 2,048 tokens; reads cost ~10% of input, but *storage* bills roughly $1/M tokens/hour on Flash-class and ~$4.50 on Pro-class. Create a cache when a study session opens, TTL ~1 hour, let it expire. Caching clearly pays on Flash-class; measure before relying on it with Pro-class.
 - **Gemini has no native citation support for arbitrary supplied documents.** `groundingSupports` / `groundingChunks` metadata is built for Google Search grounding and the File Search managed store, not for documents passed in context. Citations here are implemented by us — see below.
-- Vertex AI RAG Engine / File Search is the fallback if scope-constrained citation proves insufficient. It is deliberately unused: it substitutes semantic retrieval for the structural retrieval that is the product thesis.
+- **Vertex AI RAG Engine is the retrieval layer** — changed 2026-09-26; it was previously named here
+  as deliberately unused. One corpus per learner. Import is asynchronous and its latency is not
+  contractual, which is what makes requirement 0010's freshness bound something to measure rather than
+  choose (PRD open question 10). Corpus deletion is not immediate either — hence mechanism 3 above.
 
 ## The citation invariant
 
-Because Gemini won't cite supplied documents for us, citation correctness is enforced in our own code:
+Because Gemini won't cite supplied documents for us, citation correctness is enforced in our own code.
+Revised 2026-09-26: the check below used to compare a cited session against the scope the product
+*sent*, which was knowable because the product chose it. Retrieval now chooses it, so the check is
+re-founded rather than dropped.
 
-1. Every document placed in context is explicitly labelled in the prompt with its session (e.g. `Document 3 = Session 5, Thermodynamics, lecture slides`).
-2. The model must return structured JSON containing a `citations[]` array of session IDs and page numbers.
-3. **Every returned session ID is validated against the scope set that was actually sent.** An ID outside that set is a hard error — retry, never surface it.
+1. Every chunk placed in context is explicitly labelled in the prompt with its session (e.g.
+   `Document 3 = Session 5, Thermodynamics, lecture slides`), from the chunk's own `session_id`.
+2. The model must return structured JSON containing a `citations[]` array of session IDs and pages.
+3. **Every returned session ID is validated against the union of sessions present in the retrieval
+   contexts actually returned**, across every step of the loop. An ID outside that union is a hard
+   error — retry, never surface it. A citation the retriever never supplied is a fabrication.
+4. **Every returned chunk's `learner_id` must equal the caller's.** A mismatch is not a retry: the
+   answer is withheld and it is reported as an incident. Zero occurrences, ever, in any environment
+   including test.
+5. **If any cited session lies outside the scope the learner named, the answer must say so and name
+   those sessions.** Widening is permitted; silent widening is a defect. This replaces the old
+   boundary check as the unroundable line — PRD §5, requirement 0006.
 
-This makes citation accuracy a checkable invariant rather than a hope. Treat step 3 as non-negotiable.
+Steps 3, 4 and 5 are non-negotiable. Note honestly what changed: step 3 now verifies internal
+consistency — that the model cited what it was handed — where it used to verify that an answer stayed
+inside what the learner asked against. Step 5 carries the learner-facing guarantee now, and it is
+weaker in kind: it depends on us reporting correctly rather than on the answer being unable to leave
+the scope in the first place.
+
 
 ## Scope boundaries for v1
 
@@ -263,7 +319,13 @@ Deliberately excluded — do not implement without an explicit decision to expan
 - Lecture audio recording or transcription
 - Notifications, streaks, and pre-lecture prompting (the companion layer — a later phase)
 - Ads or any revenue mechanics
-- Agent frameworks and agentic loops. All five v1 actions (ask, explain, check-my-summary, quiz, coverage) are single structured model calls against known material. None involves open-ended exploration, so an agent loop would add latency, cost, and failure modes for capability that isn't used.
+- Agent *frameworks*, and unbounded loops. Removed from this list on 2026-09-26: a learner-facing
+  action may now take several bounded retrieval steps. The bound is explicit and enforced outside the
+  model — a maximum step count, a maximum retrieved-token budget, and a wall-clock deadline, whichever
+  binds first. Still excluded: any loop that decides its own stopping point, because something that
+  stops when it judges itself finished will prefer producing an answer to reporting that the material
+  does not cover the question — the exact failure requirement 0006 exists to prevent. And still a
+  loop in our own code, not a framework.
 
 ## Model selection
 
