@@ -1,0 +1,4 @@
+google-cloud-aiplatform[adk,agent_engines]==2.2.0
+google-adk==2.10.0
+mcp==2.2.0
+httpx==0.28.1
