@@ -25,6 +25,10 @@ export type Material = {
   ragFileId?: string;
   chunks: number;
   createdAt: string;
+  /** When the import finished and the material became answerable. `readyAt` minus
+   *  `createdAt` is the five-minute bound in PRD §5 — measurable after the fact rather
+   *  than only observable live, which is what lets the validator check it at all. */
+  readyAt?: string;
 };
 
 export type Citation = {
@@ -40,6 +44,10 @@ export type Answer = {
   /** False when the learner's material does not cover the question. A correct and
    *  expected outcome, not a failure (intent 0006). */
   covered: boolean;
+  /** Material that is still being read. Present so the learner is told the answer was
+   *  built from less than they have added, rather than being handed a thinner answer
+   *  that looks complete. An empty array and an absent one mean the same thing. */
+  pending?: { filename: string }[];
 };
 
 export type ChatTurn = { role: "learner" | "tutor"; text: string };

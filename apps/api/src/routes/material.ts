@@ -2,6 +2,7 @@ import type { Material } from "@aitutor/shared";
 import { isAcceptedType, MAX_UPLOAD_BYTES } from "@aitutor/shared";
 import type { Hono } from "hono";
 import { type AuthedEnv, requireAuth, type TokenVerifier } from "../auth.ts";
+import type { Emit } from "../events.ts";
 import { type Files, objectKey } from "../files.ts";
 import type { Store } from "../firestore.ts";
 import type { Rag } from "../rag.ts";
@@ -18,6 +19,9 @@ export type MaterialDeps = {
   verifier: TokenVerifier;
   files: Files;
   rag: Rag;
+  /** Requirement 0010's freshness signal. Optional so a test that does not care about
+   *  events need not wire one, and absent means the event is simply not written. */
+  emit?: Emit;
   now?: () => Date;
   newId?: () => string;
   /** Awaited in tests so assertions see the finished state; detached in production so the
@@ -131,6 +135,7 @@ export function mountMaterial(app: Hono<AuthedEnv>, deps: MaterialDeps) {
  *  conclude a product is broken. */
 async function importIntoCorpus(deps: MaterialDeps, material: Material): Promise<void> {
   const { learner, course, id } = material;
+  const now = deps.now ?? (() => new Date());
   try {
     const owner = await deps.store.getLearner(learner);
     if (!owner) throw new Error("the learner record disappeared");
@@ -144,10 +149,22 @@ async function importIntoCorpus(deps: MaterialDeps, material: Material): Promise
     }
 
     const ragFileId = await deps.rag.importFile(corpus, material.gsUri);
+    const readyAt = now();
     await deps.store.updateMaterial(learner, course, id, {
       state: "ready",
       ragFileId,
       chunks: 1,
+      readyAt: readyAt.toISOString(),
+    });
+    // The five-minute bound in PRD §5 is measured from this pair. The event carries no
+    // filename — ADR 0008 forbids a name the learner chose — and no session id, which
+    // requirement 0009 has no use for.
+    await deps.emit?.("material.became_answerable", learner, {
+      secondsToReady: Math.round(
+        (readyAt.getTime() - new Date(material.createdAt).getTime()) / 1000,
+      ),
+      bytes: material.bytes,
+      contentType: material.contentType,
     });
   } catch (cause) {
     await deps.store.updateMaterial(learner, course, id, {

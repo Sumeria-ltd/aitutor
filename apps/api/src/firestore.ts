@@ -7,6 +7,20 @@ import type { AitutorEvent, Course, CourseSession, Learner, Material } from "@ai
  *  every one, including the reads that already have a course id. That is deliberate —
  *  it means a handler cannot fetch a record by id alone and then forget to check who
  *  owns it, because there is no method that would let it. */
+/** What a container deletion took with it. `ragFileId` is absent when the import never
+ *  finished, which is normal and not an error. */
+export type Removed = { id: string; gsUri: string; filename: string; ragFileId?: string };
+
+/** Reduces a stored material to what a container deletion needs to finish the job. */
+function removed(m: Material): Removed {
+  return {
+    id: m.id,
+    gsUri: m.gsUri,
+    filename: m.filename,
+    ...(m.ragFileId ? { ragFileId: m.ragFileId } : {}),
+  };
+}
+
 export type Store = {
   getLearner(id: string): Promise<Learner | null>;
   createLearner(learner: Learner): Promise<Learner>;
@@ -16,11 +30,14 @@ export type Store = {
   createCourse(course: Course): Promise<Course>;
   coursesFor(learner: string): Promise<Course[]>;
   getCourse(learner: string, courseId: string): Promise<Course | null>;
-  deleteCourse(learner: string, courseId: string): Promise<void>;
+  /** Returns what it removed, so the caller can delete the ragFile and the object too.
+   *  Firestore alone is enough for the acceptance line — retrieval allow-lists what the
+   *  learner still holds — but "deleted" to a learner means gone, not unreachable. */
+  deleteCourse(learner: string, courseId: string): Promise<Removed[]>;
   createSession(session: CourseSession): Promise<CourseSession>;
   sessionsFor(learner: string, courseId: string): Promise<CourseSession[]>;
   getSession(learner: string, courseId: string, sessionId: string): Promise<CourseSession | null>;
-  deleteSession(learner: string, courseId: string, sessionId: string): Promise<void>;
+  deleteSession(learner: string, courseId: string, sessionId: string): Promise<Removed[]>;
   createMaterial(material: Material): Promise<Material>;
   updateMaterial(
     learner: string,
@@ -78,7 +95,9 @@ export function inMemoryStore(): Store {
       // A course's sessions, material and chunks all go with it: PRD open question 11 —
       // one rule for a document, a session and a course.
       sessions = sessions.filter((s) => !(s.learner === learner && s.course === courseId));
+      const doomed = materials.filter((m) => m.learner === learner && m.course === courseId);
       materials = materials.filter((m) => !(m.learner === learner && m.course === courseId));
+      return doomed.map(removed);
     },
     async createSession(session) {
       sessions.push(session);
@@ -98,9 +117,13 @@ export function inMemoryStore(): Store {
       sessions = sessions.filter(
         (s) => !(s.learner === learner && s.course === courseId && s.id === sessionId),
       );
+      const doomed = materials.filter(
+        (m) => m.learner === learner && m.course === courseId && m.session === sessionId,
+      );
       materials = materials.filter(
         (m) => !(m.learner === learner && m.course === courseId && m.session === sessionId),
       );
+      return doomed.map(removed);
     },
     async createMaterial(material) {
       materials.push(material);
@@ -215,11 +238,16 @@ export function firestoreStore(db: FirestoreLike): Store {
       // Deleting a document in Firestore does not delete its subcollections, so the
       // sessions, material and chunks have to go explicitly or they become unreachable
       // rather than gone — which is exactly the failure requirement 0010 is about.
+      const held = await db.collection(materialsPath(learner, courseId)).get();
+      const taken = held.docs.map((d) =>
+        removed({ id: d.id, ...(d.data() as object) } as Material),
+      );
       for (const path of [materialsPath(learner, courseId), sessionsPath(learner, courseId)]) {
         const found = await db.collection(path).get();
         await Promise.all(found.docs.map((d) => db.collection(path).doc(d.id).delete()));
       }
       await db.collection(coursesPath(learner)).doc(courseId).delete();
+      return taken;
     },
     async createSession(session) {
       const { id, learner, course, ...rest } = session;
@@ -248,14 +276,18 @@ export function firestoreStore(db: FirestoreLike): Store {
     async deleteSession(learner, courseId, sessionId) {
       // Same reasoning as deleteCourse: the material and chunks under this session must go,
       // or an answer could still quote a session the learner deleted.
+      const taken: Removed[] = [];
       for (const path of [materialsPath(learner, courseId)]) {
         const found = await db.collection(path).get();
         const doomed = found.docs.filter(
           (d) => (d.data() as { session?: string }).session === sessionId,
         );
+        for (const d of doomed)
+          taken.push(removed({ id: d.id, ...(d.data() as object) } as Material));
         await Promise.all(doomed.map((d) => db.collection(path).doc(d.id).delete()));
       }
       await db.collection(sessionsPath(learner, courseId)).doc(sessionId).delete();
+      return taken;
     },
     async createMaterial(material) {
       const { id, learner, course, ...rest } = material;

@@ -56,12 +56,13 @@ describe("makeEvent", () => {
 });
 
 describe("the registry", () => {
-  it("holds only the events requirement 0001 emits", () => {
+  it("holds every registered name, and nothing a spec added without asking", () => {
     expect([...EVENTS]).toEqual([
       "account.registered",
       "account.signed_in",
       "account.exported",
       "account.deleted",
+      "material.became_answerable",
     ]);
   });
 });

@@ -4,6 +4,7 @@ import type { Hono } from "hono";
 import { type AuthedEnv, requireAuth, type TokenVerifier } from "../auth.ts";
 import type { Store } from "../firestore.ts";
 import type { Rag, RagContext } from "../rag.ts";
+import { readableSet, retrieveFor } from "../readable.ts";
 import type { Ai, LabelledChunk } from "../vertex.ts";
 
 /** The chat — AIT-94. Multi-turn, answers only from the asking learner's own material,
@@ -35,6 +36,12 @@ export const CHAT_ROUTES = { ask: "/api/courses/:courseId/chat" } as const;
 const NOTHING_YET =
   "Nothing in this course's material covers that yet. If you have a handout or slides about it, add them to the session they belong to and ask again.";
 
+/** Distinct from NOTHING_YET on purpose. "Your material doesn't cover this" and "I have
+ *  not finished reading your material" are different facts, and telling the learner the
+ *  first when the second is true is the quiet failure requirement 0010 exists to stop. */
+const STILL_READING =
+  "Some of this course's material is still being read, so there is nothing to answer from yet. Try again in a moment.";
+
 export function mountChat(app: Hono<AuthedEnv>, deps: ChatDeps) {
   const topK = deps.topK ?? 8;
   const authed = requireAuth(deps.verifier);
@@ -62,33 +69,40 @@ export function mountChat(app: Hono<AuthedEnv>, deps: ChatDeps) {
           .slice(-8)
       : [];
 
-    const [owner, materials] = await Promise.all([
-      deps.store.getLearner(learner),
-      deps.store.materialsFor(learner, courseId),
-    ]);
-    const ready = materials.filter((m) => m.state === "ready" && m.ragFileId);
-    if (!owner?.corpus || ready.length === 0) {
+    // The one place that answers "what may this request read?" — spec 0010. Nothing else
+    // in this handler decides it, and nothing else calls the retriever.
+    const set = await readableSet(deps.store, learner, courseId);
+    const stillReading = set.pending.map((m) => ({ filename: m.filename }));
+
+    if (set.allow.length === 0) {
       return c.json({
-        answer: { text: NOTHING_YET, citations: [], covered: false } satisfies Answer,
+        answer: {
+          text: stillReading.length > 0 ? STILL_READING : NOTHING_YET,
+          citations: [],
+          covered: false,
+          ...(stillReading.length > 0 ? { pending: stillReading } : {}),
+        } satisfies Answer,
       });
     }
 
-    const contexts = await deps.rag.retrieve({
-      corpus: owner.corpus,
-      ragFileIds: ready.map((m) => m.ragFileId as string),
-      query: message,
-      topK,
-    });
+    const contexts = await retrieveFor(deps.rag, set, message, topK);
     // A keyword pass over what came back. Vector retrieval is weakest on a course's own
     // vocabulary — a symbol, a module code, a lecturer's coinage — so a chunk that literally
     // contains the asked words is promoted. Cheap, and it only reorders what RAG returned.
     const ranked = rankByWords(contexts, message);
 
-    const byUri = new Map(ready.map((m) => [m.gsUri, m]));
-    const usable = ranked.filter((ctx) => byUri.has(ctx.sourceUri));
+    // retrieveFor has already asserted every context belongs to this learner, so this map
+    // is a lookup rather than a filter. A foreign context never reaches here — it throws.
+    const byUri = new Map(set.allow.map((a) => [a.material.gsUri, a.material]));
+    const usable = ranked;
     if (usable.length === 0) {
       return c.json({
-        answer: { text: NOTHING_YET, citations: [], covered: false } satisfies Answer,
+        answer: {
+          text: stillReading.length > 0 ? STILL_READING : NOTHING_YET,
+          citations: [],
+          covered: false,
+          ...(stillReading.length > 0 ? { pending: stillReading } : {}),
+        } satisfies Answer,
       });
     }
 
@@ -106,7 +120,12 @@ export function mountChat(app: Hono<AuthedEnv>, deps: ChatDeps) {
     });
 
     const reply = await deps.ai.answer({ question: message, history, chunks: labelled });
-    return c.json({ answer: attribute(reply, usable, byUri, titles) });
+    const answer = attribute(reply, usable, byUri, titles);
+    // Named, not merely counted. An answer built from a subset of what the learner has
+    // added is thinner than it looks, and saying nothing is the failure PRD §8 describes.
+    return c.json({
+      answer: stillReading.length > 0 ? { ...answer, pending: stillReading } : answer,
+    });
   });
 
   return app;
