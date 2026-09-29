@@ -1,13 +1,4 @@
-import type {
-  AitutorEvent,
-  Chunk,
-  Course,
-  CourseSession,
-  Learner,
-  Material,
-  Retrieved,
-} from "@aitutor/shared";
-import { cosine, keywordScore } from "@aitutor/shared";
+import type { AitutorEvent, Course, CourseSession, Learner, Material } from "@aitutor/shared";
 
 /** Storage is a port. Every read is scoped by the owning learner id, so there is no
  *  query shape here that can return another learner's record (ADR 0006).
@@ -20,6 +11,8 @@ export type Store = {
   getLearner(id: string): Promise<Learner | null>;
   createLearner(learner: Learner): Promise<Learner>;
   deleteLearner(id: string): Promise<void>;
+  /** Records the learner's RAG corpus so it is created once and only once. */
+  setLearnerCorpus(id: string, corpus: string): Promise<void>;
   createCourse(course: Course): Promise<Course>;
   coursesFor(learner: string): Promise<Course[]>;
   getCourse(learner: string, courseId: string): Promise<Course | null>;
@@ -41,17 +34,6 @@ export type Store = {
    *  returns, no search can reach it — that is requirement 0010's deletion criterion and
    *  it allows zero retries, so there is no eventual-consistency window to wait out. */
   deleteMaterial(learner: string, courseId: string, materialId: string): Promise<void>;
-  putChunks(chunks: Chunk[]): Promise<void>;
-  /** Hybrid retrieval: similarity and keyword, fused. Scoped to one learner and one
-   *  course by the path it reads, so there is no filter to forget. */
-  searchChunks(input: {
-    learner: string;
-    courseId: string;
-    sessions?: string[];
-    queryEmbedding: number[];
-    queryText: string;
-    limit: number;
-  }): Promise<Retrieved[]>;
   appendEvent(event: AitutorEvent): Promise<void>;
   /** Replaces the learner key on every event they produced with a token recorded
    *  nowhere, so the events stay countable and stop being attributable. */
@@ -60,32 +42,12 @@ export type Store = {
   allEvents(): Promise<AitutorEvent[]>;
 };
 
-/** The fusion rule, shared by both stores so the ranking cannot drift between the one the
- *  tests exercise and the one production runs. Similarity carries most of the weight;
- *  keyword is there for the cases similarity is worst at — a course's own term, a symbol,
- *  a name that means nothing to an embedding model. */
-function rank(
-  candidates: Chunk[],
-  input: { queryEmbedding: number[]; queryText: string; limit: number },
-): Retrieved[] {
-  return candidates
-    .map((k) => {
-      const similarity = cosine(input.queryEmbedding, k.embedding);
-      const keyword = keywordScore(input.queryText, k.text);
-      return { ...k, similarity, keyword, score: 0.75 * similarity + 0.25 * keyword };
-    })
-    .filter((k) => k.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, input.limit);
-}
-
 export function inMemoryStore(): Store {
   const learners = new Map<string, Learner>();
   let events: AitutorEvent[] = [];
   let courses: Course[] = [];
   let sessions: CourseSession[] = [];
   let materials: Material[] = [];
-  let chunks: Chunk[] = [];
   return {
     async getLearner(id) {
       return learners.get(id) ?? null;
@@ -96,6 +58,10 @@ export function inMemoryStore(): Store {
     },
     async deleteLearner(id) {
       learners.delete(id);
+    },
+    async setLearnerCorpus(id, corpus) {
+      const existing = learners.get(id);
+      if (existing) learners.set(id, { ...existing, corpus });
     },
     async createCourse(course) {
       courses.push(course);
@@ -113,7 +79,6 @@ export function inMemoryStore(): Store {
       // one rule for a document, a session and a course.
       sessions = sessions.filter((s) => !(s.learner === learner && s.course === courseId));
       materials = materials.filter((m) => !(m.learner === learner && m.course === courseId));
-      chunks = chunks.filter((k) => !(k.learner === learner && k.course === courseId));
     },
     async createSession(session) {
       sessions.push(session);
@@ -135,9 +100,6 @@ export function inMemoryStore(): Store {
       );
       materials = materials.filter(
         (m) => !(m.learner === learner && m.course === courseId && m.session === sessionId),
-      );
-      chunks = chunks.filter(
-        (k) => !(k.learner === learner && k.course === courseId && k.session === sessionId),
       );
     },
     async createMaterial(material) {
@@ -164,24 +126,6 @@ export function inMemoryStore(): Store {
     async deleteMaterial(learner, courseId, materialId) {
       materials = materials.filter(
         (m) => !(m.learner === learner && m.course === courseId && m.id === materialId),
-      );
-      chunks = chunks.filter(
-        (k) => !(k.learner === learner && k.course === courseId && k.material === materialId),
-      );
-    },
-    async putChunks(incoming) {
-      chunks.push(...incoming);
-    },
-    async searchChunks(input) {
-      const scope = new Set(input.sessions ?? []);
-      return rank(
-        chunks.filter(
-          (k) =>
-            k.learner === input.learner &&
-            k.course === input.courseId &&
-            (scope.size === 0 || scope.has(k.session)),
-        ),
-        input,
       );
     },
     async appendEvent(event) {
@@ -230,10 +174,6 @@ const sessionsPath = (learner: string, courseId: string) =>
   `learners/${learner}/courses/${courseId}/sessions`;
 const materialsPath = (learner: string, courseId: string) =>
   `learners/${learner}/courses/${courseId}/materials`;
-/** Chunks sit at course level, not session level, so one read gathers every candidate for
- *  a search. Each chunk carries its own session, which is what the answer is attributed to. */
-const chunksPath = (learner: string, courseId: string) =>
-  `learners/${learner}/courses/${courseId}/chunks`;
 
 export function firestoreStore(db: FirestoreLike): Store {
   return {
@@ -249,6 +189,9 @@ export function firestoreStore(db: FirestoreLike): Store {
     },
     async deleteLearner(id) {
       await db.collection("learners").doc(id).delete();
+    },
+    async setLearnerCorpus(id, corpus) {
+      await db.collection("learners").doc(id).update({ corpus });
     },
     async createCourse(course) {
       const { id, learner, ...rest } = course;
@@ -272,11 +215,7 @@ export function firestoreStore(db: FirestoreLike): Store {
       // Deleting a document in Firestore does not delete its subcollections, so the
       // sessions, material and chunks have to go explicitly or they become unreachable
       // rather than gone — which is exactly the failure requirement 0010 is about.
-      for (const path of [
-        chunksPath(learner, courseId),
-        materialsPath(learner, courseId),
-        sessionsPath(learner, courseId),
-      ]) {
+      for (const path of [materialsPath(learner, courseId), sessionsPath(learner, courseId)]) {
         const found = await db.collection(path).get();
         await Promise.all(found.docs.map((d) => db.collection(path).doc(d.id).delete()));
       }
@@ -309,7 +248,7 @@ export function firestoreStore(db: FirestoreLike): Store {
     async deleteSession(learner, courseId, sessionId) {
       // Same reasoning as deleteCourse: the material and chunks under this session must go,
       // or an answer could still quote a session the learner deleted.
-      for (const path of [chunksPath(learner, courseId), materialsPath(learner, courseId)]) {
+      for (const path of [materialsPath(learner, courseId)]) {
         const found = await db.collection(path).get();
         const doomed = found.docs.filter(
           (d) => (d.data() as { session?: string }).session === sessionId,
@@ -348,43 +287,7 @@ export function firestoreStore(db: FirestoreLike): Store {
       };
     },
     async deleteMaterial(learner, courseId, materialId) {
-      // Chunks first. If this order were reversed and the second delete failed, the
-      // material would be gone from the learner's list while still answering questions.
-      const found = await db.collection(chunksPath(learner, courseId)).get();
-      const doomed = found.docs.filter(
-        (d) => (d.data() as { material?: string }).material === materialId,
-      );
-      await Promise.all(
-        doomed.map((d) => db.collection(chunksPath(learner, courseId)).doc(d.id).delete()),
-      );
       await db.collection(materialsPath(learner, courseId)).doc(materialId).delete();
-    },
-    async putChunks(chunks) {
-      await Promise.all(
-        chunks.map((k) => {
-          const { id, learner, course, ...rest } = k;
-          return db.collection(chunksPath(learner, course)).doc(id).set(rest);
-        }),
-      );
-    },
-    async searchChunks(input) {
-      // Read the course's chunks and rank in process, rather than using Firestore's vector
-      // index. A demo course holds tens to low hundreds of chunks, so this is immediate —
-      // and it avoids a composite index that has to be created and finish building before
-      // any search works, which is a failure mode you discover on the day. The same rank()
-      // runs here and in the in-memory store, so the ordering cannot drift between them.
-      // This is the one thing to revisit if a course ever holds thousands of chunks.
-      const found = await db.collection(chunksPath(input.learner, input.courseId)).get();
-      const scope = new Set(input.sessions ?? []);
-      const candidates = found.docs
-        .map((d) => ({
-          id: d.id,
-          learner: input.learner,
-          course: input.courseId,
-          ...(d.data() as Omit<Chunk, "id" | "learner" | "course">),
-        }))
-        .filter((k) => scope.size === 0 || scope.has(k.session));
-      return rank(candidates, input);
     },
     async appendEvent(event) {
       await db.collection("events").add(event);

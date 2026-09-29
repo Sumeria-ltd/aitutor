@@ -9,8 +9,24 @@ export type Files = {
   remove(key: string): Promise<void>;
 };
 
-export function objectKey(learner: string, courseId: string, materialId: string): string {
-  return `learners/${learner}/courses/${courseId}/${materialId}`;
+/** The extension is not decoration. Vertex AI RAG Engine infers a file's type from it, and an
+ *  object without one is rejected at import with failedRagFilesCount=1 and no stated reason —
+ *  established the hard way on 2026-09-26. */
+export function objectKey(
+  learner: string,
+  courseId: string,
+  materialId: string,
+  filename = "",
+): string {
+  const dot = filename.lastIndexOf(".");
+  const ext =
+    dot > 0
+      ? filename
+          .slice(dot)
+          .toLowerCase()
+          .replace(/[^.a-z0-9]/g, "")
+      : "";
+  return `learners/${learner}/courses/${courseId}/${materialId}${ext}`;
 }
 
 export function inMemoryFiles(): Files & { held(): string[] } {

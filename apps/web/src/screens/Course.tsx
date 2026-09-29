@@ -32,15 +32,16 @@ export function Course({ api, course, onBack }: CourseProps) {
   // While anything is still being read, poll. This is what makes "add it and ask about it
   // in the same sitting" visible rather than a guess (AIT-79).
   const reading = materials.some((m) => m.state === "reading");
-  const timer = useRef<number | null>(null);
   useEffect(() => {
     if (!reading) return;
-    timer.current = window.setTimeout(() => {
+    // An interval, not a timeout. A timeout here fired exactly once: the effect only re-runs
+    // when `reading` flips, so while material stayed in `reading` nothing rescheduled it and
+    // the row sat there forever. An interval keeps firing until `reading` goes false, which
+    // is also what the lint rule wants — no `materials` in the dependency list.
+    const id = window.setInterval(() => {
       refresh().catch(() => {});
     }, 2000);
-    return () => {
-      if (timer.current) window.clearTimeout(timer.current);
-    };
+    return () => window.clearInterval(id);
   }, [reading, refresh]);
 
   async function addSession(e: React.FormEvent) {

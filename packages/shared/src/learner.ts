@@ -4,6 +4,11 @@ export type Learner = {
   id: string;
   email: string;
   createdAt: string;
+  /** This learner's Vertex AI RAG Engine corpus resource name. One corpus per learner is the
+   *  isolation boundary: a retrieval cannot reach another learner's material because it is
+   *  not in the corpus being searched. Created on first upload, so most learners never pay
+   *  the ~20s it takes. */
+  corpus?: string;
 };
 
 /** Stated on the sign-in screen before any credential is entered. */

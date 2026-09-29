@@ -1,27 +1,27 @@
-import type { Chunk, Material } from "@aitutor/shared";
-import { chunkText, isAcceptedType, MAX_UPLOAD_BYTES } from "@aitutor/shared";
+import type { Material } from "@aitutor/shared";
+import { isAcceptedType, MAX_UPLOAD_BYTES } from "@aitutor/shared";
 import type { Hono } from "hono";
 import { type AuthedEnv, requireAuth, type TokenVerifier } from "../auth.ts";
 import { type Files, objectKey } from "../files.ts";
 import type { Store } from "../firestore.ts";
-import type { Ai } from "../vertex.ts";
+import type { Rag } from "../rag.ts";
 
-/** Upload material to a session and make it searchable — AIT-93.
+/** Upload material to a session and import it into the learner's RAG corpus — AIT-93.
  *
- *  The learner is told the state (`reading` → `ready` | `failed`) rather than being given
- *  a thinner answer from material that is not searchable yet (AIT-82). Reading happens
- *  after the response, so the upload itself returns immediately — capture must not wait on
- *  a model call (PRD §7, and requirement 0004's two-minute phone capture). */
+ *  The learner sees a state (`reading` → `ready` | `failed`) rather than being handed a
+ *  thinner answer from material that is not searchable yet (AIT-82). That matters more here
+ *  than it would with local indexing: corpus creation takes about twenty seconds and an
+ *  import about ten, so `reading` is a real interval, not a formality. */
 
 export type MaterialDeps = {
   store: Store;
   verifier: TokenVerifier;
   files: Files;
-  ai: Ai;
+  rag: Rag;
   now?: () => Date;
   newId?: () => string;
-  /** Awaited in tests so assertions see the finished state; left un-awaited in production
-   *  so the learner is not held up. */
+  /** Awaited in tests so assertions see the finished state; detached in production so the
+   *  upload returns at once — capture must not wait on an import (PRD §7). */
   afterResponse?: (work: Promise<unknown>) => void;
 };
 
@@ -42,8 +42,6 @@ export function mountMaterial(app: Hono<AuthedEnv>, deps: MaterialDeps) {
     const courseId = c.req.param("courseId");
     const sessionId = c.req.param("sessionId");
 
-    // The session must exist and be this learner's. Uploading to someone else's session
-    // is indistinguishable from uploading to one that does not exist.
     const session = await deps.store.getSession(learner, courseId, sessionId);
     if (!session) return c.json({ error: "not found" }, 404);
 
@@ -63,9 +61,12 @@ export function mountMaterial(app: Hono<AuthedEnv>, deps: MaterialDeps) {
     }
 
     const materialId = newId();
+    const filename = file.name || "untitled";
     const bytes = new Uint8Array(await file.arrayBuffer());
+    // The key carries the file extension — RAG Engine infers the type from it and silently
+    // rejects the import without one.
     const gsUri = await deps.files.put(
-      objectKey(learner, courseId, materialId),
+      objectKey(learner, courseId, materialId, filename),
       bytes,
       contentType,
     );
@@ -75,7 +76,7 @@ export function mountMaterial(app: Hono<AuthedEnv>, deps: MaterialDeps) {
       learner,
       course: courseId,
       session: sessionId,
-      filename: file.name || "untitled",
+      filename,
       contentType,
       bytes: file.size,
       gsUri,
@@ -85,7 +86,7 @@ export function mountMaterial(app: Hono<AuthedEnv>, deps: MaterialDeps) {
     };
     await deps.store.createMaterial(material);
 
-    detach(readAndIndex(deps, material, bytes));
+    detach(importIntoCorpus(deps, material));
     return c.json({ material }, 202);
   });
 
@@ -103,58 +104,55 @@ export function mountMaterial(app: Hono<AuthedEnv>, deps: MaterialDeps) {
     const materialId = c.req.param("materialId");
     const material = await deps.store.getMaterial(learner, courseId, materialId);
     if (!material) return c.json({ error: "not found" }, 404);
-    // Chunks and the record go first, so the material stops being answerable before the
-    // response is sent. The stored file goes after: an orphaned object costs pennies, an
-    // answer quoting a deleted document costs the product's credibility (AIT-95).
+
+    // Our own record goes first and synchronously. Retrieval is scoped to the ragFileIds of
+    // the materials we still hold, so once this row is gone the document cannot reach an
+    // answer even if the corpus has not caught up — which is what lets AIT-95 allow zero
+    // retries against a store whose deletes are not instant.
     await deps.store.deleteMaterial(learner, courseId, materialId);
-    await deps.files.remove(objectKey(learner, courseId, materialId));
+
+    const owner = await deps.store.getLearner(learner);
+    if (owner?.corpus && material.ragFileId) {
+      // Best effort, after the record is gone. A ragFile we failed to remove is cost and
+      // clutter; it is not reachable, because nothing points at it any more.
+      await deps.rag.deleteFile(owner.corpus, material.ragFileId).catch(() => {});
+    }
+    await deps.files
+      .remove(objectKey(learner, courseId, materialId, material.filename))
+      .catch(() => {});
     return c.body(null, 204);
   });
 
   return app;
 }
 
-/** Extract → chunk → embed → store. Every failure lands on the material as `failed` with a
- *  reason, because a learner who is told nothing concludes the product is broken. */
-async function readAndIndex(
-  deps: MaterialDeps,
-  material: Material,
-  bytes: Uint8Array,
-): Promise<void> {
-  const { learner, course, session, id } = material;
+/** Ensure the corpus, import the object, record the ragFile id. Every failure lands on the
+ *  material as `failed` with a reason the learner can read — silence is what makes people
+ *  conclude a product is broken. */
+async function importIntoCorpus(deps: MaterialDeps, material: Material): Promise<void> {
+  const { learner, course, id } = material;
   try {
-    const text = material.contentType.startsWith("text/")
-      ? new TextDecoder().decode(bytes)
-      : await deps.ai.extractText(material.gsUri, material.contentType);
+    const owner = await deps.store.getLearner(learner);
+    if (!owner) throw new Error("the learner record disappeared");
 
-    const pieces = chunkText(text);
-    if (pieces.length === 0) {
-      await deps.store.updateMaterial(learner, course, id, {
-        state: "failed",
-        error: "no readable text was found in that file",
-      });
-      return;
+    let corpus = owner.corpus;
+    if (!corpus) {
+      // One corpus per learner, created on first upload. This is the isolation boundary:
+      // a retrieval cannot reach another learner's material because it is not in this corpus.
+      corpus = await deps.rag.createCorpus(`learner-${learner}`);
+      await deps.store.setLearnerCorpus(learner, corpus);
     }
 
-    const embeddings = await deps.ai.embed(pieces, "document");
-    const chunks: Chunk[] = pieces.map((piece, i) => ({
-      id: `${id}-${i}`,
-      learner,
-      course,
-      session,
-      material: id,
-      text: piece,
-      embedding: embeddings[i] ?? [],
-    }));
-    await deps.store.putChunks(chunks);
+    const ragFileId = await deps.rag.importFile(corpus, material.gsUri);
     await deps.store.updateMaterial(learner, course, id, {
       state: "ready",
-      chunks: chunks.length,
+      ragFileId,
+      chunks: 1,
     });
   } catch (cause) {
     await deps.store.updateMaterial(learner, course, id, {
       state: "failed",
-      error: cause instanceof Error ? cause.message.slice(0, 200) : "could not read that file",
+      error: cause instanceof Error ? cause.message.slice(0, 300) : "could not read that file",
     });
   }
 }

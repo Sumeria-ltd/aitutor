@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { firebaseVerifier } from "./auth.ts";
 import { cloudStorageFiles } from "./files.ts";
 import { type FirestoreLike, firestoreStore } from "./firestore.ts";
+import { vertexRag } from "./rag.ts";
 import { mountChat } from "./routes/chat.ts";
 import { mountCourses } from "./routes/courses.ts";
 import { mountMaterial } from "./routes/material.ts";
@@ -24,8 +25,9 @@ mountCourses(app, { store, verifier });
 // Both are lazy: nothing here resolves a credential or reaches the network, so the service
 // listens even when Vertex or the bucket is unreachable. Only the routes that need them fail.
 const ai = vertexAi({ project });
-mountMaterial(app, { store, verifier, files: cloudStorageFiles(bucket), ai });
-mountChat(app, { store, verifier, ai });
+const rag = vertexRag(project);
+mountMaterial(app, { store, verifier, files: cloudStorageFiles(bucket), rag });
+mountChat(app, { store, verifier, ai, rag });
 
 const port = Number(process.env.PORT ?? 8080);
 serve({ fetch: app.fetch, port });

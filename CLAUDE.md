@@ -19,7 +19,7 @@ ADR 0013 and ADR 0014. Anything written before that date — ADR 0001 and ADR 00
 particular — describes the retrieval model this file no longer specifies.
 
 **Since 2026-09-12 the requirement chain lives in Atlassian, not in `docs/`.** The PRD, the
-nine intents, the twelve ADRs and spec 0001 are pages in the Confluence space `AI`; the work
+twelve intents, the fourteen ADRs and spec 0001 are pages in the Confluence space `AI`; the work
 is epics, stories and chain tasks in the Jira project `AIT`. `.claude/ATLASSIAN.md` is the map.
 The document-invariant checks that guarded `docs/` were retired with it.
 
@@ -180,9 +180,9 @@ NEXT:      <the role that should run next, and what it needs from the human firs
 | Page (space `AI`) | Owner | Status |
 |---|---|---|
 | `problem.txt` (in the repository) | — | The original brief. This is what the role skills call the pitch. |
-| `PRD — AITutor` | `aitutor-pm` | Nine-section PRD, nine ranked requirements `0001`–`0009`; the repository scaffold is a §7 constraint, not a requirement. Carries no technology by design — anything technical a requirement forces is a note for the architect in §7. |
+| `PRD — AITutor` | `aitutor-pm` | Ten-section PRD, twelve ranked requirements `0001`–`0012`; the repository scaffold is a §7 constraint, not a requirement. Carries no technology by design — anything technical a requirement forces is a note for the architect in §7. |
 | `Intent NNNN · …` | `aitutor-pm` | One per requirement, six fields, countable SUCCESS. |
-| `ADR NNNN · …` | `aitutor-architect` | Twelve so far. One decision per ADR, two rejected options minimum. ADR numbers are their own sequence. |
+| `ADR NNNN · …` | `aitutor-architect` | Fourteen so far; 0013 and 0014 are `blocked`. One decision per ADR, two rejected options minimum. ADR numbers are their own sequence. |
 | `Spec NNNN · …` | `aitutor-architect` | One per intent, written only when that intent is named to start. Spec 0001 exists. |
 | `Architecture Overview` | `aitutor-architect` | The diagrams, rendered from `docs/diagrams/*.mmd` in this repository. |
 | `Validation NNNN · …` | `aitutor-validator` | Created on first use. |
@@ -202,8 +202,8 @@ User: a learner taking a structured course — one that declares what it teaches
 ## The PRD
 
 The `PRD — AITutor` page in the Confluence space `AI` is the source of truth for **what**
-AITutor is and what it must do: the problem, the users, the six journeys, nine ranked
-requirements `0001`–`0009` with countable acceptance criteria, out of scope with the reason
+AITutor is and what it must do: the problem, the users, the nine journeys, twelve ranked
+requirements `0001`–`0012` with countable acceptance criteria, out of scope with the reason
 for each, the constraints table, the risks with their early signals, the open questions,
 and the build phases.
 
