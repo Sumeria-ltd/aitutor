@@ -161,15 +161,15 @@ the human moves a story to `Done` when they accept the evidence.
 |---|---|---|---|---|---|---|---|---|
 | 0001 | AIT-1 | AIT-10…13 | AIT-42 | AIT-43 | AIT-44 | AIT-45 | 330334218 | 330596353 |
 | 0002 | AIT-2 | AIT-14…16 | AIT-46 | AIT-47 | AIT-48 | AIT-49 | 330039625 | — |
-| 0003 | AIT-3 | AIT-17…19 | AIT-50 | AIT-51 | AIT-52 | AIT-53 | 330465308 | — |
+| 0003 | AIT-3 | AIT-17…19, AIT-123, AIT-124 | AIT-50 | AIT-51 | AIT-52 | AIT-53 | 330465308 | — |
 | 0004 | AIT-4 | AIT-20…23, AIT-89, AIT-90, AIT-116 | AIT-54 | AIT-55 | AIT-56 | AIT-57 | 330203159 | — |
 | 0005 | AIT-5 | AIT-24…27 | AIT-58 | AIT-59 | AIT-60 | AIT-61 | 330203183 | — |
 | 0006 | AIT-6 | AIT-28…31 | AIT-62 | AIT-63 | AIT-64 | AIT-65 | 330498049 | — |
 | 0007 | AIT-7 | AIT-32…34 | AIT-66 | AIT-67 | AIT-68 | AIT-69 | 330530817 | — |
-| 0008 | AIT-8 | AIT-35…37 | AIT-70 | AIT-71 | AIT-72 | AIT-73 | 330399769 | — |
+| 0008 | AIT-8 | AIT-35…37, AIT-122 | AIT-70 | AIT-71 | AIT-72 | AIT-73 | 330399769 | — |
 | 0009 | AIT-9 | AIT-38…41 | AIT-74 | AIT-75 | AIT-76 | AIT-77 | 330563585 | — |
-| 0010 | AIT-78 | AIT-79…82 | AIT-83 | AIT-84 | AIT-85 | AIT-86 | 339116033 | — |
-| 0011 | AIT-97 | AIT-99…102, AIT-117 | AIT-108 | AIT-109 | AIT-110 | AIT-111 | 341639169 | — |
+| 0010 | AIT-78 | AIT-79…82, AIT-119 | AIT-83 | AIT-84 | AIT-85 | AIT-86 | 339116033 | — |
+| 0011 | AIT-97 | AIT-99…102, AIT-117, AIT-120, AIT-121 | AIT-108 | AIT-109 | AIT-110 | AIT-111 | 341639169 | — |
 | 0012 | AIT-98 | AIT-103…107, AIT-118 | AIT-112 | AIT-113 | AIT-114 | AIT-115 | 341671937 | — |
 
 Requirement `0010` — answer from my current material only — was added on 2026-09-25 at rank 5,
@@ -206,6 +206,38 @@ nothing else — `AIT-104` was rewritten: its "scope is open, settle it before b
 framing is gone and it now also counts zero controls beyond those three, which narrows the
 business's "all the font editing menu like MS Word" deliberately. `AIT-54`, `AIT-108` and
 `AIT-112` each carry a comment naming what cleared and what remains.
+
+**Four more decisions, later the same day — and four pages went back to `ready-for-review`
+because of them.** Open questions 3, 9, 12 and 20 were answered. Three of the four added *new
+countable promises* to PRD §5 rather than clarifying existing ones, and an approval cannot reach
+forward over text that did not exist when it was given (handover rule 2), so the PRD (v42),
+`0003`, `0008`, `0010` and `0011` are all awaiting a human again. `0006` and `0012` still stand
+`approved`. Six stories carry the new criteria:
+
+| Q | Decision | Work |
+|---|---|---|
+| 12 | Isolation is proven by a **deliberate attempt on every release, recorded as having failed** — not only by fifty clean questions. It gates the deploy | `AIT-119` |
+| 20 | A session whose scheduled time passed **with nothing in it is named in the schedule**; a class still to come is **never** a gap in readiness | `AIT-120`, `AIT-121`, `AIT-122` |
+| 3 | A learner with no syllabus **writes their own objectives from worked examples**; extraction becomes the lucky path, not the main one | `AIT-123`, `AIT-124` |
+| 9 | `0010` **keeps rank 5** as a requirement of its own rather than becoming a constraint on the features it qualifies | none — no text changed |
+
+Three of these are worth understanding rather than just recording. **`AIT-119` is the only story
+in this project that asks for work to be done *against* the product**, and the only place the
+chain commits to evidence rather than to a count: fifty clean answers can only report that nothing
+went wrong while someone was watching. Its own failure mode, in PRD §8, is worse than a leak — a
+probe that keeps passing after the thing it probes was rewritten, still forging an identifier the
+system stopped using, because a green light is believed. **`AIT-121` counts a sentence, not a
+behaviour**, which looks like a category error and is not: `AIT-120` can be built perfectly and
+still turn the schedule into a ledger of failure, so the wording is what decides whether the
+feature helps. And **`AIT-124`'s "zero objectives written for the learner" is the half most likely
+to be improved away** — generating them from the course title or the captured material is the
+product doing the comprehension, which the first product invariant forbids.
+
+`0008` was the one `approved` page that had to be reopened; its rank was corrected from 8 to 11
+while it was open. `AIT-50`, `AIT-70`, `AIT-83`, `AIT-85` and `AIT-108` carry comments saying what
+changed, what now blocks, and — on `AIT-83` and `AIT-85` — the question answering 12 created:
+**who runs the isolation attempt, and who may declare that it passed.** If the role that builds
+the boundary also writes the probe and judges the result, the evidence is self-certified.
 
 **Two more sets of issues sit outside the chain**, and neither appears in the table above.
 `AIT-91` is the phase D customer demo epic, labelled `demo` and `phase-D`, with stories
