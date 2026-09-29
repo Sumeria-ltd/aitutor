@@ -29,7 +29,7 @@ export function objectKey(
   return `learners/${learner}/courses/${courseId}/${materialId}${ext}`;
 }
 
-export function inMemoryFiles(): Files & { held(): string[] } {
+export function inMemoryFiles(): Files & { held(): string[]; body(key: string): string } {
   const held = new Map<string, { body: Uint8Array; contentType: string }>();
   return {
     async put(key, body, contentType) {
@@ -41,6 +41,12 @@ export function inMemoryFiles(): Files & { held(): string[] } {
     },
     held() {
       return [...held.keys()];
+    },
+    /** What was actually stored, as text. Lets a test assert that a note was kept exactly
+     *  as the learner typed it rather than merely that something was written. */
+    body(key) {
+      const found = held.get(key);
+      return found ? new TextDecoder().decode(found.body) : "";
     },
   };
 }

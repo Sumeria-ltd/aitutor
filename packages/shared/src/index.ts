@@ -16,5 +16,22 @@ export {
 } from "./events.ts";
 export type { Learner } from "./learner.ts";
 export { PRIVACY_PROMISE, paths, ROUTES } from "./learner.ts";
-export type { Answer, ChatTurn, Citation, Material, MaterialState } from "./material.ts";
-export { ACCEPTED_TYPES, isAcceptedType, keywordScore, MAX_UPLOAD_BYTES } from "./material.ts";
+export type {
+  Answer,
+  ChatTurn,
+  Citation,
+  Material,
+  MaterialAuthor,
+  MaterialState,
+  NoteCheck,
+} from "./material.ts";
+export {
+  ACCEPTED_TYPES,
+  checkNote,
+  isAcceptedType,
+  isAuthor,
+  keywordScore,
+  MAX_NOTE_BYTES,
+  MAX_UPLOAD_BYTES,
+  noteObjectName,
+} from "./material.ts";
