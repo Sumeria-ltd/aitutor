@@ -208,11 +208,12 @@ business's "all the font editing menu like MS Word" deliberately. `AIT-54`, `AIT
 `AIT-112` each carry a comment naming what cleared and what remains.
 
 **Four more decisions, later the same day — and four pages went back to `ready-for-review`
-because of them.** Open questions 3, 9, 12 and 20 were answered. Three of the four added *new
-countable promises* to PRD §5 rather than clarifying existing ones, and an approval cannot reach
-forward over text that did not exist when it was given (handover rule 2), so the PRD (v42),
-`0003`, `0008`, `0010` and `0011` are all awaiting a human again. `0006` and `0012` still stand
-`approved`. Six stories carry the new criteria:
+before being approved again.** Open questions 3, 9, 12 and 20 were answered. Three of the four
+added *new countable promises* to PRD §5 rather than clarifying existing ones, and an approval
+cannot reach forward over text that did not exist when it was given (handover rule 2), so the
+PRD, `0003`, `0008`, `0010` and `0011` all went back for a human. **All five were then approved:
+PRD v43, `0003` v7, `0008` v5, `0010` v5, `0011` v4.** `0006` and `0012` never left `approved`.
+Six stories carry the new criteria:
 
 | Q | Decision | Work |
 |---|---|---|
@@ -234,10 +235,21 @@ to be improved away** — generating them from the course title or the captured 
 product doing the comprehension, which the first product invariant forbids.
 
 `0008` was the one `approved` page that had to be reopened; its rank was corrected from 8 to 11
-while it was open. `AIT-50`, `AIT-70`, `AIT-83`, `AIT-85` and `AIT-108` carry comments saying what
-changed, what now blocks, and — on `AIT-83` and `AIT-85` — the question answering 12 created:
-**who runs the isolation attempt, and who may declare that it passed.** If the role that builds
-the boundary also writes the probe and judges the result, the evidence is self-certified.
+while it was open. `AIT-50`, `AIT-54`, `AIT-70`, `AIT-83`, `AIT-85`, `AIT-108` and `AIT-112` carry
+comments saying what changed, what cleared, and — on `AIT-83` and `AIT-85` — the question answering
+12 created: **who runs the isolation attempt, and who may declare that it passed.** If the role
+that builds the boundary also writes the probe and judges the result, the evidence is
+self-certified, and it was **approved into Intent 0010 unanswered on purpose** because it is the
+one thing that could make the answer to question 12 hollow.
+
+**Where this leaves the chain.** The PRD and all twelve intents are `approved`, which means every
+`NNNN · Spec` task is unblocked by handover rule 1 for the first time in the project's life —
+`AIT-50`, `AIT-54`, `AIT-70`, `AIT-83`, `AIT-108` and `AIT-112` all say so. Two ordering facts
+worth carrying: `0008`'s spec **depends on `0011`**, because readiness cannot tell *behind* from
+*not yet* without the schedule; and `0010`'s spec has to settle who owns the isolation attempt
+before its own "Done when" can be met. Approval closed four questions and left the rest standing —
+the `Intents` index names the ones a downstream role meets first, and none of them is a number
+anyone can look up.
 
 **Two more sets of issues sit outside the chain**, and neither appears in the table above.
 `AIT-91` is the phase D customer demo epic, labelled `demo` and `phase-D`, with stories
