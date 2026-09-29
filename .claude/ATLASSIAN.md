@@ -265,6 +265,12 @@ Two of those answers changed a record rather than releasing it. **ADR 0014 was r
 
 **The bottleneck has moved, and it is no longer 0010.** [ADR 0002](https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/330465332) — citation validity checked against the scope the product *sent* — was never superseded when retrieval stopped being a scope query. **Four specs cannot be completed without its successor**: 0005, 0006, 0007 and 0008. `attribute()` in the deployed chat route is running on a superseded decision today. It binds requirement 0006, so by the rules it is written when `0006 · Spec` is requested — it should not wait that long.
 
+**Written 2026-09-29, and it is the last architecture record the chain is waiting on.** `aitutor-architect` wrote **[ADR 0017](https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/341573661)** rather than waiting for `0006 · Spec` to be requested, because ADR 0002 being `approved` *and* unperformable is the worst state a record can be in. It is `ready-for-review`; approving it moves 0002 to `superseded` and **unblocks 0005, 0006, 0007 and 0008 at once**. **[ADR 0016](https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/342196226) was approved the same day**, which clears Spec 0010's last dependency — a human's signature on the spec is now the only thing between it and `AIT-84`.
+
+**ADR 0017 is not a formalisation of what is deployed.** ADR 0002 told the model the session identifiers and then checked them, which fails *silently* when an invented identifier happens to land inside the sent set. 0017 labels chunks by **opaque position** and never tells the model a session exists, so an out-of-set citation is **unrepresentable rather than detectable** — a returned label is either an index into an array we built or it is nothing. Its cost is stated plainly on the page: the model cannot name a session in its prose, so answers read more clinically than one that could say *"as your week three slides put it"*.
+
+**And a thing that only became visible while writing it.** The honest reading of the retrieval reversal used to be that we traded an enforceable scope boundary for better recall. **We did not, in the end.** ADR 0016's allow-list means material outside the learner's chosen sessions is not retrievable at all, so the boundary is structural again — it moved from *what we chose to send* to *what we allow to be retrieved*, one layer earlier. The citation check reports; it no longer holds the line. That was recorded back onto ADR 0016 as well as into 0017.
+
 **Spec 0010 names six places the phase D demo code does not meet requirement 0010**, the demo having been built without an approved spec at the business's direction. The one worth knowing here: **`deleteSession` and `deleteCourse` remove the material from answers but leave the bytes in the bucket and the chunks in the corpus.** The acceptance line is about answers, so it passes; the promise a learner hears is about existence. It would have shipped green.
 
 **Two more sets of issues sit outside the chain**, and neither appears in the table above.
@@ -280,6 +286,7 @@ Page IDs are `https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/<id>`.
 | Product | 330203138 | | Decision log | 330235908 |
 | PRD — AITutor | 330465281 | | ADR 0001 … 0012 | 330268696, 330465332, 330203207, 330334242, 330432516, 330465362, 330596398, 330268730, 330563609, 330268760, 330039649, 330268788 |
 | Intent 0010 | 339116033 | | ADR 0013, 0014, 0015 | 339542019, 339804161, 342392834 |
+| ADR 0016, ADR 0017 | 342196226, 341573661 | | | |
 | Spec 0010 | 342622210 | | | |
 | Intent 0011 | 341639169 | | Intent 0012 | 341671937 |
 | Intents | 330268676 | | Specs | 330235928 |

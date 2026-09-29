@@ -290,6 +290,23 @@ Revised 2026-09-26: the check below used to compare a cited session against the 
 *sent*, which was knowable because the product chose it. Retrieval now chooses it, so the check is
 re-founded rather than dropped.
 
+> **No approved ADR decides what follows, and that is a live problem rather than a formality.**
+> ADR 0002 is `approved` and describes a check the product **cannot perform** — it validates against
+> a scope the product stopped choosing when ADR 0013 superseded ADR 0001 on 2026-09-29. `attribute()`
+> in `apps/api/src/routes/chat.ts` runs on a version of it today, and **specs 0005, 0006, 0007 and
+> 0008 cannot be completed until this is settled.**
+>
+> **ADR 0017 is written and awaiting approval, and it changes the mechanism rather than repairing
+> the check.** The model is given opaque positional labels — `Document 1 … n` — and is **never told
+> that a session exists**, so an out-of-set citation becomes *unrepresentable* rather than
+> *detectable*; a label is either an index into an array we built or it is nothing. The boundary half
+> of ADR 0002's job came back structurally under ADR 0016: material outside the learner's chosen
+> sessions is not in the retrieval allow-list, so there is nothing to catch. Its stated cost is that
+> the model cannot name a session in its prose.
+>
+> **Until ADR 0017 is approved, treat the five steps below as the current behaviour and not as a
+> decision.** Do not change `attribute()` on the strength of this section alone.
+
 1. Every chunk placed in context is explicitly labelled in the prompt with its session (e.g.
    `Document 3 = Session 5, Thermodynamics, lecture slides`), from the chunk's own `session_id`.
 2. The model must return structured JSON containing a `citations[]` array of session IDs and pages.
