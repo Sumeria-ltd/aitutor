@@ -1,34 +1,57 @@
-%% Ask my course (requirement 0006) — the request path and the citation invariant.
-%% Derived from ADR 0001 (scope query), ADR 0002 (citations validated against scope),
-%% ADR 0007 (one structured request), ADR 0008 (event in the same write), CLAUDE.md.
+%% Ask my course (requirement 0006) — the request path, and where 0010 bounds it.
+%% Derived from ADR 0013 (managed hybrid index), ADR 0014 (bounded loop, consent before widening),
+%% ADR 0016 (scope is an allow-list), ADR 0008 (event in the same write), spec 0010, CLAUDE.md.
+%% Changed 2026-09-29. ADR 0001 (scope query) and ADR 0007 (one request) are superseded.
+%% NOT YET DECIDED: the citation check. ADR 0002 validated a cited session against the scope the
+%% product SENT; retrieval now chooses it, so that record must be superseded and its successor is
+%% not written. The check drawn below is CLAUDE.md's re-founded five-step invariant, which binds
+%% requirement 0006 and awaits an ADR. Do not build from this box.
 sequenceDiagram
   autonumber
   actor L as Learner
   participant W as apps/web
   participant A as apps/api
   participant F as Firestore
+  participant R as RAG Engine — this learner's corpus
   participant G as Gemini (Vertex AI)
 
-  L->>W: a question, and the sessions to ask it against
+  L->>W: a question, and optionally the sessions to ask it against
   W->>A: question + sessionIds — Bearer ID token
-  A->>A: resolve the learner  ·  scope = the named sessions this learner owns
-  A->>F: materials WHERE session IN (scope) — ADR 0001: a scope query, no index, no similarity search
-  F-->>A: one gs:// URI per material, each carrying its session
-  A->>A: label every document in the prompt with its session<br/>"Document 3 = Session 5 · Thermodynamics · lecture slides"
-  A->>G: one structured request — ADR 0007<br/>documents by gs:// URI, response schema with citations[]
-  G-->>A: { answer, citations: [ { sessionId, page } ] }
-  A->>A: ADR 0002 — is every cited sessionId in the scope that was sent?
-  alt a cited session is outside the scope sent
-    A->>G: retry the same request
-    G-->>A: new payload
-    A->>A: if it recurs — withhold  ·  never show the unverified answer
-    A-->>W: nothing shown  ·  the withholding is an event the operator can see (0009)
-  else no attributable session
-    A-->>W: withheld, for the same reason
-  else the material does not cover it
+  A->>F: the learner's corpus, and the material they hold now
+  F-->>A: corpus  ·  allow-list of ragFile ids  ·  what is still reading
+  Note over A: readableSet() — the one place that answers<br/>"what may this request read?" (spec 0010)
+  alt material for these sessions is still being read
+    A-->>W: say so and name it — never a thinner answer that looks complete (0010, AIT-82)
+  end
+  rect rgb(238,246,255)
+    Note over A,R: PHASE ONE — inside the scope the learner chose<br/>bound: 3 steps · 12,000 retrieved tokens · 15 s, whichever binds first (ADR 0014)
+    loop until grounded, or the bound binds
+      A->>R: retrieve — allow-list narrowed to the named sessions<br/>dense + sparse, rank-fused (ADR 0013, ADR 0016)
+      R-->>A: contexts { sourceUri, text, score }
+      A->>A: assert every context maps to the allow-list<br/>a foreign context is an IsolationFault — withheld and reported, never retried
+    end
+  end
+  alt phase one found nothing sufficient
+    A-->>W: the chosen sessions do not cover this  ·  may I look wider?
+    W-->>L: the offer  ·  nothing outside the scope has been read yet
+    L->>W: yes
+    W->>A: the same question, with consent for this question only
+    rect rgb(255,247,235)
+      Note over A,R: PHASE TWO — the learner's whole corpus, never beyond it<br/>same bound again · consent is never remembered (Intent 0006 NOT NOW)
+      A->>R: retrieve — the full allow-list
+      R-->>A: contexts
+    end
+  end
+  A->>A: label every chunk "Document 3 = Session 5 · Thermodynamics · lecture slides"<br/>the model never sees a session id, so it cannot invent one
+  A->>G: one structured request  ·  response schema with citations[] by label
+  G-->>A: { answer, cited: [labels], covered }
+  rect rgb(245,245,245)
+    Note over A: CITATION CHECK — awaiting ADR 0002's successor.<br/>Drop any label outside the set sent · withhold a grounded answer that cites nothing verifiable
+  end
+  alt nothing the learner owns covers it
     A-->>W: say so plainly and name what appears missing — never a guess from general knowledge
-  else every citation is inside the scope
-    A->>F: the event, in the same write — ADR 0008<br/>{ name, occurredAt, learner, requirement: 0006, attributes: { cost, … } }
-    A-->>W: answer + citations
+  else answered
+    A->>F: the event, in the same write — ADR 0008<br/>{ learner, requirement: 0006, attributes: { steps, phase, termination, cost } }
+    A-->>W: answer + citations, naming any session outside the original scope
     W-->>L: the answer names its session  ·  one click reaches the source material itself
   end
