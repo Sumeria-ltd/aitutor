@@ -162,15 +162,15 @@ the human moves a story to `Done` when they accept the evidence.
 | 0001 | AIT-1 | AIT-10…13 | AIT-42 | AIT-43 | AIT-44 | AIT-45 | 330334218 | 330596353 |
 | 0002 | AIT-2 | AIT-14…16 | AIT-46 | AIT-47 | AIT-48 | AIT-49 | 330039625 | — |
 | 0003 | AIT-3 | AIT-17…19 | AIT-50 | AIT-51 | AIT-52 | AIT-53 | 330465308 | — |
-| 0004 | AIT-4 | AIT-20…23 | AIT-54 | AIT-55 | AIT-56 | AIT-57 | 330203159 | — |
+| 0004 | AIT-4 | AIT-20…23, AIT-89, AIT-90, AIT-116 | AIT-54 | AIT-55 | AIT-56 | AIT-57 | 330203159 | — |
 | 0005 | AIT-5 | AIT-24…27 | AIT-58 | AIT-59 | AIT-60 | AIT-61 | 330203183 | — |
 | 0006 | AIT-6 | AIT-28…31 | AIT-62 | AIT-63 | AIT-64 | AIT-65 | 330498049 | — |
 | 0007 | AIT-7 | AIT-32…34 | AIT-66 | AIT-67 | AIT-68 | AIT-69 | 330530817 | — |
 | 0008 | AIT-8 | AIT-35…37 | AIT-70 | AIT-71 | AIT-72 | AIT-73 | 330399769 | — |
 | 0009 | AIT-9 | AIT-38…41 | AIT-74 | AIT-75 | AIT-76 | AIT-77 | 330563585 | — |
 | 0010 | AIT-78 | AIT-79…82 | AIT-83 | AIT-84 | AIT-85 | AIT-86 | 339116033 | — |
-| 0011 | AIT-97 | AIT-99…102 | AIT-108 | AIT-109 | AIT-110 | AIT-111 | 341639169 | — |
-| 0012 | AIT-98 | AIT-103…107 | AIT-112 | AIT-113 | AIT-114 | AIT-115 | 341671937 | — |
+| 0011 | AIT-97 | AIT-99…102, AIT-117 | AIT-108 | AIT-109 | AIT-110 | AIT-111 | 341639169 | — |
+| 0012 | AIT-98 | AIT-103…107, AIT-118 | AIT-112 | AIT-113 | AIT-114 | AIT-115 | 341671937 | — |
 
 Requirement `0010` — answer from my current material only — was added on 2026-09-25 at rank 5,
 which moved `0005`–`0009` to ranks 6–10. Its journey is J7. Two issues under `AIT-78` are **not**
@@ -182,7 +182,30 @@ behaviour; and `AIT-88` is a second story on `AIT-6` (not `AIT-78`) added when r
 Requirements `0011` (plan the course schedule) and `0012` (keep my notes for a session) were added
 on 2026-09-29 at ranks 6 and 7, moving `0005`–`0009` to 8–12. Their journeys are J8 and J9.
 `0011` reverses a line of intent `0003`'s NOT NOW, which is why that page went back to
-`ready-for-review`.
+`ready-for-review` — and was then re-approved the same day.
+
+**The approval pass of 2026-09-29.** The PRD and all twelve intents are `approved`. Five pages
+had been waiting — `0003`, `0006`, `0010`, `0011`, `0012` — and were approved by the human,
+instructed in session and recorded on their behalf; each carries an attribution line saying so,
+because `aitutor-pm` may not approve its own work. Approval closed none of the open questions,
+and the `Intents` index now names the four a downstream role will meet first: **PRD open question
+12** (proving the cross-learner guarantee rather than asserting it, on `0010`, and the most
+consequential one left anywhere in the chain), **PRD open question 20** (whether a passed, empty
+session is a gap the product names, on `0011`), `0006`'s first question (what a learner sees when
+an answer must be withheld for want of an attribution), and `0012`'s two spec-level ambiguities
+(an unreadable photograph of handwriting, and one note reachable from two accounts).
+
+**Four decisions of 2026-09-29 became work**, so the countable line lives on a story rather than
+only in the PRD. **PRD open question 16** — may a course hold material of its own? — was decided
+both ways in one sitting and settled as *out of scope for this phase*: `AIT-116` therefore says an
+upload may start from the course screen and the learner is still asked which session it belongs
+to, and `AIT-89` (never file a document for me) is untouched. **17** the learner's chosen order
+beats the dates — `AIT-117`, zero reorders on their behalf. **18** the learner declares whose
+words a note is — `AIT-118`, zero classified for them. **19** emphasis, headings and lists and
+nothing else — `AIT-104` was rewritten: its "scope is open, settle it before building the toolbar"
+framing is gone and it now also counts zero controls beyond those three, which narrows the
+business's "all the font editing menu like MS Word" deliberately. `AIT-54`, `AIT-108` and
+`AIT-112` each carry a comment naming what cleared and what remains.
 
 **Two more sets of issues sit outside the chain**, and neither appears in the table above.
 `AIT-91` is the phase D customer demo epic, labelled `demo` and `phase-D`, with stories
