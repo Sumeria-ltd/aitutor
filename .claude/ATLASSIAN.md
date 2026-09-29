@@ -168,7 +168,7 @@ the human moves a story to `Done` when they accept the evidence.
 | 0007 | AIT-7 | AIT-32…34 | AIT-66 | AIT-67 | AIT-68 | AIT-69 | 330530817 | — |
 | 0008 | AIT-8 | AIT-35…37, AIT-122 | AIT-70 | AIT-71 | AIT-72 | AIT-73 | 330399769 | — |
 | 0009 | AIT-9 | AIT-38…41 | AIT-74 | AIT-75 | AIT-76 | AIT-77 | 330563585 | — |
-| 0010 | AIT-78 | AIT-79…82, AIT-119 | AIT-83 | AIT-84 | AIT-85 | AIT-86 | 339116033 | — |
+| 0010 | AIT-78 | AIT-79…82, AIT-119 | AIT-83 | AIT-84 | AIT-85 | AIT-86 | 339116033 | 342622210 |
 | 0011 | AIT-97 | AIT-99…102, AIT-117, AIT-120, AIT-121 | AIT-108 | AIT-109 | AIT-110 | AIT-111 | 341639169 | — |
 | 0012 | AIT-98 | AIT-103…107, AIT-118 | AIT-112 | AIT-113 | AIT-114 | AIT-115 | 341671937 | — |
 
@@ -251,6 +251,16 @@ before its own "Done when" can be met. Approval closed four questions and left t
 the `Intents` index names the ones a downstream role meets first, and none of them is a number
 anyone can look up.
 
+**Architecture, 2026-09-29.** `aitutor-architect` ran on `AIT-83` and **[Spec 0010](https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/342622210) is written in full and `blocked`** — waiting on two ADR approvals, not on more design. The run's real work was clearing the ADRs: **0013 and 0014 had eleven blockers between them and every one is now settled**, seven by the PM in PRD v43. Both are `ready-for-review`, each keeping its blocker list with what cleared it.
+
+Two of those answers changed a record rather than releasing it. **ADR 0014 was revised**: its refusal to widen scope — the one place it declined the direction it was given — is replaced by a **two-phase loop with the learner's consent in the middle**, because PRD open question 14 decided the product asks first. Bounds are set as opening hypotheses: 3 steps, 12,000 retrieved tokens, 15 s. And **[ADR 0015](https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/342392834) is new**, answering the question Intent 0010 was approved with deliberately unanswered — isolation is proven by a **black-box adversary** that imports nothing from `apps/api` or `packages/shared`, written by the engineer, run by CI and by `aitutor-platform` at deploy, and **judged by `aitutor-validator`**, which owns no code. Nobody declares it passed; the exit status is the verdict. The probe **hard-codes the surface it attacks** so that a rename breaks it — that is the mitigation for PRD §8's stale-probe risk, not an oversight.
+
+**Approval order is 0013, then 0014, then 0015.** Approving 0013 puts ADR 0001 into `superseded`; approving 0014 puts ADR 0007 into `superseded`. Until 0013 is approved, **ADR 0001 remains in force and says retrieval is a scope query with no index** — which contradicts the approved PRD §7 *and* the code already on `main`. That contradiction is the single most consequential open item in the project.
+
+**The `Architecture Overview` page is deliberately untouched.** It still describes ADR 0001's scope query, because the Overview may not describe something no approved ADR has decided. It gets updated in the same run as 0013's approval.
+
+**Spec 0010 names six places the phase D demo code does not meet requirement 0010**, the demo having been built without an approved spec at the business's direction. The one worth knowing here: **`deleteSession` and `deleteCourse` remove the material from answers but leave the bytes in the bucket and the chunks in the corpus.** The acceptance line is about answers, so it passes; the promise a learner hears is about existence. It would have shipped green.
+
 **Two more sets of issues sit outside the chain**, and neither appears in the table above.
 `AIT-91` is the phase D customer demo epic, labelled `demo` and `phase-D`, with stories
 `AIT-92`–`AIT-96`; it is a delivery vehicle rather than a requirement and discharges none. And
@@ -263,7 +273,8 @@ Page IDs are `https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/<id>`.
 | aitutor Home | 330039466 | | Architecture Overview | 330268820 |
 | Product | 330203138 | | Decision log | 330235908 |
 | PRD — AITutor | 330465281 | | ADR 0001 … 0012 | 330268696, 330465332, 330203207, 330334242, 330432516, 330465362, 330596398, 330268730, 330563609, 330268760, 330039649, 330268788 |
-| Intent 0010 | 339116033 | | ADR 0013, ADR 0014 | 339542019, 339804161 |
+| Intent 0010 | 339116033 | | ADR 0013, 0014, 0015 | 339542019, 339804161, 342392834 |
+| Spec 0010 | 342622210 | | | |
 | Intent 0011 | 341639169 | | Intent 0012 | 341671937 |
 | Intents | 330268676 | | Specs | 330235928 |
 | Architecture | 330301441 | | Delivery | 330366977 |
