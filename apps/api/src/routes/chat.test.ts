@@ -2,7 +2,7 @@ import type { Material } from "@aitutor/shared";
 import { ROUTES } from "@aitutor/shared";
 import { describe, expect, it } from "vitest";
 import { fakeVerifier } from "../auth.ts";
-import { emitter } from "../events.ts";
+import { type Emit, emitter } from "../events.ts";
 import { inMemoryFiles } from "../files.ts";
 import { inMemoryStore, type Store } from "../firestore.ts";
 import { fakeRag, type Rag, type RagContext } from "../rag.ts";
@@ -15,7 +15,7 @@ import { createApp } from "./me.ts";
 const ADA = { uid: "ada", email: "ada@example.test" };
 const BOB = { uid: "bob", email: "bob@example.test" };
 
-function harness(opts: { ai?: Ai; rag?: Rag } = {}) {
+function harness(opts: { ai?: Ai; rag?: Rag; emit?: Emit } = {}) {
   const store: Store = inMemoryStore();
   // Advanced by hand so readyAt − createdAt is a fact rather than a race.
   let clock = new Date("2026-09-29T09:00:00.000Z");
@@ -53,7 +53,7 @@ function harness(opts: { ai?: Ai; rag?: Rag } = {}) {
     rag,
     newId,
     now: () => clock,
-    emit: emitter(store, () => clock, "0010"),
+    emit: opts.emit ?? emitter(store, () => clock, "0010"),
     afterResponse: (w) => pending.push(w),
   });
   mountChat(app, { store, verifier, ai, rag });
@@ -317,11 +317,14 @@ describe("freshness is measurable, not asserted", () => {
     expect(emitted?.requirement).toBe("0010");
     expect(typeof emitted?.attributes.secondsToReady).toBe("number");
     // ADR 0008: no filename the learner chose, no prose, nothing but scalars.
+    // `kind`, not the raw content type: ADR 0008 caps an attribute string at 64
+    // characters and a PowerPoint's MIME type is 73, which is the bug this replaced.
     expect(Object.keys(emitted?.attributes ?? {}).sort()).toEqual([
       "bytes",
-      "contentType",
+      "kind",
       "secondsToReady",
     ]);
+    expect(emitted?.attributes.kind).toBe("pdf");
   });
 });
 
@@ -477,5 +480,45 @@ describe("parseAnswer", () => {
 
   it("drops citations from a reply that says it is not covered", () => {
     expect(parseAnswer('{"covered":false,"cited":[1,2],"text":"nope"}').cited).toEqual([]);
+  });
+});
+
+describe("the freshness event cannot break the upload it measures", () => {
+  it("accepts a PowerPoint, whose content type is longer than an attribute may be", async () => {
+    const h = harness();
+    const { courseId, sessionId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
+
+    const form = new FormData();
+    form.set(
+      "file",
+      new File(["slides"], "LOT1-Session2.pptx", {
+        // 73 characters. The event attribute cap is 64, and sending this raw threw inside
+        // the import, which marked a perfectly readable file as failed.
+        type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      }),
+    );
+    const res = await h.call(
+      "ada-token",
+      `/api/courses/${courseId}/sessions/${sessionId}/materials`,
+      { method: "POST", body: form },
+    );
+    expect(res.status).toBe(202);
+
+    const held = await h.materials("ada-token", courseId);
+    const deck = held.find((m) => m.filename.endsWith(".pptx"));
+    expect(deck?.state, `the deck was marked ${deck?.state}: ${deck?.error ?? ""}`).toBe("ready");
+  });
+
+  it("still makes the material answerable when emitting the event fails outright", async () => {
+    const h = harness({
+      emit: async () => {
+        throw new Error("the event stream is having a bad day");
+      },
+    });
+    const { courseId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
+
+    // Measurement must never be able to fail the thing it measures.
+    const held = await h.materials("ada-token", courseId);
+    expect(held[0]?.state).toBe("ready");
   });
 });
