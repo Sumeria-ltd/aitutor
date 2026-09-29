@@ -16,7 +16,7 @@ import {
 import { fakeRag, type Rag } from "../rag.ts";
 import { mountCourses } from "./courses.ts";
 import { mountMaterial } from "./material.ts";
-import { MCP_ROUTES, mountMcp } from "./mcp.ts";
+import { MCP_ROUTES, mountMcp, SESSION_HEADER } from "./mcp.ts";
 import { createApp } from "./me.ts";
 
 const ADA = { uid: "ada", email: "ada@example.test" };
@@ -44,7 +44,13 @@ function harness(opts: { rag?: Rag; tools?: Tool[] } = {}) {
     emit: emitter(store, () => clock, "0010"),
     afterResponse: (w) => pending.push(w),
   });
-  mountMcp(app, { store, verifier, rag, ...(opts.tools ? { tools: opts.tools } : {}) });
+  mountMcp(app, {
+    store,
+    verifier,
+    rag,
+    newSessionId: () => "session-1",
+    ...(opts.tools ? { tools: opts.tools } : {}),
+  });
 
   const call = (token: string | null, path: string, init: RequestInit = {}) =>
     app.request(path, {
@@ -335,5 +341,93 @@ describe("identity", () => {
         .courses;
     expect(courses(forAda)).toHaveLength(1);
     expect(courses(forBob)).toHaveLength(0);
+  });
+});
+
+describe("the Streamable HTTP transport", () => {
+  /** The client we must work with is one we did not write, so the negotiation is the risk. */
+  const post = (h: ReturnType<typeof harness>, accept: string | null, body: unknown) =>
+    h.call("ada-token", MCP_ROUTES.rpc, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "content-type": "application/json",
+        ...(accept === null ? {} : { accept }),
+      },
+    });
+
+  const init = { jsonrpc: "2.0", id: 1, method: "initialize" };
+
+  it("answers with JSON when the client accepts both", async () => {
+    const h = harness();
+    // What the reference client sends. JSON is the easier path to debug, so it wins.
+    const res = await post(h, "application/json, text/event-stream", init);
+    expect(res.headers.get("content-type")).toContain("application/json");
+    const body = (await res.json()) as { result: { protocolVersion: string } };
+    expect(body.result.protocolVersion).toBe("2025-06-18");
+  });
+
+  it("answers with an SSE event when the client will not take JSON", async () => {
+    const h = harness();
+    const res = await post(h, "text/event-stream", init);
+    expect(res.headers.get("content-type")).toContain("text/event-stream");
+    const text = await res.text();
+    expect(text.startsWith("event: message\ndata: ")).toBe(true);
+    const payload = JSON.parse(text.slice(text.indexOf("data: ") + 6).trim());
+    expect(payload.result.serverInfo.name).toBe("aitutor-material");
+  });
+
+  it("returns a session id on initialize and on nothing else", async () => {
+    const h = harness();
+    const first = await post(h, "application/json", init);
+    expect(first.headers.get(SESSION_HEADER)).toBe("session-1");
+
+    const later = await post(h, "application/json", { jsonrpc: "2.0", id: 2, method: "ping" });
+    expect(later.headers.get(SESSION_HEADER)).toBeNull();
+  });
+
+  it("refuses GET with 405 rather than a confusing 404", async () => {
+    const h = harness();
+    const res = await h.call("ada-token", MCP_ROUTES.rpc);
+    expect(res.status).toBe(405);
+  });
+
+  it("accepts DELETE so a client can end a session politely", async () => {
+    const h = harness();
+    const res = await h.call("ada-token", MCP_ROUTES.rpc, { method: "DELETE" });
+    expect(res.status).toBe(204);
+  });
+
+  it("answers a batch with an array, and an all-notification batch with 202", async () => {
+    const h = harness();
+    await h.seed("ada-token", "Thermo", "Week 3", "entropy rises");
+
+    const both = await post(h, "application/json", [
+      { jsonrpc: "2.0", id: 1, method: "ping" },
+      { jsonrpc: "2.0", id: 2, method: "tools/list" },
+      { jsonrpc: "2.0", method: "notifications/initialized" },
+    ]);
+    const arr = await both.json();
+    expect(Array.isArray(arr)).toBe(true);
+    // The notification contributes nothing, so two in and two out of three.
+    expect(arr).toHaveLength(2);
+
+    const quiet = await post(h, "application/json", [
+      { jsonrpc: "2.0", method: "notifications/initialized" },
+    ]);
+    expect(quiet.status).toBe(202);
+    expect(await quiet.text()).toBe("");
+  });
+
+  it("reports malformed JSON as a parse error rather than crashing", async () => {
+    const h = harness();
+    const res = await h.call("ada-token", MCP_ROUTES.rpc, {
+      method: "POST",
+      body: "{not json",
+      headers: { "content-type": "application/json" },
+    });
+    expect(res.status).toBe(400);
+    const parsed = (await res.json()) as { error: { code: number } };
+    expect(parsed.error.code).toBe(-32700);
   });
 });
