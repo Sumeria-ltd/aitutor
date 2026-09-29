@@ -1,6 +1,10 @@
-%% Capture a session (requirement 0004) — acknowledge first, read the material afterwards.
+%% Capture a session (requirement 0004) — acknowledge first, import the material afterwards.
 %% Derived from ADR 0005 (acknowledge before processing), ADR 0006 (owner on every write),
-%% ADR 0008 (event in the same write), CLAUDE.md (gs:// URIs, page-count ceilings).
+%% ADR 0008 (event in the same write), ADR 0013 (import into the learner's corpus),
+%% ADR 0016 (the ragFile id is what scopes later retrieval), spec 0010, CLAUDE.md.
+%% Changed 2026-09-29: "read the material" is now "import, chunk, embed, index" into the
+%% learner's own RAG Engine corpus. The learner sees a state because that interval is real —
+%% about twenty seconds to create a corpus and ten to import a 900 KB PDF, observed, not promised.
 sequenceDiagram
   autonumber
   actor L as Learner — phone, poor connection
@@ -8,20 +12,25 @@ sequenceDiagram
   participant A as apps/api
   participant S as Cloud Storage
   participant F as Firestore
-  participant P as Processing — outside the learner's request<br/>(mechanism decided in spec 0004)
+  participant R as Vertex AI RAG Engine<br/>this learner's corpus — us-central1
 
   L->>W: choose the course and session, attach a file,<br/>optionally write what they took from it
   W->>A: capture — Bearer ID token
-  A->>S: store the file
+  A->>S: store the file — the object key carries the file extension<br/>RAG Engine infers type from it and silently rejects an import without one
   S-->>A: gs:// URI
-  A->>F: one write — Session, Material { learner, session, gs://, read state: not yet read }, and the event (ADR 0008)
-  A-->>W: acknowledged within seconds — ADR 0005  ·  independent of document size
-  W-->>L: the session exists and is usable  ·  its material shows as being read
-  Note over L,P: the learner can close the page here and nothing is lost
-  P->>S: read the material — page count, size and page ceilings (CLAUDE.md)
-  alt inside the ceilings, read succeeds
-    P->>F: Material read state → read
-  else over a ceiling, or processing fails
-    P->>F: Material read state → failed, with the reason  ·  an operational event for 0009
-    Note over W,F: 0004 tells the learner what happened and what to do instead<br/>0006 never treats unread material as read  ·  0008 never counts it as evidence
+  A->>F: one write — Material { learner, session, gsUri, state: reading }, and the event (ADR 0008)
+  A-->>W: 202 within seconds — ADR 0005  ·  independent of document size
+  W-->>L: the session exists and is usable  ·  this material shows as being read
+  Note over L,R: the learner can close the page here and nothing is lost
+  A->>R: ensure the corpus for this learner, then import the object<br/>corpus identity comes from the authenticated caller — never from the request (ADR 0013)
+  alt import reports one file imported
+    R-->>A: ragFile id
+    A->>F: Material { state: ready, ragFileId, readyAt }<br/>readyAt − createdAt is the five-minute bound in PRD §5, measured
+  else import reports zero imported — the API calls this a successful operation
+    R-->>A: importedRagFilesCount = 0
+    A->>F: Material { state: failed, error: a reason the learner can read }
+    Note over A,F: reading the count is the only way to know it did not work
   end
+  W->>A: poll while any material is reading
+  A-->>W: the states
+  W-->>L: ready, or failed with the reason  ·  never a spinner that lies

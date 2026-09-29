@@ -1,18 +1,25 @@
-%% Data model — Firestore, one database. Built today: LEARNER and EVENT (spec 0001).
-%% Declared, not built: COURSE, SESSION, MATERIAL, SUMMARY — the four collections spec 0001's
-%% export payload names. Their fields are only what ADRs already require: the owner key
-%% (ADR 0006), the session as index (ADR 0001), the gs:// URI (CLAUDE.md), the read state
-%% (ADR 0005). Nothing else is decided yet.
+%% Data model — Firestore, one database. Built today: LEARNER and EVENT (spec 0001), plus
+%% COURSE, SESSION and MATERIAL as the phase D demo built them (AIT-93/94/95).
+%% Fields are only what an ADR or a spec requires: the owner key (ADR 0006), the gs:// URI
+%% (CLAUDE.md), the read state and readyAt (ADR 0005, spec 0010), the learner's corpus and the
+%% ragFile id (ADR 0013, ADR 0016). SUMMARY is declared, not built.
+%% Changed 2026-09-29: the session is no longer the index. ADR 0001 is superseded by ADR 0013 —
+%% retrieval is a per-learner managed corpus, and the allow-list of ragFile ids for material the
+%% learner holds is what scopes it (ADR 0016). Filing still buys attribution (PRD §10 claim 3).
 erDiagram
   LEARNER ||--o{ EVENT : "emits — anonymised, not deleted, on account deletion"
   LEARNER ||--o{ COURSE : owns
-  COURSE ||--o{ SESSION : "has, in order"
-  SESSION ||--o{ MATERIAL : "has — the learner's assignment is the index"
+  LEARNER ||--|| CORPUS : "owns exactly one — the isolation boundary, ADR 0013 mechanism 1"
+  COURSE ||--o{ SESSION : "has, in the learner's order (0011)"
+  SESSION ||--o{ MATERIAL : "has — the learner assigns it, and that is what an answer is attributed to"
   SESSION ||--o{ SUMMARY : "has — the learner's own words"
+  MATERIAL ||--o| RAGFILE : "imported as, once readable"
+  CORPUS ||--o{ RAGFILE : contains
 
   LEARNER {
     string id "Firebase Auth uid; the owner key every record carries"
     string email "the one field registration asks for"
+    string corpus "RAG Engine corpus resource name; created on first upload, destroyed with the account"
     string createdAt
   }
   EVENT {
@@ -24,19 +31,30 @@ erDiagram
   }
   COURSE {
     string learner "owner"
-    list objectives "declared or confirmed by the learner (0003)"
+    list objectives "written by the learner, or confirmed from a document they supplied (0003)"
   }
   SESSION {
     string learner "owner"
     string course
+    string startsAt "date and time (0011); may be absent — a term is planned with gaps"
+    number minutes "how long the class runs (0011)"
+    number position "the learner's order; dates never sort (0011)"
   }
   MATERIAL {
     string learner "owner"
-    string session "the scope query key"
-    string gsUri "gs:// object in Cloud Storage"
-    string readState "not yet read, read, or failed with a reason"
+    string session "what an answer is attributed to — no longer the retrieval index"
+    string gsUri "gs:// object in Cloud Storage; the key carries the file extension"
+    string state "reading, ready, or failed with a reason the learner can read"
+    string ragFileId "set when import succeeds; membership of the allow-list, ADR 0016"
+    string readyAt "when it became answerable — the five-minute bound is measured from createdAt"
   }
   SUMMARY {
     string learner "owner"
     string session
+  }
+  CORPUS {
+    string name "projects/…/locations/us-central1/ragCorpora/… — one per learner, never shared"
+  }
+  RAGFILE {
+    string id "the unit retrieval is scoped to; never passed in from a request"
   }
