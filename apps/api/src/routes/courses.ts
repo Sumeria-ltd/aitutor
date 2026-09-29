@@ -2,7 +2,9 @@ import type { Course, CourseSession } from "@aitutor/shared";
 import { checkName, ROUTES } from "@aitutor/shared";
 import type { Hono } from "hono";
 import { type AuthedEnv, requireAuth, type TokenVerifier } from "../auth.ts";
-import type { Store } from "../firestore.ts";
+import { type Files, objectKey } from "../files.ts";
+import type { Removed, Store } from "../firestore.ts";
+import type { Rag } from "../rag.ts";
 
 /** Courses and their sessions — phase D (PRD §10), the customer capability demo.
  *
@@ -14,9 +16,34 @@ import type { Store } from "../firestore.ts";
 export type CourseDeps = {
   store: Store;
   verifier: TokenVerifier;
+  /** Deleting a session or a course must free the bytes too, not only make them
+   *  unreachable. Optional so the route still works without them, in which case the
+   *  cleanup is skipped and the records are still gone. */
+  rag?: Rag;
+  files?: Files;
   now?: () => Date;
   newId?: () => string;
 };
+
+/** Removes what a container deletion left behind in the index and the bucket.
+ *
+ *  The Firestore records have already gone by the time this runs, so retrieval cannot
+ *  reach any of it — requirement 0010's acceptance line is satisfied before this starts,
+ *  and that is why every failure here is swallowed. What this adds is the other half of
+ *  the promise: a learner told "deleted" should not still have bytes in our storage.
+ *  Best effort, because a ragFile we failed to remove is cost and clutter rather than a
+ *  leak, and because failing the request would tell the learner nothing was deleted when
+ *  in fact it was. */
+async function sweep(deps: CourseDeps, learner: string, courseId: string, taken: Removed[]) {
+  if (taken.length === 0) return;
+  const owner = deps.rag ? await deps.store.getLearner(learner).catch(() => null) : null;
+  for (const m of taken) {
+    if (deps.rag && owner?.corpus && m.ragFileId) {
+      await deps.rag.deleteFile(owner.corpus, m.ragFileId).catch(() => {});
+    }
+    await deps.files?.remove(objectKey(learner, courseId, m.id, m.filename)).catch(() => {});
+  }
+}
 
 export function mountCourses(app: Hono<AuthedEnv>, deps: CourseDeps) {
   const now = deps.now ?? (() => new Date());
@@ -57,7 +84,8 @@ export function mountCourses(app: Hono<AuthedEnv>, deps: CourseDeps) {
     // learner does not own, and report success for something that never happened.
     const course = await deps.store.getCourse(learner, courseId);
     if (!course) return c.json({ error: "not found" }, 404);
-    await deps.store.deleteCourse(learner, courseId);
+    const taken = await deps.store.deleteCourse(learner, courseId);
+    await sweep(deps, learner, courseId, taken);
     return c.body(null, 204);
   });
 
@@ -97,7 +125,8 @@ export function mountCourses(app: Hono<AuthedEnv>, deps: CourseDeps) {
     const sessionId = c.req.param("sessionId");
     const session = await deps.store.getSession(learner, courseId, sessionId);
     if (!session) return c.json({ error: "not found" }, 404);
-    await deps.store.deleteSession(learner, courseId, sessionId);
+    const taken = await deps.store.deleteSession(learner, courseId, sessionId);
+    await sweep(deps, learner, courseId, taken);
     return c.body(null, 204);
   });
 

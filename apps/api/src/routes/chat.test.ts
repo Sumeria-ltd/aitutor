@@ -3,6 +3,7 @@ import { ROUTES } from "@aitutor/shared";
 import { describe, expect, it } from "vitest";
 import { fakeVerifier } from "../auth.ts";
 import { inMemoryFiles } from "../files.ts";
+import { emitter } from "../events.ts";
 import { inMemoryStore, type Store } from "../firestore.ts";
 import { fakeRag, type Rag, type RagContext } from "../rag.ts";
 import { type Ai, fakeAi, parseAnswer } from "../vertex.ts";
@@ -16,6 +17,11 @@ const BOB = { uid: "bob", email: "bob@example.test" };
 
 function harness(opts: { ai?: Ai; rag?: Rag } = {}) {
   const store: Store = inMemoryStore();
+  // Advanced by hand so readyAt − createdAt is a fact rather than a race.
+  let clock = new Date("2026-09-29T09:00:00.000Z");
+  const tick = (seconds: number) => {
+    clock = new Date(clock.getTime() + seconds * 1000);
+  };
   const files = inMemoryFiles();
   const rag = opts.rag ?? fakeRag();
   const ai =
@@ -38,8 +44,18 @@ function harness(opts: { ai?: Ai; rag?: Rag } = {}) {
   const pending: Promise<unknown>[] = [];
 
   const app = createApp({ store, verifier });
-  mountCourses(app, { store, verifier, newId });
-  mountMaterial(app, { store, verifier, files, rag, newId, afterResponse: (w) => pending.push(w) });
+  // rag and files so a container deletion frees the bytes, not only the records (spec 0010).
+  mountCourses(app, { store, verifier, newId, rag, files });
+  mountMaterial(app, {
+    store,
+    verifier,
+    files,
+    rag,
+    newId,
+    now: () => clock,
+    emit: emitter(store, () => clock, "0010"),
+    afterResponse: (w) => pending.push(w),
+  });
   mountChat(app, { store, verifier, ai, rag });
 
   const call = (token: string | null, path: string, init: RequestInit = {}) =>
@@ -86,7 +102,7 @@ function harness(opts: { ai?: Ai; rag?: Rag } = {}) {
       }
     ).materials;
 
-  return { store, files, rag, call, json, seed, materials };
+  return { store, files, rag, call, json, seed, materials, tick };
 }
 
 describe("upload into the learner's corpus", () => {
@@ -226,7 +242,10 @@ describe("chat", () => {
 
   // Belt and braces on the same guarantee: even if the corpus returns a deleted file's chunks,
   // a context whose gs:// URI matches no material we hold cannot become an answer.
-  it("ignores a retrieved context belonging to no material we still hold", async () => {
+  it("withholds rather than quietly dropping a context we do not hold", async () => {
+    // Changed for spec 0010. This used to assert that a foreign context was silently
+    // filtered out and an empty answer returned — which is a leak nobody hears about.
+    // retrieveFor now throws IsolationFault, the request fails, and no answer is shown.
     const h = harness({
       rag: fakeRag({
         async retrieve() {
@@ -237,6 +256,135 @@ describe("chat", () => {
     const { courseId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
     const res = await h.json("ada-token", `/api/courses/${courseId}/chat`, "POST", {
       message: "anything",
+    });
+    expect(res.status).toBe(500);
+    expect(res.headers.get("content-type") ?? "").not.toContain("application/json");
+  });
+
+  it("says the material is still being read rather than that nothing covers it", async () => {
+    const h = harness();
+    const { courseId, sessionId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
+    // A second material that never finished importing. Nothing is ready, so the old code
+    // said "nothing covers that yet" — a different fact, and the wrong one.
+    await h.store.createMaterial({
+      id: "m-reading",
+      learner: "ada",
+      course: courseId,
+      session: sessionId,
+      filename: "week-two.pdf",
+      contentType: "application/pdf",
+      bytes: 1,
+      gsUri: "gs://b/week-two.pdf",
+      state: "reading",
+      chunks: 0,
+      createdAt: "2026-09-29T09:00:00.000Z",
+    });
+    // Remove the one that did import, so nothing is ready and the only material the
+    // learner has is still being read.
+    const held = await h.materials("ada-token", courseId);
+    for (const m of held.filter((x) => x.state === "ready")) {
+      await h.store.deleteMaterial("ada", courseId, m.id);
+    }
+
+    const res = await h.json("ada-token", `/api/courses/${courseId}/chat`, "POST", {
+      message: "anything",
+    });
+    const { answer } = (await res.json()) as {
+      answer: { text: string; covered: boolean; pending?: { filename: string }[] };
+    };
+    expect(answer.covered).toBe(false);
+    expect(answer.text).toMatch(/still being read/);
+    expect(answer.pending).toEqual([{ filename: "week-two.pdf" }]);
+  });
+});
+
+describe("freshness is measurable, not asserted", () => {
+  it("records readyAt and emits material.became_answerable with the seconds it took", async () => {
+    const h = harness();
+    // The import takes time; readyAt − createdAt is what PRD §5's five-minute bound reads.
+    const { courseId } = await h.seed("ada-token", "Thermo", "Week 1", "indexes in week three");
+
+    const held = await h.materials("ada-token", courseId);
+    const ready = held.find((m) => m.state === "ready");
+    expect(ready?.readyAt, "a ready material with no readyAt cannot be measured").toBeTruthy();
+    expect(new Date(ready?.readyAt as string).getTime()).toBeGreaterThanOrEqual(
+      new Date(ready?.createdAt as string).getTime(),
+    );
+
+    const events = await h.store.eventsFor("ada");
+    const emitted = events.find((e) => e.name === "material.became_answerable");
+    expect(emitted, "requirement 0009 gets no freshness signal without this").toBeTruthy();
+    expect(emitted?.requirement).toBe("0010");
+    expect(typeof emitted?.attributes.secondsToReady).toBe("number");
+    // ADR 0008: no filename the learner chose, no prose, nothing but scalars.
+    expect(Object.keys(emitted?.attributes ?? {}).sort()).toEqual([
+      "bytes",
+      "contentType",
+      "secondsToReady",
+    ]);
+  });
+});
+
+describe("deleting a container frees the bytes, not only the records", () => {
+  /** fakeRag keeps no record of what it deleted, so the probe for it is here. */
+  function watched() {
+    const deleted: string[] = [];
+    const base = fakeRag();
+    return {
+      deleted,
+      rag: fakeRag({
+        importFile: base.importFile,
+        retrieve: base.retrieve,
+        async deleteFile(corpus, ragFileId) {
+          deleted.push(ragFileId);
+          await base.deleteFile(corpus, ragFileId);
+        },
+      }),
+    };
+  }
+
+  it("removes the ragFile and the object when a session goes", async () => {
+    const w = watched();
+    const h = harness({ rag: w.rag });
+    const { courseId, sessionId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
+    const held = await h.materials("ada-token", courseId);
+    const victim = held.find((m) => m.state === "ready");
+    expect(victim?.ragFileId).toBeTruthy();
+
+    const res = await h.call("ada-token", `/api/courses/${courseId}/sessions/${sessionId}`, {
+      method: "DELETE",
+    });
+    expect(res.status).toBe(204);
+
+    // The record is gone, which is what the acceptance line counts...
+    expect(await h.materials("ada-token", courseId)).toEqual([]);
+    // ...and so are the bytes, which is what the learner was actually promised.
+    expect(w.deleted).toEqual([victim?.ragFileId]);
+    expect(h.files.held()).toEqual([]);
+  });
+
+  it("removes them when a whole course goes", async () => {
+    const w = watched();
+    const h = harness({ rag: w.rag });
+    const { courseId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
+
+    const res = await h.call("ada-token", `/api/courses/${courseId}`, { method: "DELETE" });
+    expect(res.status).toBe(204);
+
+    expect(w.deleted).toHaveLength(1);
+    expect(h.files.held()).toEqual([]);
+  });
+
+  it("answers nothing from a session deleted a moment ago, with zero retries", async () => {
+    const h = harness();
+    const { courseId, sessionId } = await h.seed("ada-token", "Thermo", "Week 1", "indexes");
+    await h.call("ada-token", `/api/courses/${courseId}/sessions/${sessionId}`, {
+      method: "DELETE",
+    });
+
+    // The very next request. No sleep, no retry.
+    const res = await h.json("ada-token", `/api/courses/${courseId}/chat`, "POST", {
+      message: "what about indexes?",
     });
     const { answer } = (await res.json()) as { answer: { covered: boolean; citations: unknown[] } };
     expect(answer.covered).toBe(false);

@@ -9,6 +9,10 @@ export const EVENTS = [
   "account.signed_in",
   "account.exported",
   "account.deleted",
+  // Requirement 0010. Emitted in the same write that sets a material to `ready`, so the
+  // five-minute freshness bound in PRD §5 can be measured rather than asserted. Carries no
+  // filename: ADR 0008 forbids a name the learner chose.
+  "material.became_answerable",
 ] as const;
 
 export type EventName = (typeof EVENTS)[number];
