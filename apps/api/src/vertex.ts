@@ -87,8 +87,26 @@ async function callVertex(
 
 /** The prompt. Every chunk is labelled with its session, and the model is told to cite by
  *  label — it never sees or invents a session id, which is what makes the caller's
- *  validation meaningful (CLAUDE.md, the citation invariant). */
-function buildPrompt(input: Parameters<Ai["answer"]>[0]): string {
+ *  validation meaningful (CLAUDE.md, the citation invariant).
+ *
+ *  **It answers a message, not a question.** A learner writes "what's the time, I have an exam
+ *  on session 2, help me plan" in one line, and the first version of this prompt judged the
+ *  whole thing against the documents and refused all of it — including the part the material
+ *  plainly supported. Two defects in one: no decomposition, and a single `covered` verdict
+ *  applied to several requests.
+ *
+ *  **On the product invariant.** PRD §7 says answers may draw only on the learner's own
+ *  material: "never general knowledge, never blended quietly." The operative word is
+ *  *quietly*. Nothing about what the course taught may come from anywhere but the documents —
+ *  that line does not move, because a learner cannot tell the difference and would stop
+ *  checking. What changes is that a request which is *not* about the course's content gets
+ *  answered and **labelled**, so the learner can always see which sentences came from their
+ *  material. Blended, never quietly.
+ *
+ *  **And it has no clock.** Asked the time, the honest answer is that it does not have one.
+ *  A model guessing at the current time is not answering from general knowledge, it is making
+ *  something up. */
+export function buildPrompt(input: Parameters<Ai["answer"]>[0]): string {
   const documents = input.chunks
     .map(
       (c) =>
@@ -100,20 +118,27 @@ function buildPrompt(input: Parameters<Ai["answer"]>[0]): string {
     .map((t) => `${t.role === "learner" ? "Learner" : "You"}: ${t.text}`)
     .join("\n");
 
-  return `You are helping a learner understand material from their own course. You may use ONLY the documents below. You have never seen this material before and you must not add anything from general knowledge, even if you are confident it is correct.
+  return `You are helping a learner with their own course. The documents below are their material. You have never seen it before, and it is your only source for anything the course taught.
 
 ${documents || "(no documents were found)"}
 
 ${conversation ? `Conversation so far:\n${conversation}\n` : ""}
-Learner's question: ${input.question}
+Learner's message: ${input.question}
 
 Reply with JSON only, no markdown fence, in exactly this shape:
 {"covered": true|false, "cited": [document numbers you used], "text": "your answer"}
 
-Rules:
-- If the documents above do not answer the question, set "covered" to false, set "cited" to [], and in "text" say plainly that their material does not cover it and name what appears to be missing. This is a correct answer, not a failure.
-- If they do answer it, set "covered" to true and list in "cited" every document number you actually drew on. Never cite a document you did not use.
-- Write "text" in the course's own terms and notation. Be concise.
+How to answer:
+- A message may contain more than one request. Deal with each of them. Refusing the whole message because one part is not covered is a defect, not caution.
+- Anything about what the course taught — what a session covered, what a term means here, what the material says — comes ONLY from the documents. If they do not cover it, say so for that request and name what appears to be missing. Never close a gap in the course's material with general knowledge, however confident you are. The learner cannot tell the difference, and that is the one thing you must not do to them.
+- Anything that is not about what the course taught — putting the sessions you can see into a revision order, general advice on how to revise, the meaning of an ordinary word in their message — you may answer normally. Start that part with "Not from your material:" so the learner can always tell which of your sentences came from their course and which did not.
+- Answer what the documents do support, even when they do not support all of it. If they give the run of the sessions but no exam date, build the order and say the date is not there.
+- You have no clock, no calendar, and nothing outside this prompt. Asked the time or today's date, say you do not have it. Do not guess, and do not infer one from the material.
+
+Then:
+- Set "covered" true if you drew on any document, false if you drew on none.
+- List in "cited" every document number you actually drew on, and nothing else. Never cite a document you did not use.
+- Write in the course's own terms and notation. Be concise.
 - Do not mention document numbers in "text" — the learner is shown the sources separately.`;
 }
 
