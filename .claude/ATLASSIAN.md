@@ -174,8 +174,8 @@ the human moves a story to `Done` when they accept the evidence.
 | 0010 | AIT-78 | AIT-79…82, AIT-119 | AIT-83 | AIT-84 | AIT-85 | AIT-86 | 339116033 | 342622210 |
 | 0011 | AIT-97 | AIT-99…102, AIT-117, AIT-120, AIT-121 | AIT-108 | AIT-109 | AIT-110 | AIT-111 | 341639169 | — |
 | 0012 | AIT-98 | AIT-103…107, AIT-118 | AIT-112 | AIT-113 | AIT-114 | AIT-115 | 341671937 | — |
-| 0013 | AIT-126 | AIT-134…140 | AIT-145 | AIT-146 | AIT-147 | AIT-148 | 343179265 | — |
-| 0014 | AIT-125 | AIT-127…133 | AIT-141 | AIT-142 | AIT-143 | AIT-144 | 343146497 | — |
+| 0013 | AIT-126 | AIT-134…140, AIT-151…153 | AIT-145 | AIT-146 | AIT-147 | AIT-148 | 343179265 | — |
+| 0014 | AIT-125 | AIT-127…133, AIT-149, AIT-150 | AIT-141 | AIT-142 | AIT-143 | AIT-144 | 343146497 | — |
 
 Requirement `0010` — answer from my current material only — was added on 2026-09-25 at rank 5,
 which moved `0005`–`0009` to ranks 6–10. Its journey is J7. Two issues under `AIT-78` are **not**
@@ -248,7 +248,7 @@ self-certified, and it was **approved into Intent 0010 unanswered on purpose** b
 one thing that could make the answer to question 12 hollow.
 
 **Two more business requests, later on 2026-09-29, became requirements `0013` and `0014`** — and the
-PRD went back to `ready-for-review` a third time that day, for the same reason as the second: fourteen
+PRD went back to `ready-for-review` a second time that day, for the same reason as the first: fourteen
 new §5 rows an earlier approval cannot have covered. Both new intent pages are `ready-for-review` and
 have never been approved. Ranks are now 0001–0004 at 1–4, `0010` at 5, **`0014` at 6, `0013` at 7**,
 `0011` and `0012` at 8 and 9, and `0005`–`0009` at 10–14. P1's order is `0010, 0014, 0013, 0011, 0012,
@@ -287,14 +287,56 @@ every product invariant waivable by a learner who says yes. Third, **`AIT-134` p
 and will keep doing so until PRD open question 23 lists which changes the product may be asked to make
 at all; zero out of zero is not evidence, and `AIT-148` says to record that rather than report it met.
 
-**Two of the six new open questions block a spec outright.** Question 23 — which changes the product may
-be asked to make — blocks `AIT-145`, and question 26 — what a learner is told when a run stops on its
-budget rather than on an answer — blocks `AIT-141`. A third, question 28, is shared: `0013` asks whether
-agreeing once covers the next act and `0006` asks whether a scope chosen once covers the next turn, and
-they are the same question from two directions, so both spec tasks say to answer them together. `AIT-62`
-and `AIT-74` carry comments naming what lands on them — `0006` gains question 28, and `0009` gains
-`AIT-133` plus question 27, which collides with its own 24-hour criterion while `0014`'s constants are
-still wrong.
+**All six of those questions were answered the same day, in session, minutes after the PRD was approved
+at version 48 — and that approval is why the page is back at `ready-for-review`.** Four of the six answers
+added *new countable promises* rather than clarifying existing ones, five §5 rows in total, and handover
+rule 2 does not bend for the fact that the same person had approved the page minutes earlier. An approval
+cannot reach forward over text that did not exist when it was given. **This is the third time in one day
+the rule has done that**, and the pattern is now well enough established to state as a habit rather than
+an incident: approve, answer questions, re-approve.
+
+| Q | Decision | Work |
+|---|---|---|
+| 23 | **No changing actions exist yet — `0013` is a rule for the future, not a list for today** | `AIT-151` |
+| 24 | The gate is **the conversation's**; a learner's own delete is never gated | `AIT-152` |
+| 25 | **One ask naming all three changes, each declinable on its own** — consent per act, interruption not | `AIT-153` |
+| 26 | A budget stop says **it stopped looking, and shows what it found** | `AIT-149` |
+| 27 | A budget stop is an **ordinary event, counted not alerted** — `0009`'s 24-hour alarm is not spent on it | `AIT-150` |
+| 28 | **Scope persists across a conversation; an approved widening does not** | none — a clarification |
+
+**Question 23's answer is the one that changes what `0013` is, and it is worth understanding rather than
+just recording.** Deciding that nothing can change a learner's material yet makes `0013` a foundation
+laid before the thing it will carry — which is correct, and which leaves `AIT-134` passing by counting
+**zero out of zero**. That is a vacuous pass, not a met criterion, and a requirement satisfiable only
+vacuously is one nobody notices breaking. §5 therefore now asks for the inventory of what the product can
+do while answering to be **taken on every release** rather than once (`AIT-151`), on exactly the reasoning
+that produced `AIT-119`: the evidence is a check that was performed, not a number that happens to read
+zero. §8 carries the matching risk, and its early signal is structural rather than statistical — a new
+action in the answering path with no inventory entry beside it. The instruction to the architect is that
+**adding an action without the gate must be the thing that breaks, not the thing that passes.**
+
+**Question 28 was deliberately recorded as a clarification of `0006` rather than an addition to it**, and
+that choice is the reason [Intent 0006](https://sumerialtd.atlassian.net/wiki/spaces/AI/pages/330498049)
+did not have to be reopened. Its existing criterion already reads *count the times the learner was asked
+before anything outside it was read: all of them*; the decision pins *all of them* to every **turn** rather
+than every conversation, and §7 carries a constraint row so the meaning cannot be re-read later. Read the
+other way, that row would have been satisfiable by asking once on turn three and reading freely after — the
+technicality §8's *learners always say yes to looking wider* row is about. It is question 25's answer
+reached from `0006`'s side: **consent is to one act.**
+
+`AIT-141` and `AIT-145` carry comments naming every decision and what remains; `AIT-62` and `AIT-74` carry
+what landed on `0006` and `0009`. **`0009`'s alarm was protected rather than extended** — question 27
+resolved the collision this file flagged when `0014` was created, and `AIT-150` counts the alarms raised
+for a budget stop at zero.
+
+**What is still open on the two new intents**, and neither blocks a spec any longer. `0014`'s question 2 is
+now the largest unanswered thing on either page: **one budget for every question, or more for a harder one.**
+LIMITS requires a normal study question to complete, and the only measurement anyone has is the
+twenty-three-step pathological run — ADR 0014's 3 steps / 12,000 tokens / 15 s are hypotheses, and answering
+26 and 27 removed the questions about what is *shown* and *recorded*, which leaves the constant itself
+exposed. `0013`'s remaining two are both about the *content* of the ask rather than whether it happens, and
+question 5 is the one to watch: whether the ask states what a change will cost or only what it will do. An
+ask naming three actions without their three consequences is the batch confirmation `0013` exists to prevent.
 
 **Where this leaves the chain.** Twelve of the fourteen intents are `approved`, which means every
 `NNNN · Spec` task for those twelve is unblocked by handover rule 1 — `AIT-50`, `AIT-54`, `AIT-70`,
