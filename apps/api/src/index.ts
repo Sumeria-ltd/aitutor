@@ -7,6 +7,7 @@ import { vertexRag } from "./rag.ts";
 import { mountChat } from "./routes/chat.ts";
 import { mountCourses } from "./routes/courses.ts";
 import { mountMaterial } from "./routes/material.ts";
+import { mountMcp } from "./routes/mcp.ts";
 import { createApp } from "./routes/me.ts";
 import { vertexAi } from "./vertex.ts";
 
@@ -41,6 +42,9 @@ mountMaterial(app, {
   emit: emitter(store, () => new Date(), "0010"),
 });
 mountChat(app, { store, verifier, ai, rag });
+// The same retrieval, spoken as MCP so an agent runtime can call it. Identity comes from the
+// caller's token inside mountMcp; no tool takes a learner id.
+mountMcp(app, { store, verifier, rag });
 
 const port = Number(process.env.PORT ?? 8080);
 serve({ fetch: app.fetch, port });
