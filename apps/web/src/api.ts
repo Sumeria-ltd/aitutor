@@ -1,4 +1,11 @@
-import type { Answer, ChatTurn, Course, CourseSession, Material } from "@aitutor/shared";
+import type {
+  Answer,
+  ChatTurn,
+  Course,
+  CourseSession,
+  Material,
+  MaterialAuthor,
+} from "@aitutor/shared";
 import { paths, ROUTES } from "@aitutor/shared";
 
 /** The API client. Every call carries the learner's token; nothing here ever sends a
@@ -63,9 +70,22 @@ export function api(token: TokenFn) {
     listMaterials: (courseId: string) =>
       call<{ materials: Material[] }>(token, `/api/courses/${courseId}/materials`),
 
-    upload: (courseId: string, sessionId: string, file: File) => {
+    /** A note the learner typed. Stored exactly as written — nothing here or behind it
+     *  rewrites, completes or tidies it (AIT-107). */
+    addNote: (
+      courseId: string,
+      sessionId: string,
+      note: { title: string; text: string; author: MaterialAuthor },
+    ) =>
+      call<{ material: Material }>(token, `/api/courses/${courseId}/sessions/${sessionId}/notes`, {
+        method: "POST",
+        body: JSON.stringify(note),
+      }),
+
+    upload: (courseId: string, sessionId: string, file: File, author: MaterialAuthor) => {
       const form = new FormData();
       form.set("file", file);
+      form.set("author", author);
       return call<{ material: Material }>(
         token,
         `/api/courses/${courseId}/sessions/${sessionId}/materials`,
