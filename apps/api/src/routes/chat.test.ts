@@ -3,7 +3,7 @@ import type { Material } from "@aitutor/shared";
 import { ROUTES } from "@aitutor/shared";
 import { describe, expect, it } from "vitest";
 import { fakeVerifier } from "../auth.ts";
-import { emitter } from "../events.ts";
+import { type Emit, emitter } from "../events.ts";
 import { inMemoryFiles } from "../files.ts";
 import { inMemoryStore, type Store } from "../firestore.ts";
 import { fakeRag, type Rag, type RagContext } from "../rag.ts";
@@ -16,7 +16,7 @@ import { createApp } from "./me.ts";
 const ADA = { uid: "ada", email: "ada@example.test" };
 const BOB = { uid: "bob", email: "bob@example.test" };
 
-function harness(opts: { ai?: Ai; rag?: Rag } = {}) {
+function harness(opts: { ai?: Ai; rag?: Rag; emit?: Emit } = {}) {
   const store: Store = inMemoryStore();
   // Advanced by hand so readyAt − createdAt is a fact rather than a race.
   let clock = new Date("2026-09-29T09:00:00.000Z");
@@ -54,7 +54,7 @@ function harness(opts: { ai?: Ai; rag?: Rag } = {}) {
     rag,
     newId,
     now: () => clock,
-    emit: emitter(store, () => clock, "0010"),
+    emit: opts.emit ?? emitter(store, () => clock, "0010"),
     afterResponse: (w) => pending.push(w),
   });
   mountChat(app, { store, verifier, ai, rag });
@@ -324,11 +324,14 @@ describe("freshness is measurable, not asserted", () => {
     expect(emitted?.requirement).toBe("0010");
     expect(typeof emitted?.attributes.secondsToReady).toBe("number");
     // ADR 0008: no filename the learner chose, no prose, nothing but scalars.
+    // `kind`, not the raw content type: ADR 0008 caps an attribute string at 64
+    // characters and a PowerPoint's MIME type is 73, which is the bug this replaced.
     expect(Object.keys(emitted?.attributes ?? {}).sort()).toEqual([
       "bytes",
-      "contentType",
+      "kind",
       "secondsToReady",
     ]);
+    expect(emitted?.attributes.kind).toBe("pdf");
   });
 });
 

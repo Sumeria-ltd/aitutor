@@ -227,17 +227,50 @@ async function importIntoCorpus(deps: MaterialDeps, material: Material): Promise
     // The five-minute bound in PRD §5 is measured from this pair. The event carries no
     // filename — ADR 0008 forbids a name the learner chose — and no session id, which
     // requirement 0009 has no use for.
-    await deps.emit?.("material.became_answerable", learner, {
-      secondsToReady: Math.round(
-        (readyAt.getTime() - new Date(material.createdAt).getTime()) / 1000,
-      ),
-      bytes: material.bytes,
-      contentType: material.contentType,
-    });
+    //
+    // Outside the try that guards the import, and swallowing its own failure, because
+    // **measurement must never be able to fail the thing it measures.** It could, and it
+    // did: a PowerPoint's content type is 73 characters against a 64-character attribute
+    // cap, so the event threw, the catch below marked a perfectly readable deck `failed`,
+    // and the learner was told their file could not be read.
+    await emitAnswerable(deps, material, readyAt);
   } catch (cause) {
     await deps.store.updateMaterial(learner, course, id, {
       state: "failed",
       error: cause instanceof Error ? cause.message.slice(0, 300) : "could not read that file",
     });
+  }
+}
+
+/** ADR 0008 caps an attribute string at 64 characters so a free-text field cannot be
+ *  smuggled in as an identifier. A raw MIME type is exactly that kind of thing — Office
+ *  types run to 73 characters — so the cap was right and the attribute was wrong. A short
+ *  enum is also what requirement 0009 would actually group by. */
+function kindOf(contentType: string): string {
+  if (contentType === "application/pdf") return "pdf";
+  if (contentType === "text/markdown") return "markdown";
+  if (contentType.startsWith("text/")) return "text";
+  if (contentType.startsWith("image/")) return "image";
+  if (contentType.includes("presentationml")) return "pptx";
+  if (contentType.includes("wordprocessingml")) return "docx";
+  return "other";
+}
+
+/** Never throws. The material is already `ready` by the time this runs, and a failure to
+ *  record a measurement is not a failure to read the file. */
+async function emitAnswerable(deps: MaterialDeps, material: Material, readyAt: Date) {
+  try {
+    await deps.emit?.("material.became_answerable", material.learner, {
+      secondsToReady: Math.round(
+        (readyAt.getTime() - new Date(material.createdAt).getTime()) / 1000,
+      ),
+      bytes: material.bytes,
+      kind: kindOf(material.contentType),
+    });
+  } catch (cause) {
+    // Loud enough for the operator alert, invisible to the learner, whose upload worked.
+    console.error(
+      `material.became_answerable was not recorded: ${cause instanceof Error ? cause.message : cause}`,
+    );
   }
 }
