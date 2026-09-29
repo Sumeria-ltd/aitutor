@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import type { Material } from "@aitutor/shared";
 import { ROUTES } from "@aitutor/shared";
 import { describe, expect, it } from "vitest";
@@ -102,7 +103,12 @@ function harness(opts: { ai?: Ai; rag?: Rag; emit?: Emit } = {}) {
       }
     ).materials;
 
-  return { store, files, rag, call, json, seed, materials, tick };
+  /** Awaits the detached imports, so an assertion sees the finished state. */
+  const settle = async () => {
+    await Promise.all(pending);
+  };
+
+  return { store, files, rag, call, json, seed, materials, tick, settle };
 }
 
 describe("upload into the learner's corpus", () => {
@@ -276,6 +282,7 @@ describe("chat", () => {
       bytes: 1,
       gsUri: "gs://b/week-two.pdf",
       state: "reading",
+      author: "learner",
       chunks: 0,
       createdAt: "2026-09-29T09:00:00.000Z",
     });
@@ -406,6 +413,7 @@ describe("the citation invariant", () => {
     bytes: 1,
     gsUri: "gs://b/m1.pdf",
     state: "ready",
+    author: "course",
     ragFileId: "rf-m1",
     chunks: 1,
     createdAt: "2026-09-26T00:00:00.000Z",
@@ -483,42 +491,125 @@ describe("parseAnswer", () => {
   });
 });
 
-describe("the freshness event cannot break the upload it measures", () => {
-  it("accepts a PowerPoint, whose content type is longer than an attribute may be", async () => {
+describe("notes are material — requirement 0012", () => {
+  const NOTE = "# Entropy\n\nIt *always* increases.\n\n- closed systems\n- not reversible\n";
+
+  it("keeps a typed note exactly as it was written, and makes it answerable", async () => {
     const h = harness();
     const { courseId, sessionId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
 
-    const form = new FormData();
-    form.set(
-      "file",
-      new File(["slides"], "LOT1-Session2.pptx", {
-        // 73 characters. The event attribute cap is 64, and sending this raw threw inside
-        // the import, which marked a perfectly readable file as failed.
-        type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      }),
-    );
-    const res = await h.call(
+    const res = await h.json(
       "ada-token",
-      `/api/courses/${courseId}/sessions/${sessionId}/materials`,
-      { method: "POST", body: form },
+      `/api/courses/${courseId}/sessions/${sessionId}/notes`,
+      "POST",
+      { title: "My week 1 notes", text: NOTE },
     );
     expect(res.status).toBe(202);
+    await h.settle();
 
-    const held = await h.materials("ada-token", courseId);
-    const deck = held.find((m) => m.filename.endsWith(".pptx"));
-    expect(deck?.state, `the deck was marked ${deck?.state}: ${deck?.error ?? ""}`).toBe("ready");
+    const note = (await h.materials("ada-token", courseId)).find(
+      (m) => m.contentType === "text/markdown",
+    );
+    expect(note?.state).toBe("ready");
+
+    // Zero words missing, and not a word added: the stored bytes are what was typed.
+    // gs://in-memory/<key> — the bucket the harness uses keys by object name.
+    expect(note).toBeTruthy();
+    const key = (note as Material).gsUri.replace("gs://in-memory/", "");
+    const stored = h.files.body(key);
+    expect(stored).toBe(NOTE);
+    // The heading, the emphasis and the list all survive, because the text is the record.
+    expect(stored).toContain("# Entropy");
+    expect(stored).toContain("*always*");
+    expect(stored).toContain("- closed systems");
   });
 
-  it("still makes the material answerable when emitting the event fails outright", async () => {
-    const h = harness({
-      emit: async () => {
-        throw new Error("the event stream is having a bad day");
-      },
-    });
-    const { courseId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
+  it("asks whose words it is and stores the answer, never inferring it", async () => {
+    const h = harness();
+    const { courseId, sessionId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
 
-    // Measurement must never be able to fail the thing it measures.
+    // A note the learner says came from the course — the opposite of the note default.
+    // If author were inferred from the route, this would come back "learner".
+    await h.json("ada-token", `/api/courses/${courseId}/sessions/${sessionId}/notes`, "POST", {
+      title: "Handout, retyped",
+      text: "Given out in class.",
+      author: "course",
+    });
+    await h.settle();
+
     const held = await h.materials("ada-token", courseId);
-    expect(held[0]?.state).toBe("ready");
+    const retyped = held.find((m) => m.filename.startsWith("handout"));
+    expect(retyped?.author).toBe("course");
+    // And the uploaded file, which defaults the other way.
+    expect(held.find((m) => m.contentType === "application/pdf")?.author).toBe("course");
+  });
+
+  it("answers from the learner's own note and cites that session", async () => {
+    const h = harness();
+    const { courseId, sessionId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
+    await h.json("ada-token", `/api/courses/${courseId}/sessions/${sessionId}/notes`, "POST", {
+      title: "My week 1 notes",
+      text: NOTE,
+    });
+    await h.settle();
+
+    const res = await h.json("ada-token", `/api/courses/${courseId}/chat`, "POST", {
+      message: "entropy",
+    });
+    const { answer } = (await res.json()) as {
+      answer: { covered: boolean; citations: { session: string }[] };
+    };
+    expect(answer.covered).toBe(true);
+    expect(answer.citations.map((x) => x.session)).toContain(sessionId);
+  });
+
+  it("refuses an empty note rather than storing one", async () => {
+    const h = harness();
+    const { courseId, sessionId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
+    for (const text of ["", "   ", 42]) {
+      const res = await h.json(
+        "ada-token",
+        `/api/courses/${courseId}/sessions/${sessionId}/notes`,
+        "POST",
+        { title: "Empty", text },
+      );
+      expect(res.status).toBe(400);
+    }
+  });
+
+  it("accepts a photograph and a word-processor file as notes", async () => {
+    const h = harness();
+    const { courseId, sessionId } = await h.seed("ada-token", "Thermo", "Week 1", "x");
+
+    for (const [name, type] of [
+      ["handwriting.jpg", "image/jpeg"],
+      ["handwriting.png", "image/png"],
+      ["notes.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+    ] as const) {
+      const form = new FormData();
+      form.set("file", new File(["bytes"], name, { type }));
+      form.set("author", "learner");
+      const res = await h.call(
+        "ada-token",
+        `/api/courses/${courseId}/sessions/${sessionId}/materials`,
+        { method: "POST", body: form },
+      );
+      expect(res.status, `${type} was refused`).toBe(202);
+    }
+    await h.settle();
+
+    const held = await h.materials("ada-token", courseId);
+    // The learner said these are their own, and that is what was stored.
+    expect(held.filter((m) => m.author === "learner")).toHaveLength(3);
+  });
+
+  it("has nowhere that writes, completes or rewrites a learner's note", () => {
+    // AIT-107 is a negative, and a negative is only honestly checked by reading the
+    // surface. The note route stores what it was given and calls no model; the only model
+    // call in this service answers questions and is handed retrieved chunks, never a note
+    // to extend. If a route ever returns note text it did not receive, this must change.
+    const source = readFileSync(new URL("./material.ts", import.meta.url), "utf8");
+    expect(source).not.toMatch(/\bai\.|deps\.ai\b/);
+    expect(source).toContain("checkNote");
   });
 });

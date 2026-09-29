@@ -1,4 +1,11 @@
-import type { Answer, ChatTurn, CourseSession, Course as CourseT, Material } from "@aitutor/shared";
+import type {
+  Answer,
+  ChatTurn,
+  CourseSession,
+  Course as CourseT,
+  Material,
+  MaterialAuthor,
+} from "@aitutor/shared";
 import { standingOf } from "@aitutor/shared";
 import { useCallback, useEffect, useState } from "react";
 import type { Api } from "../api.ts";
@@ -97,10 +104,22 @@ export function Course({ api, course, onBack }: CourseProps) {
     }
   }
 
-  async function upload(sessionId: string, file: File) {
+  async function addNote(
+    sessionId: string,
+    note: { title: string; text: string; author: MaterialAuthor },
+  ) {
+    try {
+      await api.addNote(course.id, sessionId, note);
+      await refresh();
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
+
+  async function upload(sessionId: string, file: File, author: MaterialAuthor) {
     setError(null);
     try {
-      await api.upload(course.id, sessionId, file);
+      await api.upload(course.id, sessionId, file, author);
       await refresh();
     } catch (err) {
       setError((err as Error).message);
@@ -201,7 +220,8 @@ export function Course({ api, course, onBack }: CourseProps) {
                 <SessionRow
                   session={session}
                   materials={materials.filter((m) => m.session === session.id)}
-                  onUpload={(file) => upload(session.id, file)}
+                  onUpload={(file, author) => upload(session.id, file, author)}
+                  onAddNote={(note) => addNote(session.id, note)}
                   onRemove={removeMaterial}
                   // Dragging is a mouse gesture and nothing else. These two buttons are the
                   // keyboard and screen-reader path to the same reorder — without them the
@@ -337,18 +357,21 @@ function SessionRow({
   session,
   materials,
   onUpload,
+  onAddNote,
   onRemove,
   onMoveUp,
   onMoveDown,
 }: {
   session: CourseSession;
   materials: Material[];
-  onUpload: (file: File) => void;
+  onUpload: (file: File, author: MaterialAuthor) => void;
+  onAddNote: (note: { title: string; text: string; author: MaterialAuthor }) => void;
   onRemove: (materialId: string) => void;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
 }) {
   const inputId = `file-${session.id}`;
+  const [writing, setWriting] = useState(false);
   const standing = standingOf(session, materials.length);
   const when = session.startsAt
     ? new Date(session.startsAt).toLocaleString(undefined, {
@@ -419,13 +442,138 @@ function SessionRow({
           id={inputId}
           type="file"
           className="sr-only"
-          accept=".pdf,.txt,.md,.pptx"
+          accept=".pdf,.txt,.md,.pptx,.docx,.jpg,.jpeg,.png"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) onUpload(file);
+            // Asked, every time, and never decided for them (AIT-118). An attachment is
+            // usually the course's; a photograph of a page is usually the learner's.
+            if (file) onUpload(file, whoseWords(file.name));
             e.target.value = "";
           }}
         />
+        <button type="button" className="btn btn--text" onClick={() => setWriting((w) => !w)}>
+          {writing ? "Close notes" : "Write notes"}
+        </button>
+      </div>
+
+      {writing && <NoteEditor session={session} onAddNote={onAddNote} />}
+    </div>
+  );
+}
+
+/** Asks whose words it is. A confirm rather than a silent default: PRD open question 18
+ *  decided the learner declares, and a default nobody is shown is an inference. */
+function whoseWords(filename: string): MaterialAuthor {
+  const mine = window.confirm(
+    `Is "${filename}" your own notes?\n\nOK — my own words.\nCancel — it came from the course.`,
+  );
+  return mine ? "learner" : "course";
+}
+
+/** Emphasis, a heading and a list. **Three controls, and deliberately no others** — PRD
+ *  open question 19 decided exactly these and zero beyond them. Colours, fonts, sizes and
+ *  alignment are presentation; they let a learner decorate a note instead of organising a
+ *  thought, and organising the thought is the work this product exists to cause.
+ *
+ *  The text is Markdown and is stored exactly as typed. Nothing here writes, completes,
+ *  extends or suggests anything — AIT-107 counts those at zero. */
+function NoteEditor({
+  session,
+  onAddNote,
+}: {
+  session: CourseSession;
+  onAddNote: (note: { title: string; text: string; author: MaterialAuthor }) => void;
+}) {
+  const [title, setTitle] = useState(`${session.title} — my notes`);
+  const [text, setText] = useState("");
+  const [author, setAuthor] = useState<MaterialAuthor>("learner");
+  const areaId = `note-${session.id}`;
+
+  function wrap(before: string, after = before) {
+    const el = document.getElementById(areaId) as HTMLTextAreaElement | null;
+    if (!el) return;
+    const { selectionStart: a, selectionEnd: b } = el;
+    setText(`${text.slice(0, a)}${before}${text.slice(a, b)}${after}${text.slice(b)}`);
+  }
+
+  function linePrefix(prefix: string) {
+    const el = document.getElementById(areaId) as HTMLTextAreaElement | null;
+    if (!el) return;
+    const start = text.lastIndexOf("\n", Math.max(0, el.selectionStart - 1)) + 1;
+    setText(`${text.slice(0, start)}${prefix}${text.slice(start)}`);
+  }
+
+  return (
+    <div className="stack stack--tight">
+      <div className="field">
+        <label htmlFor={`${areaId}-title`}>Title</label>
+        <input
+          id={`${areaId}-title`}
+          className="input"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          maxLength={120}
+        />
+      </div>
+
+      <div className="actions">
+        <button type="button" className="btn btn--text" onClick={() => wrap("*")}>
+          Emphasis
+        </button>
+        <button type="button" className="btn btn--text" onClick={() => linePrefix("## ")}>
+          Heading
+        </button>
+        <button type="button" className="btn btn--text" onClick={() => linePrefix("- ")}>
+          List
+        </button>
+      </div>
+
+      <div className="field">
+        <label htmlFor={areaId}>Your notes</label>
+        <textarea
+          id={areaId}
+          className="input"
+          rows={8}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="What you took from this session, in your own words."
+        />
+      </div>
+
+      <fieldset className="stack stack--tight" style={{ border: 0, padding: 0, margin: 0 }}>
+        <legend className="note">Whose words are these?</legend>
+        <label className="note">
+          <input
+            type="radio"
+            name={`${areaId}-author`}
+            checked={author === "learner"}
+            onChange={() => setAuthor("learner")}
+          />{" "}
+          My own
+        </label>
+        <label className="note">
+          <input
+            type="radio"
+            name={`${areaId}-author`}
+            checked={author === "course"}
+            onChange={() => setAuthor("course")}
+          />{" "}
+          From the course
+        </label>
+      </fieldset>
+
+      <div className="actions">
+        <button
+          type="button"
+          className="btn btn--quiet"
+          disabled={text.trim().length === 0 || title.trim().length === 0}
+          onClick={() => {
+            onAddNote({ title, text, author });
+            setText("");
+          }}
+        >
+          Save notes
+        </button>
       </div>
     </div>
   );

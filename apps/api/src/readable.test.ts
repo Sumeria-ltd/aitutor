@@ -14,6 +14,7 @@ const material = (over: Partial<Material> = {}): Material => ({
   bytes: 10,
   gsUri: "gs://bucket/learner-a/c1/m1.pdf",
   state: "ready",
+  author: "course",
   ragFileId: "file-1",
   chunks: 1,
   createdAt: "2026-09-29T09:00:00.000Z",

@@ -1,5 +1,12 @@
-import type { Material } from "@aitutor/shared";
-import { isAcceptedType, MAX_UPLOAD_BYTES } from "@aitutor/shared";
+import type { Material, MaterialAuthor } from "@aitutor/shared";
+import {
+  checkName,
+  checkNote,
+  isAcceptedType,
+  isAuthor,
+  MAX_UPLOAD_BYTES,
+  noteObjectName,
+} from "@aitutor/shared";
 import type { Hono } from "hono";
 import { type AuthedEnv, requireAuth, type TokenVerifier } from "../auth.ts";
 import type { Emit } from "../events.ts";
@@ -32,6 +39,7 @@ export type MaterialDeps = {
 export const MATERIAL_ROUTES = {
   list: "/api/courses/:courseId/materials",
   upload: "/api/courses/:courseId/sessions/:sessionId/materials",
+  notes: "/api/courses/:courseId/sessions/:sessionId/notes",
   one: "/api/courses/:courseId/materials/:materialId",
 } as const;
 
@@ -63,6 +71,10 @@ export function mountMaterial(app: Hono<AuthedEnv>, deps: MaterialDeps) {
     if (!isAcceptedType(contentType)) {
       return c.json({ error: `${contentType} is not a file type this can read yet` }, 400);
     }
+    // Declared by the learner, never inferred from the route or the file type (PRD open
+    // question 18). The default is what an upload usually is; the learner is asked, and
+    // whatever they answer is what is stored.
+    const author: MaterialAuthor = isAuthor(body.author) ? body.author : "course";
 
     const materialId = newId();
     const filename = file.name || "untitled";
@@ -85,6 +97,62 @@ export function mountMaterial(app: Hono<AuthedEnv>, deps: MaterialDeps) {
       bytes: file.size,
       gsUri,
       state: "reading",
+      author,
+      chunks: 0,
+      createdAt: now().toISOString(),
+    };
+    await deps.store.createMaterial(material);
+
+    detach(importIntoCorpus(deps, material));
+    return c.json({ material }, 202);
+  });
+
+  /** A note the learner typed. It becomes material and takes the path Spec 0010 already
+   *  built — same corpus, same allow-list, same citation — which is what makes "ask a
+   *  question whose answer is only in my own notes" work on the day it ships.
+   *
+   *  **Nothing here writes, completes, extends or tidies what the learner wrote.** The
+   *  text is stored exactly as typed. AIT-107 counts the places that do at zero, and this
+   *  route is the one that would be tempted. */
+  app.post(MATERIAL_ROUTES.notes, authed, async (c) => {
+    const learner = c.get("learnerId");
+    const courseId = c.req.param("courseId");
+    const sessionId = c.req.param("sessionId");
+
+    const session = await deps.store.getSession(learner, courseId, sessionId);
+    if (!session) return c.json({ error: "not found" }, 404);
+
+    type Body = { title?: unknown; text?: unknown; author?: unknown };
+    const body = await c.req.json<Body>().catch(() => ({}) as Body);
+    const title = checkName(body.title);
+    if (!title.ok) return c.json({ error: title.reason }, 400);
+    const note = checkNote(body.text);
+    if (!note.ok) return c.json({ error: note.reason }, 400);
+
+    // A note defaults to the learner's own words, and an upload defaults to the course's.
+    // Both are defaults the learner is shown and can change — never a silent decision.
+    const author: MaterialAuthor = isAuthor(body.author) ? body.author : "learner";
+
+    const materialId = newId();
+    const filename = noteObjectName(title.value);
+    const bytes = new TextEncoder().encode(note.value);
+    const gsUri = await deps.files.put(
+      objectKey(learner, courseId, materialId, filename),
+      bytes,
+      "text/markdown",
+    );
+
+    const material: Material = {
+      id: materialId,
+      learner,
+      course: courseId,
+      session: sessionId,
+      filename,
+      contentType: "text/markdown",
+      bytes: bytes.byteLength,
+      gsUri,
+      state: "reading",
+      author,
       chunks: 0,
       createdAt: now().toISOString(),
     };
