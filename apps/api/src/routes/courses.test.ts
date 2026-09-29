@@ -159,3 +159,140 @@ describe("sessions", () => {
     expect(await h.store.getCourse("ada", course)).toBeNull();
   });
 });
+
+describe("the schedule — requirement 0011", () => {
+  const add = (
+    h: ReturnType<typeof harness>,
+    courseId: string,
+    title: string,
+    extra: Record<string, unknown> = {},
+  ) =>
+    h.call("ada-token", `/api/courses/${courseId}/sessions`, {
+      method: "POST",
+      body: JSON.stringify({ title, ...extra }),
+    });
+
+  const list = async (h: ReturnType<typeof harness>, courseId: string) =>
+    (
+      (await (await h.call("ada-token", `/api/courses/${courseId}/sessions`)).json()) as {
+        sessions: { id: string; title: string; startsAt?: string; minutes?: number }[];
+      }
+    ).sessions;
+
+  it("shows a date, a start time and a length on every session that has them", async () => {
+    const h = harness();
+    const courseId = (await h.createCourse("ada-token", "Thermo")).body.course.id;
+    for (const n of [1, 2, 3, 4]) {
+      const res = await add(h, courseId, `Week ${n}`, {
+        startsAt: `2026-10-0${n}T09:00:00.000Z`,
+        minutes: 90,
+      });
+      expect(res.status).toBe(201);
+    }
+
+    const sessions = await list(h, courseId);
+    expect(sessions).toHaveLength(4);
+    // All three, without opening anything.
+    expect(sessions.every((s) => s.startsAt && s.minutes === 90)).toBe(true);
+  });
+
+  it("appends a new session to the end", async () => {
+    const h = harness();
+    const courseId = (await h.createCourse("ada-token", "Thermo")).body.course.id;
+    for (const n of [1, 2, 3]) await add(h, courseId, `Week ${n}`);
+
+    await add(h, courseId, "Week 4");
+
+    expect((await list(h, courseId)).map((s) => s.title)).toEqual([
+      "Week 1",
+      "Week 2",
+      "Week 3",
+      "Week 4",
+    ]);
+  });
+
+  it("keeps the order the learner left, and moves nothing else", async () => {
+    const h = harness();
+    const courseId = (await h.createCourse("ada-token", "Thermo")).body.course.id;
+    for (const n of [1, 2, 3, 4]) await add(h, courseId, `Week ${n}`);
+    const before = await list(h, courseId);
+
+    // Drag the last to second.
+    const moved = [before[0], before[3], before[1], before[2]].map((s) => s?.id);
+    const res = await h.call("ada-token", `/api/courses/${courseId}/session-order`, {
+      method: "PUT",
+      body: JSON.stringify({ ids: moved }),
+    });
+    expect(res.status).toBe(200);
+
+    expect((await list(h, courseId)).map((s) => s.title)).toEqual([
+      "Week 1",
+      "Week 4",
+      "Week 2",
+      "Week 3",
+    ]);
+  });
+
+  it("refuses an order that is not exactly this course's sessions", async () => {
+    const h = harness();
+    const courseId = (await h.createCourse("ada-token", "Thermo")).body.course.id;
+    for (const n of [1, 2]) await add(h, courseId, `Week ${n}`);
+    const ids = (await list(h, courseId)).map((s) => s.id);
+
+    for (const bad of [[ids[0]], [...ids, "not-mine"], [ids[0], ids[0]]]) {
+      const res = await h.call("ada-token", `/api/courses/${courseId}/session-order`, {
+        method: "PUT",
+        body: JSON.stringify({ ids: bad }),
+      });
+      // Rejected whole. A half-applied reorder leaves an arrangement nobody chose.
+      expect(res.status).toBe(400);
+    }
+    expect((await list(h, courseId)).map((s) => s.title)).toEqual(["Week 1", "Week 2"]);
+  });
+
+  it("never reorders on the learner's behalf when a date says it should", async () => {
+    const h = harness();
+    const courseId = (await h.createCourse("ada-token", "Thermo")).body.course.id;
+    await add(h, courseId, "Week 1", { startsAt: "2026-10-01T09:00:00.000Z" });
+    await add(h, courseId, "Week 2", { startsAt: "2026-10-08T09:00:00.000Z" });
+    const [, second] = await list(h, courseId);
+
+    // Give the second session a date earlier than the first and leave it where it is.
+    const res = await h.call("ada-token", `/api/courses/${courseId}/sessions/${second?.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ startsAt: "2026-09-01T09:00:00.000Z" }),
+    });
+    expect(res.status).toBe(200);
+
+    // PRD open question 17: the learner's order wins, and dates never sort.
+    expect((await list(h, courseId)).map((s) => s.title)).toEqual(["Week 1", "Week 2"]);
+  });
+
+  it("accepts a session with no date and supplies none", async () => {
+    const h = harness();
+    const courseId = (await h.createCourse("ada-token", "Thermo")).body.course.id;
+
+    const res = await add(h, courseId, "Sometime in week 5");
+    expect(res.status).toBe(201);
+
+    const [only] = await list(h, courseId);
+    expect(only?.startsAt).toBeUndefined();
+    expect(only?.minutes).toBeUndefined();
+  });
+
+  it("refuses a length that is not a sane number of minutes", async () => {
+    const h = harness();
+    const courseId = (await h.createCourse("ada-token", "Thermo")).body.course.id;
+    for (const minutes of [0, -30, 1000, 45.5]) {
+      const res = await add(h, courseId, "Week 1", { minutes });
+      expect(res.status, `minutes=${minutes} was accepted`).toBe(400);
+    }
+  });
+
+  it("refuses a date that is not a date", async () => {
+    const h = harness();
+    const courseId = (await h.createCourse("ada-token", "Thermo")).body.course.id;
+    const res = await add(h, courseId, "Week 1", { startsAt: "next tuesday-ish" });
+    expect(res.status).toBe(400);
+  });
+});

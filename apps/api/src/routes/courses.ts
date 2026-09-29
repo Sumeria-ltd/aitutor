@@ -1,5 +1,5 @@
 import type { Course, CourseSession } from "@aitutor/shared";
-import { checkName, ROUTES } from "@aitutor/shared";
+import { checkName, checkSchedule, ROUTES } from "@aitutor/shared";
 import type { Hono } from "hono";
 import { type AuthedEnv, requireAuth, type TokenVerifier } from "../auth.ts";
 import { type Files, objectKey } from "../files.ts";
@@ -95,19 +95,81 @@ export function mountCourses(app: Hono<AuthedEnv>, deps: CourseDeps) {
     const course = await deps.store.getCourse(learner, courseId);
     if (!course) return c.json({ error: "not found" }, 404);
 
-    const body = await c.req.json<{ title?: unknown }>().catch(() => ({}) as { title?: unknown });
+    type Body = { title?: unknown; startsAt?: unknown; minutes?: unknown };
+    const body = await c.req.json<Body>().catch(() => ({}) as Body);
     const title = checkName(body.title);
     if (!title.ok) return c.json({ error: title.reason }, 400);
+    const when = checkSchedule(body);
+    if (!when.ok) return c.json({ error: when.reason }, 400);
 
+    // Appended, never inserted. "Add to the bottom, then drag it where it belongs" is the
+    // interaction intent 0011 describes, and the position is ours to assign.
+    const existing = await deps.store.sessionsFor(learner, courseId);
     const session: CourseSession = {
       id: newId(),
       learner,
       course: courseId,
       title: title.value,
+      ...when.value,
+      position: existing.length,
       createdAt: now().toISOString(),
     };
     await deps.store.createSession(session);
     return c.json({ session }, 201);
+  });
+
+  app.patch(ROUTES.courseSession, authed, async (c) => {
+    const learner = c.get("learnerId");
+    const courseId = c.req.param("courseId");
+    const sessionId = c.req.param("sessionId");
+    const session = await deps.store.getSession(learner, courseId, sessionId);
+    if (!session) return c.json({ error: "not found" }, 404);
+
+    type Body = { title?: unknown; startsAt?: unknown; minutes?: unknown };
+    const body = await c.req.json<Body>().catch(() => ({}) as Body);
+    const patch: Partial<CourseSession> = {};
+
+    if (body.title !== undefined) {
+      const title = checkName(body.title);
+      if (!title.ok) return c.json({ error: title.reason }, 400);
+      patch.title = title.value;
+    }
+    const when = checkSchedule(body);
+    if (!when.ok) return c.json({ error: when.reason }, 400);
+    Object.assign(patch, when.value);
+
+    // A date arriving, changing or being corrected never moves the row. The learner's
+    // order is the truth — PRD open question 17.
+    await deps.store.updateSession(learner, courseId, sessionId, patch);
+    const updated = await deps.store.getSession(learner, courseId, sessionId);
+    return c.json({ session: updated });
+  });
+
+  app.put(ROUTES.courseSessionOrder, authed, async (c) => {
+    const learner = c.get("learnerId");
+    const courseId = c.req.param("courseId");
+    const course = await deps.store.getCourse(learner, courseId);
+    if (!course) return c.json({ error: "not found" }, 404);
+
+    const body = await c.req.json<{ ids?: unknown }>().catch(() => ({}) as { ids?: unknown });
+    const ids = Array.isArray(body.ids)
+      ? body.ids.filter((x): x is string => typeof x === "string")
+      : null;
+    if (!ids) return c.json({ error: "an order is required" }, 400);
+
+    // Rejected whole rather than applied partly: a reorder that half-lands leaves the
+    // learner with an arrangement they never chose, which is worse than a refusal.
+    const held = await deps.store.sessionsFor(learner, courseId);
+    const mine = new Set(held.map((s) => s.id));
+    const sameSize = ids.length === held.length;
+    const allMine = ids.every((id) => mine.has(id));
+    const noDuplicates = new Set(ids).size === ids.length;
+    if (!sameSize || !allMine || !noDuplicates) {
+      return c.json({ error: "that order does not match this course's sessions" }, 400);
+    }
+
+    await deps.store.reorderSessions(learner, courseId, ids);
+    return c.json({ sessions: await deps.store.sessionsFor(learner, courseId) });
   });
 
   app.get(ROUTES.courseSessions, authed, async (c) => {

@@ -21,6 +21,16 @@ function removed(m: Material): Removed {
   };
 }
 
+/** Existing sessions predate `position` and have none. Ordering falls back to creation
+ *  time so a learner's list does not shuffle on first load, and the API assigns a real
+ *  position on the next write — the feature arrives without a migration. */
+function byPosition(a: CourseSession, b: CourseSession): number {
+  const ap = a.position ?? Number.MAX_SAFE_INTEGER;
+  const bp = b.position ?? Number.MAX_SAFE_INTEGER;
+  if (ap !== bp) return ap - bp;
+  return a.createdAt.localeCompare(b.createdAt);
+}
+
 export type Store = {
   getLearner(id: string): Promise<Learner | null>;
   createLearner(learner: Learner): Promise<Learner>;
@@ -38,6 +48,15 @@ export type Store = {
   sessionsFor(learner: string, courseId: string): Promise<CourseSession[]>;
   getSession(learner: string, courseId: string, sessionId: string): Promise<CourseSession | null>;
   deleteSession(learner: string, courseId: string, sessionId: string): Promise<Removed[]>;
+  updateSession(
+    learner: string,
+    courseId: string,
+    sessionId: string,
+    patch: Partial<CourseSession>,
+  ): Promise<void>;
+  /** The learner's whole order, in one write. One call rather than N so a reorder cannot
+   *  half-apply and leave the list in a state the learner never chose. */
+  reorderSessions(learner: string, courseId: string, ids: string[]): Promise<void>;
   createMaterial(material: Material): Promise<Material>;
   updateMaterial(
     learner: string,
@@ -103,8 +122,25 @@ export function inMemoryStore(): Store {
       sessions.push(session);
       return session;
     },
+    async updateSession(learner, courseId, sessionId, patch) {
+      sessions = sessions.map((s) =>
+        s.learner === learner && s.course === courseId && s.id === sessionId
+          ? { ...s, ...patch }
+          : s,
+      );
+    },
+    async reorderSessions(learner, courseId, ids) {
+      const at = new Map(ids.map((id, i) => [id, i]));
+      sessions = sessions.map((s) =>
+        s.learner === learner && s.course === courseId && at.has(s.id)
+          ? { ...s, position: at.get(s.id) as number }
+          : s,
+      );
+    },
     async sessionsFor(learner, courseId) {
-      return sessions.filter((s) => s.learner === learner && s.course === courseId);
+      return sessions
+        .filter((s) => s.learner === learner && s.course === courseId)
+        .sort(byPosition);
     },
     async getSession(learner, courseId, sessionId) {
       return (
@@ -256,12 +292,24 @@ export function firestoreStore(db: FirestoreLike): Store {
     },
     async sessionsFor(learner, courseId) {
       const found = await db.collection(sessionsPath(learner, courseId)).get();
-      return found.docs.map((d) => ({
-        id: d.id,
-        learner,
-        course: courseId,
-        ...(d.data() as Omit<CourseSession, "id" | "learner" | "course">),
-      }));
+      return found.docs
+        .map((d) => ({
+          id: d.id,
+          learner,
+          course: courseId,
+          ...(d.data() as Omit<CourseSession, "id" | "learner" | "course">),
+        }))
+        .sort(byPosition);
+    },
+    async updateSession(learner, courseId, sessionId, patch) {
+      await db.collection(sessionsPath(learner, courseId)).doc(sessionId).update(patch);
+    },
+    async reorderSessions(learner, courseId, ids) {
+      await Promise.all(
+        ids.map((id, position) =>
+          db.collection(sessionsPath(learner, courseId)).doc(id).update({ position }),
+        ),
+      );
     },
     async getSession(learner, courseId, sessionId) {
       const snap = await db.collection(sessionsPath(learner, courseId)).doc(sessionId).get();

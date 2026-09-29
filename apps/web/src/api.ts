@@ -23,6 +23,8 @@ async function call<T>(token: TokenFn, path: string, init: RequestInit = {}): Pr
   return body;
 }
 
+export type Schedule = { startsAt?: string; minutes?: number };
+
 export function api(token: TokenFn) {
   return {
     listCourses: () => call<{ courses: Course[] }>(token, ROUTES.courses),
@@ -39,10 +41,23 @@ export function api(token: TokenFn) {
     deleteCourse: (courseId: string) =>
       call<void>(token, paths.course(courseId), { method: "DELETE" }),
 
-    addSession: (courseId: string, title: string) =>
+    addSession: (courseId: string, title: string, when: Schedule = {}) =>
       call<{ session: CourseSession }>(token, paths.courseSessions(courseId), {
         method: "POST",
-        body: JSON.stringify({ title }),
+        body: JSON.stringify({ title, ...when }),
+      }),
+
+    updateSession: (courseId: string, sessionId: string, patch: Schedule & { title?: string }) =>
+      call<{ session: CourseSession }>(token, paths.courseSession(courseId, sessionId), {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      }),
+
+    /** The learner's whole order, in one call: a reorder cannot half-apply. */
+    reorderSessions: (courseId: string, ids: string[]) =>
+      call<{ sessions: CourseSession[] }>(token, paths.courseSessionOrder(courseId), {
+        method: "PUT",
+        body: JSON.stringify({ ids }),
       }),
 
     listMaterials: (courseId: string) =>

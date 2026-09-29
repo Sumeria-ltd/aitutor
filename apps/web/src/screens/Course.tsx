@@ -1,5 +1,6 @@
 import type { Answer, ChatTurn, CourseSession, Course as CourseT, Material } from "@aitutor/shared";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { standingOf } from "@aitutor/shared";
+import { useCallback, useEffect, useState } from "react";
 import type { Api } from "../api.ts";
 
 export type CourseProps = { api: Api; course: CourseT; onBack: () => void };
@@ -10,6 +11,9 @@ export function Course({ api, course, onBack }: CourseProps) {
   const [sessions, setSessions] = useState<CourseSession[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [title, setTitle] = useState("");
+  const [startsAt, setStartsAt] = useState("");
+  const [minutes, setMinutes] = useState("");
+  const [dragging, setDragging] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [question, setQuestion] = useState("");
   const [exchanges, setExchanges] = useState<Exchange[]>([]);
@@ -48,10 +52,47 @@ export function Course({ api, course, onBack }: CourseProps) {
     e.preventDefault();
     if (title.trim().length === 0) return;
     try {
-      const { session } = await api.addSession(course.id, title);
+      const { session } = await api.addSession(course.id, title, {
+        // datetime-local has no zone; the browser's is the learner's, which is the one
+        // that matters for "has this class happened yet".
+        ...(startsAt ? { startsAt: new Date(startsAt).toISOString() } : {}),
+        ...(minutes ? { minutes: Number(minutes) } : {}),
+      });
+      // Appended, never inserted — the API assigned the position and this mirrors it.
       setSessions((prev) => [...prev, session]);
       setTitle("");
+      setStartsAt("");
+      setMinutes("");
     } catch (err) {
+      setError((err as Error).message);
+    }
+  }
+
+  /** Drag to reorder. The learner's whole order goes in one call, so a reorder cannot
+   *  half-apply; on failure the list is put back rather than left half-moved. */
+  async function dropOn(index: number) {
+    const from = sessions.findIndex((s) => s.id === dragging);
+    setDragging(null);
+    if (from < 0) return;
+    await move(from, index);
+  }
+
+  async function move(from: number, index: number) {
+    if (from === index) return;
+    const next = [...sessions];
+    const [moved] = next.splice(from, 1);
+    if (!moved) return;
+    next.splice(index, 0, moved);
+
+    const before = sessions;
+    setSessions(next);
+    try {
+      await api.reorderSessions(
+        course.id,
+        next.map((s) => s.id),
+      );
+    } catch (err) {
+      setSessions(before);
       setError((err as Error).message);
     }
   }
@@ -139,14 +180,38 @@ export function Course({ api, course, onBack }: CourseProps) {
             <span className="label">Sessions</span>
           </div>
           <div className="column stack">
-            {sessions.map((session) => (
-              <SessionRow
+            {sessions.map((session, index) => (
+              // Dragging has no accessible element type to hang these handlers on. The
+              // keyboard and screen-reader path to the same reorder is the pair of move
+              // buttons in SessionRow, so the gesture is an enhancement and not the only
+              // way through.
+              // biome-ignore lint/a11y/noStaticElementInteractions: keyboard path is the move buttons in SessionRow
+              <div
                 key={session.id}
-                session={session}
-                materials={materials.filter((m) => m.session === session.id)}
-                onUpload={(file) => upload(session.id, file)}
-                onRemove={removeMaterial}
-              />
+                draggable
+                onDragStart={() => setDragging(session.id)}
+                onDragEnd={() => setDragging(null)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  void dropOn(index);
+                }}
+                style={{ opacity: dragging === session.id ? 0.4 : 1 }}
+              >
+                <SessionRow
+                  session={session}
+                  materials={materials.filter((m) => m.session === session.id)}
+                  onUpload={(file) => upload(session.id, file)}
+                  onRemove={removeMaterial}
+                  // Dragging is a mouse gesture and nothing else. These two buttons are the
+                  // keyboard and screen-reader path to the same reorder — without them the
+                  // feature simply does not exist for anyone not using a pointer.
+                  onMoveUp={index > 0 ? () => void move(index, index - 1) : undefined}
+                  onMoveDown={
+                    index < sessions.length - 1 ? () => void move(index, index + 1) : undefined
+                  }
+                />
+              </div>
             ))}
 
             <form className="stack" onSubmit={addSession}>
@@ -161,6 +226,36 @@ export function Course({ api, course, onBack }: CourseProps) {
                   maxLength={120}
                 />
               </div>
+              <div className="spread" style={{ gridTemplateColumns: "1fr auto" }}>
+                <div className="field">
+                  <label htmlFor="session-when">When (optional)</label>
+                  <input
+                    id="session-when"
+                    className="input"
+                    type="datetime-local"
+                    value={startsAt}
+                    onChange={(e) => setStartsAt(e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="session-minutes">Minutes</label>
+                  <input
+                    id="session-minutes"
+                    className="input"
+                    type="number"
+                    min={1}
+                    max={240}
+                    value={minutes}
+                    onChange={(e) => setMinutes(e.target.value)}
+                    placeholder="90"
+                    style={{ width: "7rem" }}
+                  />
+                </div>
+              </div>
+              <p className="note">
+                A term is planned with gaps in it — a session with no date is fine. Drag a session
+                to move it; the order you leave is the order you get back.
+              </p>
               <div className="actions">
                 <button
                   type="submit"
@@ -243,16 +338,58 @@ function SessionRow({
   materials,
   onUpload,
   onRemove,
+  onMoveUp,
+  onMoveDown,
 }: {
   session: CourseSession;
   materials: Material[];
   onUpload: (file: File) => void;
   onRemove: (materialId: string) => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }) {
   const inputId = `file-${session.id}`;
+  const standing = standingOf(session, materials.length);
+  const when = session.startsAt
+    ? new Date(session.startsAt).toLocaleString(undefined, {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
   return (
     <div className="stack stack--tight">
-      <p className="ui strong">{session.title}</p>
+      <div className="spread" style={{ gridTemplateColumns: "1fr auto" }}>
+        <p className="ui strong">{session.title}</p>
+        <span>
+          <button
+            type="button"
+            className="btn btn--text"
+            onClick={onMoveUp}
+            disabled={!onMoveUp}
+            aria-label={`Move ${session.title} earlier`}
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            className="btn btn--text"
+            onClick={onMoveDown}
+            disabled={!onMoveDown}
+            aria-label={`Move ${session.title} later`}
+          >
+            ↓
+          </button>
+        </span>
+      </div>
+      <p className="note">
+        {when ? when : "No date yet"}
+        {session.minutes ? ` · ${session.minutes} min` : ""}
+        {/* A fact, never a verdict, and never totalled — intent 0011's NOT NOW. */}
+        {standing === "nothing-captured" ? " · nothing captured" : ""}
+      </p>
 
       {materials.length === 0 ? (
         <p className="note">Nothing attached yet.</p>
