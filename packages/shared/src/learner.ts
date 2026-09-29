@@ -26,6 +26,10 @@ export const ROUTES = {
   course: "/api/courses/:courseId",
   courseSessions: "/api/courses/:courseId/sessions",
   courseSession: "/api/courses/:courseId/sessions/:sessionId",
+  // Not "/sessions/order": that would be indistinguishable from a session whose id is
+  // literally "order", and a route that depends on nobody choosing an awkward id is a
+  // route waiting to go wrong.
+  courseSessionOrder: "/api/courses/:courseId/session-order",
 } as const;
 
 /** Client-side path builders, so the web app never hand-assembles a URL. */
@@ -34,4 +38,6 @@ export const paths = {
   courseSessions: (courseId: string) => `/api/courses/${encodeURIComponent(courseId)}/sessions`,
   courseSession: (courseId: string, sessionId: string) =>
     `/api/courses/${encodeURIComponent(courseId)}/sessions/${encodeURIComponent(sessionId)}`,
+  courseSessionOrder: (courseId: string) =>
+    `/api/courses/${encodeURIComponent(courseId)}/session-order`,
 } as const;

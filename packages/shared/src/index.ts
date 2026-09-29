@@ -1,5 +1,11 @@
-export type { Course, CourseSession, NameCheck } from "./course.ts";
-export { checkName, MAX_NAME } from "./course.ts";
+export type {
+  Course,
+  CourseSession,
+  NameCheck,
+  ScheduleCheck,
+  SessionStanding,
+} from "./course.ts";
+export { checkName, checkSchedule, MAX_NAME, MAX_SESSION_MINUTES, standingOf } from "./course.ts";
 export type { AitutorEvent, EventAttributes, EventName, Scalar } from "./events.ts";
 export {
   EVENTS,
